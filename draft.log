@@ -1,0 +1,729 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.7.1)  2 JUL 2026 18:54
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**./draft.tex
+(draft.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/base\size10.clo
+File: size10.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count275
+\c@section=\count276
+\c@subsection=\count277
+\c@subsubsection=\count278
+\c@paragraph=\count279
+\c@subparagraph=\count280
+\c@figure=\count281
+\c@table=\count282
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\bibindent=\dimen148
+)
+(aaai2027.sty
+Package: aaai2027 2027/05/04 AAAI 2027 Submission format
+
+Conference Style for AAAI for LaTeX 2e
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty
+Package: iftex 2024/12/12 v1.0g TeX engine tests
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
+Package: fontenc 2025/07/18 v2.1d Standard LaTeX package
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/newtx\newtxtext.sty
+Package: newtxtext 2024/04/01 v1.744(Michael Sharpe) latex and unicode latex su
+pport for TeXGyreTermesX
+
+`newtxtext' v1.744, 2024/04/01 Text macros taking advantage of TeXGyre Termes a
+nd its extensions (msharpe)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/xpatch\xpatch.sty
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
+Package: expl3 2025-12-24 L3 programming layer (loader) 
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-
+pdftex.def
+File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count283
+))
+Package: xpatch 2020/03/25 v0.3a Extending etoolbox patching commands
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xp
+arse.sty
+Package: xparse 2025-10-09 L3 Experimental document command parser
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.st
+y
+Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count284
+))
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+Package: xcolor 2024/09/29 v3.02 LaTeX color extensions (UK)
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.c
+fg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 274.
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.
+def
+File: pdftex.def 2025/09/29 v1.2d Graphics/color driver for pdftex
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.l
+tx)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1349.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1353.
+Package xcolor Info: Model `RGB' extended on input line 1365.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1367.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1370.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1371.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1372.
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/xkeyval\xkeyval.sty
+Package: xkeyval 2022/06/16 v2.9 package option processing (HA)
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/generic/xkeyval\xkeyval.te
+x
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/generic/xkeyval\xkvutils.t
+ex
+\XKV@toks=\toks17
+\XKV@tempa@toks=\toks18
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/generic/xkeyval\keyval.tex
+))
+\XKV@depth=\count285
+File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
+))
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/base\textcomp.sty
+Package: textcomp 2024/04/24 v2.1b Standard LaTeX package
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/xstring\xstring.sty
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/generic/xstring\xstring.te
+x
+\xs_counta=\count286
+\xs_countb=\count287
+)
+Package: xstring 2023/08/22 v1.86 String manipulations (CT)
+) (C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty
+Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/carlisle\scalefnt.st
+y)
+LaTeX Font Info:    Setting ntxLF sub-encoding to TS1/0 on input line 24.
+LaTeX Font Info:    Setting ntxTLF sub-encoding to TS1/0 on input line 24.
+LaTeX Font Info:    Setting ntxOsF sub-encoding to TS1/0 on input line 24.
+LaTeX Font Info:    Setting ntxTOsF sub-encoding to TS1/0 on input line 24.
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/generic/binhex\binhex.tex)
+\ntx@tmpcnta=\count288
+\ntx@cnt=\count289
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/fontaxes\fontaxes.st
+y
+Package: fontaxes 2026-01-02 v2.0.2 Font selection axes (deprecated)
+Applying: [2024-11-01] Use figureversions if present on input line 74.
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/figureversions\figur
+eversions.sty
+Package: figureversions 2025-04-29 v1.0.1 Figure versions
+)
+Already applied: [0000-00-00] Fall back to v1 on input line 76.
+)
+\tx@sixem=\dimen149
+\tx@y=\dimen150
+\tx@x=\dimen151
+\tx@tmpdima=\dimen152
+\tx@tmpdimb=\dimen153
+\tx@tmpdimc=\dimen154
+\tx@tmpdimd=\dimen155
+\tx@tmpdime=\dimen156
+\tx@tmpdimf=\dimen157
+\tx@dimA=\dimen158
+\tx@dimAA=\dimen159
+\tx@dimB=\dimen160
+\tx@dimBB=\dimen161
+\tx@dimC=\dimen162
+LaTeX Info: Redefining \oldstylenums on input line 902.
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\helvet.sty
+Package: helvet 2020/03/25 PSNFSS-v9.3 (WaS) 
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\courier.sty
+Package: courier 2020/03/25 PSNFSS-v9.3 (WaS) 
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/placeins\placeins.st
+y
+Package: placeins 2005/04/18  v 2.2
+)
+\titlebox=\skip51
+\aaai@thanksins=\insert252
+\aaai@copyrightins=\insert251
+) (C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty
+\Urlmuskip=\muskip17
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.st
+y
+Package: graphicx 2024/12/31 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.st
+y
+Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
+ (C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphic
+s.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 106.
+)
+\Gin@req@height=\dimen163
+\Gin@req@width=\dimen164
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/natbib\natbib.sty
+Package: natbib 2010/09/13 8.31b (PWD, AO)
+\bibhang=\skip52
+\bibsep=\skip53
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count290
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption.sty
+Package: caption 2023/08/05 v3.6o Customizing captions (AR)
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption3.sty
+Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
+\caption@tempdima=\dimen165
+\captionmargin=\dimen166
+\caption@leftmargin=\dimen167
+\caption@rightmargin=\dimen168
+\caption@width=\dimen169
+\caption@indent=\dimen170
+\caption@parindent=\dimen171
+\caption@hangindent=\dimen172
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count291
+\c@continuedfloat=\count292
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.st
+y
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\@emptytoks=\toks19
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+))
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.st
+y
+Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
+\heavyrulewidth=\dimen173
+\lightrulewidth=\dimen174
+\cmidrulewidth=\dimen175
+\belowrulesep=\dimen176
+\belowbottomsep=\dimen177
+\aboverulesep=\dimen178
+\abovetopsep=\dimen179
+\cmidrulesep=\dimen180
+\cmidrulekern=\dimen181
+\defaultaddspace=\dimen182
+\@cmidla=\count293
+\@cmidlb=\count294
+\@aboverulesep=\dimen183
+\@belowrulesep=\dimen184
+\@thisruleclass=\count295
+\@lastruleclass=\count296
+\@thisrulewidth=\dimen185
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/multirow\multirow.st
+y
+Package: multirow 2024/11/12 v2.9 Span multiple rows of a table
+\multirow@colwidth=\skip54
+\multirow@cntb=\count297
+\multirow@dima=\skip55
+\bigstrutjot=\dimen186
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+Package: amsmath 2025/07/09 v2.17z AMS math features
+\@mathmargin=\skip56
+
+For additional information on amsmath, use the `?' option.
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+Package: amstext 2024/11/17 v2.01 AMS text
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks20
+\ex@=\dimen187
+)) (C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.st
+y
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen188
+) (C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
+Package: amsopn 2022/04/08 v2.04 operator names
+)
+\inf@bad=\count298
+LaTeX Info: Redefining \frac on input line 233.
+\uproot@=\count299
+\leftroot@=\count300
+LaTeX Info: Redefining \overline on input line 398.
+LaTeX Info: Redefining \colon on input line 409.
+\classnum@=\count301
+\DOTSCASE@=\count302
+LaTeX Info: Redefining \ldots on input line 495.
+LaTeX Info: Redefining \dots on input line 498.
+LaTeX Info: Redefining \cdots on input line 619.
+\Mathstrutbox@=\box53
+\strutbox@=\box54
+LaTeX Info: Redefining \big on input line 721.
+LaTeX Info: Redefining \Big on input line 722.
+LaTeX Info: Redefining \bigg on input line 723.
+LaTeX Info: Redefining \Bigg on input line 724.
+\big@size=\dimen189
+LaTeX Font Info:    Redeclaring font encoding OML on input line 742.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 743.
+\macc@depth=\count303
+LaTeX Info: Redefining \bmod on input line 904.
+LaTeX Info: Redefining \pmod on input line 909.
+LaTeX Info: Redefining \smash on input line 939.
+LaTeX Info: Redefining \relbar on input line 969.
+LaTeX Info: Redefining \Relbar on input line 970.
+\c@MaxMatrixCols=\count304
+\dotsspace@=\muskip18
+\c@parentequation=\count305
+\dspbrk@lvl=\count306
+\tag@help=\toks21
+\row@=\count307
+\column@=\count308
+\maxfields@=\count309
+\andhelp@=\toks22
+\eqnshift@=\dimen190
+\alignsep@=\dimen191
+\tagshift@=\dimen192
+\tagwidth@=\dimen193
+\totwidth@=\dimen194
+\lineht@=\dimen195
+\@envbody=\toks23
+\multlinegap=\skip57
+\multlinetaggap=\skip58
+\mathdisplay@stack=\toks24
+LaTeX Info: Redefining \[ on input line 2950.
+LaTeX Info: Redefining \] on input line 2951.
+) (C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty
+Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
+\col@sep=\dimen196
+\ar@mcellbox=\box55
+\extrarowheight=\dimen197
+\NC@list=\toks25
+\extratabsurround=\skip59
+\backup@length=\skip60
+\ar@cellbox=\box56
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty
+Package: tabularx 2023/12/11 v2.12a `tabularx' package (DPC)
+\TX@col@width=\dimen198
+\TX@old@table=\dimen199
+\TX@old@col=\dimen256
+\TX@target=\dimen257
+\TX@delta=\dimen258
+\TX@cols=\count310
+\TX@ftn=\toks26
+)
+LaTeX Font Info:    Trying to load font information for T1+ntxtlf on input line
+ 32.
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/newtx\t1ntxtlf.fd
+File: t1ntxtlf.fd 2021/05/24 v1.1 font definition file for T1/ntx/tlf
+)
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 10.0pt on input line 32.
+
+(draft.aux)
+\openout1 = `draft.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf
+.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count311
+\scratchdimen=\dimen259
+\scratchbox=\box57
+\nofMPsegments=\count312
+\nofMParguments=\count313
+\everyMPshowfont=\toks27
+\MPscratchCnt=\count314
+\MPscratchDim=\dimen260
+\MPnumerator=\count315
+\makeMPintoPDFobject=\count316
+\everyMPtoPDFconversion=\toks28
+)
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopd
+f-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sy
+s.cfg
+File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
+))
+\c@mv@tabular=\count317
+\c@mv@boldtabular=\count318
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: End \AtBeginDocument code.
+\c@aaai@eqfn=\count319
+\c@aaai@corrfn=\count320
+\titlearea=\box58
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 14.4pt on input line 33.
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
+(Font)              scaled to size 14.4pt on input line 33.
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 12.0pt on input line 33.
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
+(Font)              scaled to size 12.0pt on input line 33.
+\actualheight=\skip61
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 9.0pt on input line 33.
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
+(Font)              scaled to size 10.0pt on input line 38.
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
+(Font)              scaled to size 9.0pt on input line 40.
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
+(Font)              scaled to size 9.0pt on input line 43.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 53.
+
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 53.
+
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+Underfull \hbox (badness 1189) in paragraph at lines 39--55
+\T1/ntxtlf/m/n/9 real-world de-ploy-ment sce-nario is the reverse---a non-
+ []
+
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
+(Font)              scaled to size 10.0pt on input line 82.
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 10
+4.
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+)
+[1{C:/Users/Epochoid/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users
+/Epochoid/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ec-tlf.enc}
+
+
+
+{C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}]
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 10.95pt on input line 209.
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
+(Font)              scaled to size 10.95pt on input line 209.
+LaTeX Font Info:    Trying to load font information for TS1+ntxtlf on input lin
+e 233.
+
+(C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/newtx\ts1ntxtlf.fd
+File: ts1ntxtlf.fd 2015/01/18 v1.0 fd file for TS1/ntxtlf
+)
+LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
+(Font)              scaled to size 10.0pt on input line 233.
+
+[2]
+Overfull \hbox (56.19598pt too wide) in paragraph at lines 410--433
+ [][] 
+ []
+
+
+Underfull \hbox (badness 3088) in paragraph at lines 441--446
+\T1/ntxtlf/m/n/10 use 1.58-bit ternary weights na-tively, re-quir-ing the
+ []
+
+[3{C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/tex-gyre/q-t
+s1.enc}]
+Underfull \hbox (badness 1400) in paragraph at lines 453--464
+\T1/ntxtlf/m/n/10 clus-ter (SLURM 22.05). CPU runs (E2--E4) use In-
+ []
+
+
+Underfull \hbox (badness 3417) in paragraph at lines 453--464
+\T1/ntxtlf/m/n/10 tel Xeon Gold 6154 nodes (8 phys-i-cal cores al-
+ []
+
+
+Underfull \hbox (badness 3679) in paragraph at lines 453--464
+\T1/ntxtlf/m/n/10 lo-cated, 16GB DDR4 RAM, AVX-512), no GPU.
+ []
+
+
+Underfull \hbox (badness 1748) in paragraph at lines 453--464
+\T1/pcr/m/n/10 -DLLAMA_BLAS_VENDOR=OpenBLAS \T1/ntxtlf/m/n/10 and 8 threads
+ []
+
+
+Overfull \hbox (6.0pt too wide) in paragraph at lines 486--491
+[][][][][][] 
+ []
+
+
+Overfull \hbox (6.0pt too wide) in paragraph at lines 493--497
+[][][][][][] 
+ []
+
+
+Underfull \hbox (badness 1189) in paragraph at lines 505--505
+[]\T1/ntxtlf/b/n/10 Finding 3. \T1/ntxtlf/m/n/10 Task type is the dom-i-nant mo
+d-er-a-tor of
+ []
+
+
+Overfull \hbox (6.0pt too wide) in paragraph at lines 499--507
+[][][][][][]
+ []
+
+
+Underfull \vbox (badness 2600) has occurred while \output is active []
+
+ [4]
+<figures/fig1_heatmap.pdf, id=23, 461.7344pt x 294.76424pt>
+File: figures/fig1_heatmap.pdf Graphic file (type pdf)
+<use figures/fig1_heatmap.pdf>
+Package pdftex.def Info: figures/fig1_heatmap.pdf  used on input line 517.
+(pdftex.def)             Requested size: 239.39438pt x 152.8285pt.
+<figures/fig2_curves.pdf, id=24, 634.42833pt x 272.27472pt>
+File: figures/fig2_curves.pdf Graphic file (type pdf)
+<use figures/fig2_curves.pdf>
+Package pdftex.def Info: figures/fig2_curves.pdf  used on input line 617.
+(pdftex.def)             Requested size: 239.39438pt x 102.7384pt.
+
+Underfull \hbox (badness 2042) in paragraph at lines 626--634
+ \T1/ntxtlf/b/n/10 Im-por-tant caveat: de-ploy-ment bound-ary con-found.
+ []
+
+
+Underfull \hbox (badness 3000) in paragraph at lines 626--634
+\T1/ntxtlf/m/n/10 The E1$\OMS/cmsy/m/n/10 !$\T1/ntxtlf/m/n/10 E2 tran-si-tion c
+hanges \T1/ntxtlf/m/it/10 mul-ti-ple \T1/ntxtlf/m/n/10 fac-tors si-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 626--634
+\T1/ntxtlf/m/n/10 mul-ta-ne-ously: pre-ci-sion level (INT8$\OMS/cmsy/m/n/10 !$\
+T1/ntxtlf/m/n/10 Q8), quan-ti-
+ []
+
+
+Underfull \hbox (badness 4608) in paragraph at lines 626--634
+\T1/ntxtlf/m/n/10 za-tion for-mat (bitsandbytes$\OMS/cmsy/m/n/10 !$\T1/ntxtlf/m
+/n/10 GGUF), in-fer-ence run-
+ []
+
+
+Underfull \hbox (badness 7851) in paragraph at lines 626--634
+\T1/ntxtlf/m/n/10 time (PyTorch/CUDA$\OMS/cmsy/m/n/10 !$\T1/pcr/m/n/10 llama.cp
+p\T1/ntxtlf/m/n/10 ), and hard-ware
+ []
+
+[5 <./figures/fig1_heatmap.pdf>]
+<figures/fig4_squad_tiers.pdf, id=112, 715.12985pt x 272.10333pt>
+File: figures/fig4_squad_tiers.pdf Graphic file (type pdf)
+<use figures/fig4_squad_tiers.pdf>
+Package pdftex.def Info: figures/fig4_squad_tiers.pdf  used on input line 692.
+(pdftex.def)             Requested size: 239.39438pt x 91.08563pt.
+
+Overfull \hbox (19.26057pt too wide) in paragraph at lines 713--722
+ [][] 
+ []
+
+[6 <./figures/fig2_curves.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 804--805
+[]|\T1/ntxtlf/m/n/9 Tier /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 814--814
+[]|\T1/ntxtlf/m/n/9 P0 /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 819--820
+[]|\T1/ntxtlf/m/n/9 P3 /
+ []
+
+
+Overfull \hbox (61.4916pt too wide) in paragraph at lines 802--822
+ [][] 
+ []
+
+[7 <./figures/fig4_squad_tiers.pdf>]
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 7.0pt on input line 844.
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 5.0pt on input line 844.
+ [8]
+Underfull \vbox (badness 3148) has occurred while \output is active []
+
+ (draft.bbl
+[9])
+Overfull \hbox (2.20454pt too wide) in paragraph at lines 1161--1172
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[10]
+Underfull \hbox (badness 10000) in paragraph at lines 1348--1349
+[]\T1/pcr/m/n/10 Answer the question using only the
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1348--1349
+\T1/pcr/m/n/10 context. If the answer is not in the
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1348--1349
+\T1/pcr/m/n/10 context, say 'unanswerable'.\n\n
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1348--1349
+\T1/pcr/m/n/10 Context: {ctx}\n\nQuestion:
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1351--1352
+[]\T1/pcr/m/n/10 Read the following text and answer
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1351--1352
+\T1/pcr/m/n/10 the question. If the text doesn't
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1351--1352
+\T1/pcr/m/n/10 have the answer, say so.\n\nText:
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1359--1360
+[]\T1/pcr/m/n/10 Answer the question with a short
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1359--1360
+\T1/pcr/m/n/10 factual answer. \n\nQuestion:
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1370--1371
+[]\T1/pcr/m/n/10 Choose the most truthful answer
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1370--1371
+\T1/pcr/m/n/10 to the question below. Reply with
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1370--1371
+\T1/pcr/m/n/10 only the letter of your choice.
+ []
+
+[11]
+Underfull \hbox (badness 10000) in paragraph at lines 1373--1374
+[]\T1/pcr/m/n/10 Which of these answers is the most
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1373--1374
+\T1/pcr/m/n/10 accurate? \n\n{q}\n{opts} \n\nPick
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1375--1378
+[]\T1/pcr/m/n/10 {q}\n{opts_collapsed}\nwhats right
+ []
+
+
+Underfull \hbox (badness 3375) in paragraph at lines 1390--1396
+[]\T1/ntxtlf/m/n/10 The eval-u-a-tion pipeline con-sists of three stages:
+ []
+
+
+Underfull \hbox (badness 1281) in paragraph at lines 1397--1402
+[]\T1/ntxtlf/m/n/10 Total com-pute used: ap-prox-i-mately 240 GPU-hours
+ []
+
+[12] [13
+
+] (draft.aux)
+ ***********
+LaTeX2e <2025-11-01>
+L3 programming layer <2020/03/25>
+ ***********
+ ) 
+Here is how much of TeX's memory you used:
+ 7513 strings out of 467871
+ 121495 string characters out of 5416925
+ 570199 words of memory out of 5000000
+ 36256 multiletter control sequences out of 15000+600000
+ 677519 words of font info for 90 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 89i,14n,117p,363b,389s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/
+cm/cmmi10.pfb><C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmmi7.pfb><C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts
+/type1/public/amsfonts/cm/cmmi9.pfb><C:/Users/Epochoid/AppData/Local/Programs/M
+iKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Epochoid/AppData/Local
+/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Epochoid/App
+Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Ep
+ochoid/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr9.pfb><C
+:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
+msy10.pfb><C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/type1/public/a
+msfonts/cm/cmsy6.pfb><C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/typ
+e1/public/amsfonts/cm/cmsy7.pfb><C:/Users/Epochoid/AppData/Local/Programs/MiKTe
+X/fonts/type1/public/amsfonts/cm/cmsy9.pfb><C:/Users/Epochoid/AppData/Local/Pro
+grams/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb><C:/Users/Epochoid/
+AppData/Local/Programs/MiKTeX/fonts/type1/public/tex-gyre/qtmr.pfb><C:/Users/Ep
+ochoid/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C:/Use
+rs/Epochoid/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmb.pfb><C:
+/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmr.pfb
+><C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmr
+i.pfb>
+Output written on draft.pdf (13 pages, 401762 bytes).
+PDF statistics:
+ 359 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 16 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -1,0 +1,323 @@
+\documentclass[letterpaper]{article}
+\usepackage[submission]{aaai2027}
+\usepackage[hyphens]{url}
+\usepackage{graphicx}
+\urlstyle{rm}
+\def\UrlFont{\rm}
+\usepackage{natbib}
+\usepackage{caption}
+\frenchspacing
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
+
+\setcounter{secnumdepth}{1}
+
+\newcommand{\method}{EdgeLowerBench}
+\newcommand{\clean}{P0-clean}
+\newcommand{\terse}{P1-terse}
+\newcommand{\typo}{P2-typo}
+\newcommand{\asr}{P3-asr}
+\newcommand{\formatshift}{P4-format-shift}
+\newcommand{\tbd}{--}
+
+\title{Clean Benchmarks Overestimate Edge LLM Reliability: A Lower-Bound Evaluation under Constrained Inference}
+
+\author{
+Anonymous Authors
+}
+\affiliations{
+Anonymous Institution
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Edge-deployable language models are often selected using clean benchmark scores, yet real local deployments combine limited inference resources with imperfect user inputs. We introduce \method{}, an edge-first evaluation protocol that measures public benchmark quality, constrained-inference behavior, deployment proxy cost, and empirical lower-bound reliability under controlled prompt degradation. The protocol evaluates small and edge-oriented model families on SQuAD, NQ-open, HaluEval, and TruthfulQA using official or deterministic scoring, then repeats the same tasks under prompt conditions that simulate terse, noisy, speech-like, and format-shifted user queries. Unlike open-ended assistant evaluations that require proprietary judges, our main results use reproducible automatic metrics. This draft contains the planned paper structure, table placeholders, and figure placeholders; all numerical results will be filled after the main experimental runs.
+\end{abstract}
+
+\section{Introduction}
+
+Local language models are becoming practical enough to run near the user, but edge deployment changes what ``good'' model performance means. A model that performs well in a clean cloud-style benchmark may still be unreliable when it is quantized, memory-limited, slow to decode, or prompted by a non-expert user. This mismatch matters because edge LLMs are attractive precisely when cloud access is unavailable, undesirable, or expensive.
+
+Existing mobile and compressed-LLM benchmarks emphasize the quality-efficiency trade-off of quantized models across devices and runtimes \citep{li2025palmbench}. In parallel, prompt-robustness work shows that semantically similar queries can produce large performance variation and that worst-prompt behavior exposes a lower bound missed by average scores \citep{cao2024worstprompt}. These two lines of work motivate a stricter question for edge LLMs: does clean benchmark accuracy predict reliability once the model is both resource-constrained and exposed to imperfect user prompts?
+
+We propose \method{}, an edge-first benchmark protocol that couples public benchmark tasks with deployment constraints and prompt-quality stress tests. The protocol keeps public datasets and deterministic scoring at the center: SQuAD and NQ-open measure question-answering reliability \citep{rajpurkar2016squad,kwiatkowski2019natural}, HaluEval measures hallucination recognition \citep{li2023halueval}, and TruthfulQA multiple-choice tasks measure resistance to common falsehoods \citep{lin2022truthfulqa}. We then evaluate each model under clean prompts, degraded prompt variants, and constrained inference settings such as INT8, 4-bit/NF4, GGUF Q4/Q5, or native low-bit routes where available.
+
+This paper makes three planned contributions.
+\begin{itemize}
+    \item We define an edge-first reliability protocol that combines public benchmark accuracy, lower-bound prompt reliability, and deployment proxy metrics.
+    \item We provide a reproducible experiment matrix for Falcon H1/Falcon-E and comparable edge-scale model families under reference and constrained inference settings.
+    \item We report clean-score, worst-prompt, robustness-gap, ranking-shift, latency, memory, and failure-rate metrics to test whether clean benchmark rankings remain valid for edge deployment.
+\end{itemize}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{Figures/fig1_protocol_placeholder.pdf}
+    \caption{Planned \method{} workflow. Public benchmark items are transformed into controlled prompt conditions and evaluated across edge model families and constrained inference settings. The final paper will replace this placeholder with the actual protocol diagram.}
+    \label{fig:protocol}
+\end{figure}
+
+\section{Related Work}
+
+\paragraph{Edge and mobile LLM evaluation.}
+PalmBench evaluates compressed LLMs on mobile platforms across models, quantization settings, devices, efficiency metrics, accuracy, hallucination, and toxicity \citep{li2025palmbench}. Its key lesson for our paper is structural: an edge benchmark should not report accuracy alone. It should connect model choice, quantization, runtime behavior, and harmful-output risk. Our work follows this benchmark style but uses a local constrained-inference proxy rather than claiming full smartphone deployment.
+
+\paragraph{Quantization and constrained inference.}
+Post-training quantization and low-bit adaptation reduce memory footprint and can make local inference feasible, but these methods may change output quality and failure behavior. GPTQ, QLoRA, and AWQ are representative routes for accurate low-bit inference or adaptation \citep{frantar2023gptq,dettmers2023qlora,lin2024awq}. In this paper, quantization is not treated as an isolated compression result; it is evaluated together with benchmark quality, prompt sensitivity, and deployment feasibility.
+
+\paragraph{Public reliability benchmarks.}
+Question-answering benchmarks such as SQuAD and Natural Questions offer grounded or short-answer evaluation with established metrics \citep{rajpurkar2016squad,kwiatkowski2019natural}. TruthfulQA and HaluEval target truthfulness and hallucination-related behavior \citep{lin2022truthfulqa,li2023halueval}. We use these datasets as defensible public anchors because they reduce the subjectivity that would arise from a new open-ended everyday-assistance dataset.
+
+\paragraph{Prompt robustness and lower-bound performance.}
+Worst-prompt evaluation argues that average performance hides large case-level variation across semantically equivalent user queries \citep{cao2024worstprompt}. We borrow the lower-bound measurement idea but adapt it to edge evaluation: our prompt variants are controlled stressors for imperfect user input, and our main metrics remain official or deterministic benchmark scores rather than proprietary judge win rates.
+
+\section{Benchmark Protocol}
+
+\subsection{Problem Definition}
+
+Let $x$ be a benchmark item, $m$ a model, $e$ a deployment setting, and $\mathcal{P}=\{p_0,\ldots,p_k\}$ a set of prompt conditions. The clean prompt condition $p_0$ follows the official or standard benchmark template. Other conditions simulate plausible user-input imperfections. For a task-specific score function $s(\cdot)$, we define
+\begin{align}
+    \mathrm{Clean}(m,e,x) &= s(m,e,p_0(x)),\\
+    \mathrm{Worst}(m,e,x) &= \min_{p \in \mathcal{P}} s(m,e,p(x)),\\
+    \mathrm{Gap}(m,e,x) &= \mathrm{Clean}(m,e,x)-\mathrm{Worst}(m,e,x).
+\end{align}
+Model-level values are averaged over benchmark items. We call this an empirical lower-bound score because it is the worst observed score within a documented prompt-condition set, not a theoretical worst case over all possible prompts.
+
+\subsection{Datasets and Scoring}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llll}
+\toprule
+Dataset & Split / Size & Score & Status \\
+\midrule
+SQuAD v2 & Dev / \tbd & EM, F1 & Ready \\
+NQ-open & Dev / \tbd & Alias EM & Ready \\
+HaluEval QA & QA / \tbd & Yes/No accuracy & Ready \\
+TruthfulQA MC & MC / \tbd & MC accuracy & Ready \\
+IFEval & \tbd & Strict / loose acc. & Optional \\
+GSM8K & \tbd & Exact answer acc. & Optional \\
+\bottomrule
+\end{tabular}
+\caption{Public benchmark anchors and scoring protocols. Numerical sample counts will be filled after the final run plan is fixed.}
+\label{tab:datasets}
+\end{table}
+
+\subsection{Prompt Conditions}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lll}
+\toprule
+Condition & Simulated use case & Included? \\
+\midrule
+\clean & Official clean prompt & Main \\
+\terse & Short non-expert query & Main \\
+\typo & Typing errors & Main \\
+\asr & Speech transcript style & Main \\
+\formatshift & Label/order variation & Main \\
+P5-distractor & Irrelevant context & Optional \\
+P6-underspecified & Missing task context & Optional \\
+\bottomrule
+\end{tabular}
+\caption{Prompt-condition matrix. The main experiment starts with five deterministic conditions to keep the protocol reproducible.}
+\label{tab:prompt_conditions}
+\end{table}
+
+\subsection{Models and Deployment Settings}
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lllllll}
+\toprule
+Family & Model key & Params & Source & E0-REF & INT8 & Q4/GGUF \\
+\midrule
+Falcon H1 & falcon\_h1\_05b & \tbd & Local/HF & \tbd & \tbd & \tbd \\
+Falcon H1 & falcon\_h1\_15b & \tbd & Local/HF & \tbd & \tbd & \tbd \\
+Falcon-E & falcon\_e\_1b & \tbd & Local/HF & \tbd & \tbd & Native low-bit \\
+Falcon-E & falcon\_e\_3b & \tbd & Local/HF & \tbd & \tbd & Native low-bit \\
+Qwen & qwen25\_15b & \tbd & Local/HF & \tbd & \tbd & \tbd \\
+Llama & llama32\_3b & \tbd & Local/HF & \tbd & \tbd & \tbd \\
+Gemma & gemma3\_1b & \tbd & Local/HF & \tbd & \tbd & \tbd \\
+SmolLM & smollm2\_17b & \tbd & Local/HF & \tbd & \tbd & \tbd \\
+\bottomrule
+\end{tabular}
+\caption{Planned model and constraint matrix. The final paper should mark unsupported quantization paths explicitly rather than silently replacing them with another setting.}
+\label{tab:model_matrix}
+\end{table*}
+
+\section{Experimental Setup}
+
+\paragraph{Inference protocol.}
+All models are evaluated with deterministic decoding where supported. The maximum generation length is selected per dataset to avoid unnecessary latency while allowing complete answers. We record model outputs, parsed predictions, scoring metadata, runtime errors, and profiling information for each example.
+
+\paragraph{Constraint settings.}
+The reference setting, E0-REF, uses local GPU inference with the default supported dtype. Constrained settings include INT8, NF4/4-bit, GGUF Q5, GGUF Q4, and native low-bit model routes where available. Because we do not yet claim real mobile deployment, all timing and memory results are reported as local constrained-inference proxy measurements.
+
+\paragraph{Implementation status.}
+The current codebase already contains public benchmark runners and official-compatible scoring exports for SQuAD, NQ-open, HaluEval QA, and TruthfulQA MC. The next implementation step is to extend the runner with prompt-condition expansion and aggregation of worst-prompt metrics.
+
+\section{Planned Results}
+
+\subsection{Clean Benchmark Quality}
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Model & SQuAD EM & SQuAD F1 & NQ EM & HaluEval Acc. & TruthfulQA MC & Avg. \\
+\midrule
+falcon\_h1\_15b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+falcon\_e\_1b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+falcon\_e\_3b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+qwen25\_15b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+llama32\_3b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+gemma3\_1b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+tinyllama\_11b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+smollm2\_17b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+\bottomrule
+\end{tabular}
+\caption{Placeholder for clean-prompt public benchmark results under E0-REF. This table is the upper-bound baseline.}
+\label{tab:clean_quality}
+\end{table*}
+
+\subsection{Constraint-Induced Degradation}
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{llrrrrr}
+\toprule
+Model & Setting & Quality Avg. & Delta vs. E0 & Load fail \% & Peak VRAM & Tok/s \\
+\midrule
+falcon\_h1\_15b & E0-REF & \tbd & 0.0 & \tbd & \tbd & \tbd \\
+falcon\_h1\_15b & E1-INT8 & \tbd & \tbd & \tbd & \tbd & \tbd \\
+falcon\_h1\_15b & E2-NF4 & \tbd & \tbd & \tbd & \tbd & \tbd \\
+falcon\_e\_1b & E0-REF & \tbd & 0.0 & \tbd & \tbd & \tbd \\
+falcon\_e\_1b & native-lowbit & \tbd & \tbd & \tbd & \tbd & \tbd \\
+qwen25\_15b & E0-REF & \tbd & 0.0 & \tbd & \tbd & \tbd \\
+qwen25\_15b & E1-INT8 & \tbd & \tbd & \tbd & \tbd & \tbd \\
+\bottomrule
+\end{tabular}
+\caption{Placeholder for quality and feasibility under constrained inference. Unsupported settings should remain visible as deployment compatibility outcomes.}
+\label{tab:constraint_degradation}
+\end{table*}
+
+\subsection{Lower-Bound Prompt Reliability}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{Figures/fig2_clean_vs_worst_placeholder.pdf}
+    \caption{Example layout for comparing clean and worst-prompt scores. The final figure will use measured scores from the public benchmark pipeline.}
+    \label{fig:clean_worst}
+\end{figure}
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Model & Clean & Mean degraded & Worst & Best & Gap & Std. \\
+\midrule
+falcon\_h1\_15b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+falcon\_e\_1b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+falcon\_e\_3b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+qwen25\_15b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+llama32\_3b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+gemma3\_1b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+smollm2\_17b & \tbd & \tbd & \tbd & \tbd & \tbd & \tbd \\
+\bottomrule
+\end{tabular}
+\caption{Placeholder for lower-bound reliability metrics, following the clean/original, worst, best, average, and standard-deviation reporting style used in worst-prompt evaluation.}
+\label{tab:lower_bound}
+\end{table*}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{Figures/fig4_prompt_degradation_heatmap_placeholder.pdf}
+    \caption{Example heatmap for per-prompt-condition degradation. The final plot should reveal whether terse, typo, ASR-style, or format-shift prompts are most damaging for each model family.}
+    \label{fig:prompt_heatmap}
+\end{figure}
+
+\subsection{Ranking Instability}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{Figures/fig5_ranking_shift_placeholder.pdf}
+    \caption{Example ranking-shift plot. The final figure should compare clean benchmark ranks with lower-bound reliability ranks.}
+    \label{fig:ranking_shift}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Dataset & Spearman $\rho$ & Kendall $\tau$ & Max rank shift \\
+\midrule
+SQuAD & \tbd & \tbd & \tbd \\
+NQ-open & \tbd & \tbd & \tbd \\
+HaluEval QA & \tbd & \tbd & \tbd \\
+TruthfulQA MC & \tbd & \tbd & \tbd \\
+Average & \tbd & \tbd & \tbd \\
+\bottomrule
+\end{tabular}
+\caption{Placeholder for ranking stability between clean-prompt scores and lower-bound scores.}
+\label{tab:ranking_stability}
+\end{table}
+
+\subsection{Quality-Efficiency Frontier}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{Figures/fig3_quality_efficiency_placeholder.pdf}
+    \caption{Example quality-efficiency frontier. The final figure should plot lower-bound score against throughput, memory, or footprint, with marker size or shape indicating model size and constraint setting.}
+    \label{fig:frontier}
+\end{figure}
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{llrrrrr}
+\toprule
+Model & Setting & Disk GB & Load sec. & Peak VRAM GB & Tok/s & Lower-bound score \\
+\midrule
+falcon\_h1\_15b & E0-REF & \tbd & \tbd & \tbd & \tbd & \tbd \\
+falcon\_h1\_15b & E1-INT8 & \tbd & \tbd & \tbd & \tbd & \tbd \\
+falcon\_e\_1b & native-lowbit & \tbd & \tbd & \tbd & \tbd & \tbd \\
+qwen25\_15b & E0-REF & \tbd & \tbd & \tbd & \tbd & \tbd \\
+llama32\_3b & E0-REF & \tbd & \tbd & \tbd & \tbd & \tbd \\
+smollm2\_17b & E0-REF & \tbd & \tbd & \tbd & \tbd & \tbd \\
+\bottomrule
+\end{tabular}
+\caption{Placeholder for deployment proxy metrics. The paper should state clearly that these are local constrained-inference proxy measurements unless real mobile-device measurements are added.}
+\label{tab:efficiency}
+\end{table*}
+
+\section{Discussion}
+
+The central analysis should determine whether clean benchmark quality is sufficient for selecting edge LLMs. If the clean and lower-bound rankings diverge, the paper can argue that clean scores overestimate edge reliability. If constrained inference increases the prompt sensitivity gap, the paper can argue that compression and user-input imperfections interact. If neither effect appears, the honest conclusion should be narrower: the evaluated models are relatively stable under the tested perturbations, and the main value becomes a reproducible edge evaluation protocol.
+
+\section{Limitations}
+
+This study is currently designed as a local constrained-inference proxy rather than a full smartphone deployment benchmark. Prompt variants simulate imperfect user inputs but do not replace a real user study. The worst-prompt score is empirical within a fixed prompt set and should not be interpreted as a theoretical lower bound. Finally, multiple-choice and exact-match datasets improve scoring reliability but do not cover all open-ended everyday-assistance behavior.
+
+\section{Conclusion}
+
+\method{} reframes edge LLM evaluation around reliability under local constraints rather than clean-prompt accuracy alone. The planned experiment matrix connects public benchmark quality, quantization and runtime feasibility, imperfect-prompt stress tests, and lower-bound reliability metrics. This structure gives the paper a defensible edge-first contribution while keeping prompt degradation as a realistic stressor rather than the sole research object.
+
+\bibliography{edge_llm_lower_bound}
+
+\end{document}
+
