@@ -1,126 +1,144 @@
-\begin{thebibliography}{22}
+\begin{thebibliography}{29}
 \providecommand{\natexlab}[1]{#1}
 
-\bibitem[{Cobbe et~al.(2021)}]{gsm8k2021}
-Cobbe, K.; et~al. 2021.
-\newblock Training Verifiers to Solve Math Word Problems.
-\newblock \emph{arXiv preprint arXiv:2110.14168}.
+\bibitem[{Anthony et~al.(2024)}]{mamba_empirical2024}
+Anthony, R.; et~al. 2024.
+\newblock An Empirical Study of Mamba-based Language Models.
+
+\bibitem[{Badawy et~al.(2025)}]{edgellm2025}
+Badawy, M.; et~al. 2025.
+\newblock Sustainable LLM Inference for Edge AI: Evaluating Quantized LLMs on
+  ARM-based Edge Platforms.
+
+\bibitem[{Cao et~al.(2024)Cao, Cai, Zhang et~al.}]{ralpaca2024}
+Cao, B.; Cai, D.; Zhang, Z.; et~al. 2024.
+\newblock On the Worst Prompt Performance of Large Language Models.
 
 \bibitem[{Dettmers et~al.(2022)Dettmers, Lewis, Belkada, and
   Zettlemoyer}]{llmint8}
 Dettmers, T.; Lewis, M.; Belkada, Y.; and Zettlemoyer, L. 2022.
-\newblock {LLM.int8()}: 8-bit Matrix Multiplication for Transformers at Scale.
-\newblock \emph{Advances in Neural Information Processing Systems}.
+\newblock LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale.
+
+\bibitem[{Dong et~al.(2024)}]{hymba2024}
+Dong, X.; et~al. 2024.
+\newblock Hymba: A Hybrid-head Architecture for Small Language Models.
 
 \bibitem[{Frantar et~al.(2022)Frantar, Ashkboos, Hoefler, and
   Alistarh}]{gptq2022}
 Frantar, E.; Ashkboos, S.; Hoefler, T.; and Alistarh, D. 2022.
-\newblock {GPTQ}: Accurate Post-Training Quantization for Generative
-  Pre-trained Transformers.
-\newblock \emph{arXiv preprint arXiv:2210.17323}.
+\newblock GPTQ: Accurate Post-Training Quantization for Generative Pre-trained
+  Transformers.
 
 \bibitem[{Gerganov et~al.(2023)}]{gguf}
 Gerganov, G.; et~al. 2023.
-\newblock llama.cpp: {LLM} Inference in {C/C++}.
-\newblock \url{https://github.com/ggerganov/llama.cpp}.
+\newblock GGUF: llama.cpp quantization format.
 
 \bibitem[{Gu and Dao(2023)}]{mamba2023}
 Gu, A.; and Dao, T. 2023.
 \newblock Mamba: Linear-Time Sequence Modeling with Selective State Spaces.
-\newblock \emph{arXiv preprint arXiv:2312.00752}.
 
-\bibitem[{Guo et~al.(2024)}]{ralpaca2024}
-Guo, Y.; et~al. 2024.
-\newblock Robust Instruction Following via Evaluating {LLM}s with Diverse
-  Prompt Variations.
-\newblock \emph{arXiv preprint arXiv:2406.10248}.
+\bibitem[{Haggenmiller et~al.(2024)}]{mobilequant2024}
+Haggenmiller, F.; et~al. 2024.
+\newblock MobileQuant: Mobile-friendly Quantization for On-device Language
+  Models.
 
 \bibitem[{Hendrycks et~al.(2021)}]{mmlu2021}
 Hendrycks, D.; et~al. 2021.
 \newblock Measuring Massive Multitask Language Understanding.
-\newblock \emph{International Conference on Learning Representations}.
+\newblock \emph{ICLR}.
 
-\bibitem[{Kwiatkowski et~al.(2019)}]{nqopen}
-Kwiatkowski, T.; et~al. 2019.
-\newblock Natural Questions: {A} Benchmark for Question Answering Research.
-\newblock \emph{Transactions of the Association for Computational Linguistics}.
+\bibitem[{Kim et~al.(2023)Kim, Hooper, Gholami et~al.}]{squeezellm2023}
+Kim, S.; Hooper, C.; Gholami, A.; et~al. 2023.
+\newblock SqueezeLLM: Dense-and-Sparse Quantization.
 
-\bibitem[{Li et~al.(2023)}]{alpacaeval2023}
-Li, X.; et~al. 2023.
-\newblock AlpacaEval: An Automatic Evaluator of Instruction-Following Models.
-\newblock \emph{arXiv preprint arXiv:2305.14387}.
+\bibitem[{Kwiatkowski et~al.(2019)Kwiatkowski, Palomaki, Redfield
+  et~al.}]{nqopen}
+Kwiatkowski, T.; Palomaki, J.; Redfield, O.; et~al. 2019.
+\newblock Natural Questions: A Benchmark for Question Answering Research.
+\newblock In \emph{TACL}.
 
-\bibitem[{Liang et~al.(2023)}]{helm2022}
-Liang, P.; et~al. 2023.
+\bibitem[{Li et~al.(2023)Li, Cheng, Zhao et~al.}]{halueval2023}
+Li, J.; Cheng, X.; Zhao, W.~X.; et~al. 2023.
+\newblock HaluEval: A Large-Scale Hallucination Evaluation Benchmark for Large
+  Language Models.
+
+\bibitem[{Li et~al.(2024)Li, Liu, Zhang et~al.}]{palmbench2024}
+Li, Y.; Liu, J.; Zhang, H.; et~al. 2024.
+\newblock PalmBench: A Comprehensive Benchmark of Compressed Large Language
+  Models on Mobile Platforms.
+
+\bibitem[{Liang et~al.(2023{\natexlab{a}})Liang, He, Luo et~al.}]{edgefm2023}
+Liang, B.; He, L.; Luo, Z.; et~al. 2023{\natexlab{a}}.
+\newblock EdgeFM: Leveraging Foundation Model for Open-set Learning on the
+  Edge.
+
+\bibitem[{Liang et~al.(2023{\natexlab{b}})}]{helm2022}
+Liang, P.; et~al. 2023{\natexlab{b}}.
 \newblock Holistic Evaluation of Language Models.
-\newblock \emph{Transactions on Machine Learning Research}.
+\newblock In \emph{TMLR}.
 
 \bibitem[{Lin, Hilton, and Evans(2022)}]{truthfulqa}
 Lin, S.; Hilton, J.; and Evans, O. 2022.
-\newblock {TruthfulQA}: Measuring How Models Mimic Human Falsehoods.
-\newblock In \emph{Proceedings of the 60th Annual Meeting of the Association
-  for Computational Linguistics}.
+\newblock TruthfulQA: Measuring How Models Mimic Human Falsehoods.
+\newblock In \emph{ACL}.
 
-\bibitem[{Luo et~al.(2023)}]{edgefm2023}
-Luo, B.; et~al. 2023.
-\newblock {EdgeFM}: Leveraging Foundation Model for Open-set Learning on the
-  Edge.
-\newblock \emph{arXiv preprint arXiv:2311.10986}.
+\bibitem[{Ma et~al.(2024)Ma, Wang, Ma et~al.}]{bitnet2024}
+Ma, S.; Wang, H.; Ma, L.; et~al. 2024.
+\newblock The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits.
 
-\bibitem[{Ma et~al.(2024)}]{bitnet2024}
-Ma, S.; et~al. 2024.
-\newblock The Era of 1-bit {LLMs}: All Large Language Models are in 1.58 Bits.
-\newblock \emph{arXiv preprint arXiv:2402.17764}.
-
-\bibitem[{Pezeshkpour and Hruschka(2023)}]{flipflop2023}
-Pezeshkpour, P.; and Hruschka, E. 2023.
-\newblock Large Language Models Are Not Robust Multiple Choice Selectors.
-\newblock \emph{arXiv preprint arXiv:2309.03882}.
-
-\bibitem[{Pham et~al.(2024)}]{mobilequant2024}
-Pham, Q.; et~al. 2024.
-\newblock {MobileQuant}: Mobile-Friendly Quantization for On-device Language
-  Models.
-\newblock \emph{arXiv preprint arXiv:2408.13933}.
+\bibitem[{Mizrahi et~al.(2024)Mizrahi, Kaplan, Malkin et~al.}]{multiprompt2024}
+Mizrahi, M.; Kaplan, G.; Malkin, D.; et~al. 2024.
+\newblock State of What Art? A Call for Multi-Prompt LLM Evaluation.
 
 \bibitem[{Rajpurkar, Jia, and Liang(2018)}]{squad2}
 Rajpurkar, P.; Jia, R.; and Liang, P. 2018.
-\newblock Know What You Don't Know: Unanswerable Questions for {SQuAD}.
-\newblock In \emph{Proceedings of the 56th Annual Meeting of the Association
-  for Computational Linguistics}.
+\newblock Know What You Don't Know: Unanswerable Questions for SQuAD.
+\newblock In \emph{ACL}.
 
-\bibitem[{Sclar et~al.(2023)}]{sclar2023}
-Sclar, M.; et~al. 2023.
+\bibitem[{Sclar et~al.(2023)Sclar, Choi, Tsvetkov, and Suhr}]{sclar2023}
+Sclar, M.; Choi, Y.; Tsvetkov, Y.; and Suhr, A. 2023.
 \newblock Quantifying Language Models' Sensitivity to Spurious Features in
-  Prompt Design or: How I Learned to Start Worrying About Prompt Formatting.
-\newblock \emph{arXiv preprint arXiv:2310.11324}.
+  Prompt Design.
 
 \bibitem[{Srivastava et~al.(2023)}]{bigbench2022}
 Srivastava, A.; et~al. 2023.
 \newblock Beyond the Imitation Game: Quantifying and Extrapolating the
   Capabilities of Language Models.
-\newblock \emph{Transactions on Machine Learning Research}.
+\newblock \emph{TMLR}.
 
-\bibitem[{{TII} et~al.(2025)}]{falconh12025}
-{TII}; et~al. 2025.
-\newblock Falcon-{H1}: {A} Family of Hybrid-Attention and {SSM} Models.
-\newblock \emph{arXiv preprint}.
+\bibitem[{Tiiuae et~al.(2025)}]{falconh12025}
+Tiiuae; et~al. 2025.
+\newblock Falcon-H1: A Family of Hybrid-Head Language Models Redefining
+  Efficiency and Performance.
 
-\bibitem[{Weng et~al.(2024)}]{palmbench2024}
-Weng, Y.; et~al. 2024.
-\newblock {PalmBench}: {A} Comprehensive Benchmark of Compressed Large Language
-  Models on Mobile Platforms.
-\newblock \emph{arXiv preprint arXiv:2410.05315}.
+\bibitem[{Tseng et~al.(2024)Tseng, Chee, Sun et~al.}]{quip2024}
+Tseng, A.; Chee, J.; Sun, Q.; et~al. 2024.
+\newblock QuIP\#: Even Better LLM Quantization with Hadamard Incoherence and
+  Lattice Codebooks.
 
-\bibitem[{Zheng et~al.(2023)}]{mtbench2023}
-Zheng, L.; et~al. 2023.
-\newblock Judging {LLM}-as-a-Judge with {MT-Bench} and Chatbot Arena.
-\newblock In \emph{Advances in Neural Information Processing Systems}.
+\bibitem[{Wang et~al.(2019)}]{superglue2019}
+Wang, A.; et~al. 2019.
+\newblock SuperGLUE: A Stickier Benchmark for General-Purpose Language
+  Understanding Systems.
+\newblock In \emph{NeurIPS}.
 
-\bibitem[{Zhu et~al.(2023)}]{promptbench2023}
-Zhu, K.; et~al. 2023.
-\newblock {PromptBench}: Towards Evaluating the Robustness of Large Language
+\bibitem[{Xiao et~al.(2025)}]{quantsys2025}
+Xiao, G.; et~al. 2025.
+\newblock A Systematic Characterization of LLM Quantization for Efficient
+  Inference.
+
+\bibitem[{Zheng et~al.(2023)Zheng, Chiang, Sheng et~al.}]{mtbench2023}
+Zheng, L.; Chiang, W.-L.; Sheng, Y.; et~al. 2023.
+\newblock Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena.
+\newblock In \emph{NeurIPS}.
+
+\bibitem[{Zhou et~al.(2023)Zhou, Lu, Mishra et~al.}]{ifeval2023}
+Zhou, J.; Lu, T.; Mishra, S.; et~al. 2023.
+\newblock Instruction-Following Evaluation for Large Language Models.
+
+\bibitem[{Zhu et~al.(2023)Zhu, Wang, Zhou et~al.}]{promptbench2023}
+Zhu, K.; Wang, J.; Zhou, J.; et~al. 2023.
+\newblock PromptBench: Towards Evaluating the Robustness of Large Language
   Models on Adversarial Prompts.
-\newblock \emph{arXiv preprint arXiv:2306.04528}.
 
 \end{thebibliography}
