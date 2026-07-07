@@ -26,7 +26,7 @@
 \maketitle
 
 \begin{abstract}
-Small language models are increasingly promoted as practical alternatives to cloud-scale LLMs for users with limited hardware access, privacy concerns, or edge deployment needs. Yet most evaluations assume idealized conditions: expert-written prompts, clean benchmark inputs, and full-precision inference on powerful infrastructure. In practice, ordinary users often provide ambiguous or poorly structured prompts, while edge deployment commonly relies on compressed or quantized models. This paper studies whether small language models remain reliable when both user input and deployment conditions are imperfect. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), an evaluation protocol for measuring model reliability as prompt quality and deployment conditions degrade. PEEL varies prompt quality, from expert-formatted to colloquially broken prompts, and deployment quality, from full-precision inference to aggressive low-bit quantization. We evaluate 18 small and efficient language models across reading comprehension, open-domain question answering, truthfulness discrimination, instruction following, and multi-turn dialogue. Our results show that quantization alone is not the dominant source of failure once output-scoring artefacts are handled: at expert prompts, TruthfulQA accuracy changes by about one point from full precision to 4-bit. Prompt degradation is far more damaging, especially for span-based reading comprehension, where SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across every model and deployment setting---a near-total, prompt-driven collapse. Architecture, not scale, governs robustness to informal prompts: a 1.5B SSM-Hybrid model scores 8.20 on MT-Bench versus 4.06 for a same-size Transformer and is essentially immune to prompt degradation. Finally, safety alignment is fragile at this scale, with models refusing only 6.5\% of unsafe prompts on average. PEEL highlights the gap between clean benchmark assumptions and ordinary-user edge conditions, and provides a practical protocol for lower-bound evaluation of small language models.
+Small language models are increasingly promoted as practical alternatives to cloud-scale LLMs for users with limited hardware access, privacy concerns, or edge deployment needs. Yet most evaluations assume idealized conditions: expert-written prompts, clean benchmark inputs, and full-precision inference on powerful infrastructure. In practice, ordinary users often provide ambiguous or poorly structured prompts, while edge deployment commonly relies on compressed or quantized models. This paper studies whether small language models remain reliable when both user input and deployment conditions are imperfect. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), an evaluation protocol for measuring model reliability as prompt quality and deployment conditions degrade. PEEL varies prompt quality, from expert-formatted to colloquially broken prompts, and deployment quality, from full-precision inference to aggressive low-bit quantization. We evaluate 16 small and efficient language models across reading comprehension, open-domain question answering, truthfulness discrimination, instruction following, and multi-turn dialogue. Our results show that quantization alone is not the dominant source of failure once output-scoring artefacts are handled: at expert prompts, TruthfulQA accuracy changes by about one point from full precision to 4-bit. Prompt degradation is far more damaging, especially for span-based reading comprehension, where SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across every model and deployment setting---a near-total, prompt-driven collapse. Architecture, not scale, governs robustness to informal prompts: a 1.5B SSM-Hybrid model scores 8.20 on MT-Bench versus 4.06 for a same-size Transformer and is essentially immune to prompt degradation. Finally, safety alignment is fragile at this scale, with models refusing only 6.5\% of unsafe prompts on average. PEEL highlights the gap between clean benchmark assumptions and ordinary-user edge conditions, and provides a practical protocol for lower-bound evaluation of small language models.
 \end{abstract}
 
 
@@ -75,7 +75,7 @@ prompt-quality tiers (expert to broken). Building on the idea that worst-case
 prompt performance is a meaningful lower bound on model reliability~\citep{ralpaca2024},
 PEEL extends lower-bound evaluation to a second axis: it measures the worst-case
 realistic performance when \emph{both} prompt quality and deployment quality are
-stressed at once. Evaluating 18 models across six tasks, we find that the two
+stressed at once. Evaluating 16 models across six tasks, we find that the two
 axes are not symmetric. Quantization is largely benign once output-scoring
 artefacts are corrected---at expert prompts, TruthfulQA-MC1 accuracy changes by
 about 1\,pp from full precision to 4-bit---whereas prompt degradation is catastrophic for
@@ -200,8 +200,9 @@ and sub-1-bit BitNet~\citep{bitnet2024} represent emerging families optimized
 for efficient inference. \citet{mamba_empirical2024} show Mamba matches
 Transformers on many tasks but underperforms on knowledge-intensive benchmarks;
 \citet{hymba2024} demonstrate that hybrid SSM+attention architectures outperform
-same-size Transformers on standard NLP tasks. PEEL is the first study to
-measure their prompt-quality robustness and edge quantization tolerance jointly.
+same-size Transformers on standard NLP tasks. PEEL is the first study to measure
+the prompt-quality robustness and edge quantization tolerance of the SSM-Hybrid
+family (Falcon-H1) jointly.
 
 These families matter for edge benchmarking because their design targets
 favourable behaviour under constrained decoding, not only lower memory. Standard
@@ -390,7 +391,7 @@ non-empty output line.
 
 \subsection{Model Selection}
 
-We evaluate 18 models spanning nine brand families (Falcon-H1, Falcon-E,
+We evaluate 16 models spanning eight brand families (Falcon-H1,
 Gemma, InternLM, Llama, Phi, Qwen, SmolLM, TinyLlama) across the
 0.09B--3.8B parameter range (Table~\ref{tab:models}).
 
@@ -398,9 +399,7 @@ The model set is organized around three comparison roles. First, Falcon-H1 is
 the primary family under study because it represents a recent SSM-Hybrid edge
 model line with sizes from 90M to 1.5B parameters. Including 0.5B, 0.6B, 1.5B,
 and a deeper 1.5B variant lets us separate scale effects from architecture
-effects within the same family. Second, Falcon-E provides native low-bit BitNet
-models, which test whether an architecture trained for low precision behaves
-differently from post-hoc quantized Transformers. Third, Qwen, Llama, SmolLM,
+effects within the same family. Second, Qwen, Llama, SmolLM,
 TinyLlama, Gemma, Phi, and InternLM serve as external baselines that reviewers
 will recognize from small-model and edge-LLM literature. The comparison is not
 intended to crown a universal winner; it asks whether the same deployment and
@@ -417,15 +416,12 @@ where users are likely to run models through lightweight local runtimes.
   \small
   \centering
   \caption{Models evaluated in PEEL.
-    $^\dagger$BitNet 1.58-bit native; excluded from E1--E4 comparisons (no GGUF).
     $^\ddagger$SSM-Hybrid (Mamba-2 + attention layers).}
   \label{tab:models}
   \begin{tabular}{@{}llc@{}}
     \toprule
     Model & Family & Params \\
     \midrule
-    Falcon-E-1B$^\dagger$         & Falcon-E    & 1.0B \\
-    Falcon-E-3B$^\dagger$         & Falcon-E    & 3.0B \\
     Falcon-H1-90M$^\ddagger$      & Falcon-H1   & 0.09B \\
     Falcon-H1-0.5B$^\ddagger$     & Falcon-H1   & 0.5B \\
     Falcon-H1-0.6B$^\ddagger$     & Falcon-H1   & 0.6B \\
@@ -453,8 +449,6 @@ institutional HPC cluster.
 CPU settings (E2--E4) use \texttt{llama.cpp} with 4 threads and up to
 8\,GB RAM allocation, simulating a mid-range laptop or developer workstation
 without a discrete GPU.
-BitNet (Falcon-E) models run via \texttt{bitnet.cpp} at native 1.58-bit
-precision and are excluded from the E1 INT8 and E2--E4 GGUF tracks.
 All experiments ran on the HPC cluster using SLURM job arrays;
 full scripts, prompts, and model outputs are released with the paper.
 
@@ -606,8 +600,7 @@ We therefore treat parser specification as part of the benchmark protocol.
 
 We evaluate MT-Bench (80 multi-turn questions, 8 categories) with GPT-4o-mini
 as judge at all five edge settings and two prompt tiers (P0, P3), totalling
-150 scored runs. Coverage is not perfectly rectangular: Falcon-E is excluded
-from MT-Bench because it uses a separate BitNet runtime, and InternLM/Phi have
+150 scored runs. Coverage is not perfectly rectangular: InternLM and Phi have
 partial setting coverage due to tokenizer and chat-template failures.
 
 \begin{figure}[t]
@@ -615,8 +608,7 @@ partial setting coverage due to tokenizer and chat-template failures.
   \includegraphics[width=\columnwidth]{Figures/fig3_mtbench_family_bar.pdf}
   \caption{MT-Bench scores at E0-REF/P0 (solid) and P3 (transparent) per model,
     colored by family. Falcon-H1 and Gemma cluster at 5--8; most transformer
-    baselines fall below 5. Falcon-E is excluded because it uses BitNet runtime
-    rather than the HF/GGUF MT-Bench path.}
+    baselines fall below 5.}
   \label{fig:mtbench_bar}
 \end{figure}
 
@@ -668,7 +660,7 @@ claim: architecture family changes the lower-bound behavior observed by users.
 \begin{table}[t]
   \small\centering
   \caption{MT-Bench mean score by family and P0$\to$P3 delta.
-    Falcon-E is excluded; InternLM and Phi have partial setting coverage.}
+    InternLM and Phi have partial setting coverage.}
   \label{tab:mtbench_arch}
   \begin{tabular}{@{}lccc@{}}
     \toprule
@@ -998,10 +990,8 @@ MT-Bench is evaluated only at P0 and P3 because it is an open-ended
 instruction-following benchmark rather than a reference-scored QA task. This
 means MT-Bench is not included in the P0/P1/P2/P3 matched heatmaps. Instead,
 the paper reports matched P3--P0 deltas by model, family, and setting.
-Falcon-E is excluded because it runs through a native BitNet inference path
-rather than the HuggingFace/GGUF path used for MT-Bench generation. InternLM
-and Phi have partial setting coverage because of tokenizer and chat-template
-failures.
+InternLM and Phi have partial setting coverage because of tokenizer and
+chat-template failures.
 
 \begin{table}[t]
   \small\centering
@@ -1091,10 +1081,9 @@ plots are included in the released analysis notebook.
 
 \subsection{Interpreting Missing Cells}
 
-Missing cells in PEEL are not silently imputed. They arise from three
-sources: (1) model families that require a different runtime, such as Falcon-E
-with \texttt{bitnet.cpp}; (2) tokenizer or chat-template incompatibilities that
-prevent reliable generation for a task/setting; and (3) optional baseline models
+Missing cells in PEEL are not silently imputed. They arise from two
+sources: (1) tokenizer or chat-template incompatibilities that
+prevent reliable generation for a task/setting; and (2) optional baseline models
 with partial coverage. We report aggregates over available cells and avoid
 claiming a comparison when the matched model--setting--prompt set is incomplete.
 For prompt-sensitivity claims, we use matched P0/P3 pairs wherever possible.
