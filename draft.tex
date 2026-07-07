@@ -26,7 +26,7 @@
 \maketitle
 
 \begin{abstract}
-Small language models are increasingly promoted as practical alternatives to cloud-scale LLMs for users with limited hardware access, privacy concerns, or edge deployment needs. Yet most evaluations assume idealized conditions: expert-written prompts, clean benchmark inputs, and full-precision inference on powerful infrastructure. In practice, ordinary users often provide ambiguous or poorly structured prompts, while edge deployment commonly relies on compressed or quantized models. This paper studies whether small language models remain reliable when both user input and deployment conditions are imperfect. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), an evaluation protocol for measuring model reliability as prompt quality and deployment conditions degrade. PEEL varies prompt quality, from expert-formatted to colloquially broken prompts, and deployment quality, from full-precision inference to aggressive low-bit quantization. We evaluate 18 small and efficient language models across reading comprehension, open-domain question answering, truthfulness discrimination, instruction following, and multi-turn dialogue. Our results show that quantization alone is not the dominant source of failure once output-scoring artefacts are handled: at expert prompts, TruthfulQA accuracy changes by under one point from full precision to 4-bit. Prompt degradation is far more damaging, especially for span-based reading comprehension, where SQuAD~v2 exact match collapses from roughly 21\% to 0\% under broken prompts across every model and every deployment setting. Architecture, not scale, governs robustness to informal prompts: a 1.5B SSM-Hybrid model scores 8.20 on MT-Bench versus 4.06 for a same-size Transformer and is essentially immune to prompt degradation. Finally, safety alignment is fragile at this scale, with models refusing only 6.5\% of unsafe prompts on average. PEEL highlights the gap between clean benchmark assumptions and ordinary-user edge conditions, and provides a practical protocol for lower-bound evaluation of small language models.
+Small language models are increasingly promoted as practical alternatives to cloud-scale LLMs for users with limited hardware access, privacy concerns, or edge deployment needs. Yet most evaluations assume idealized conditions: expert-written prompts, clean benchmark inputs, and full-precision inference on powerful infrastructure. In practice, ordinary users often provide ambiguous or poorly structured prompts, while edge deployment commonly relies on compressed or quantized models. This paper studies whether small language models remain reliable when both user input and deployment conditions are imperfect. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), an evaluation protocol for measuring model reliability as prompt quality and deployment conditions degrade. PEEL varies prompt quality, from expert-formatted to colloquially broken prompts, and deployment quality, from full-precision inference to aggressive low-bit quantization. We evaluate 18 small and efficient language models across reading comprehension, open-domain question answering, truthfulness discrimination, instruction following, and multi-turn dialogue. Our results show that quantization alone is not the dominant source of failure once output-scoring artefacts are handled: at expert prompts, TruthfulQA accuracy changes by about one point from full precision to 4-bit. Prompt degradation is far more damaging, especially for span-based reading comprehension, where SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across every model and deployment setting---a near-total, prompt-driven collapse. Architecture, not scale, governs robustness to informal prompts: a 1.5B SSM-Hybrid model scores 8.20 on MT-Bench versus 4.06 for a same-size Transformer and is essentially immune to prompt degradation. Finally, safety alignment is fragile at this scale, with models refusing only 6.5\% of unsafe prompts on average. PEEL highlights the gap between clean benchmark assumptions and ordinary-user edge conditions, and provides a practical protocol for lower-bound evaluation of small language models.
 \end{abstract}
 
 
@@ -78,16 +78,16 @@ realistic performance when \emph{both} prompt quality and deployment quality are
 stressed at once. Evaluating 18 models across six tasks, we find that the two
 axes are not symmetric. Quantization is largely benign once output-scoring
 artefacts are corrected---at expert prompts, TruthfulQA-MC1 accuracy changes by
-under 1\,pp from full precision to 4-bit---whereas prompt degradation is catastrophic for
-format-sensitive tasks: SQuAD~v2 exact match collapses from ${\sim}$21\% to
-\textbf{0\%} at the broken-prompt tier for \emph{every} model and \emph{every}
-edge setting (Figure~\ref{fig:collapse}). Architecture, not scale, governs
+about 1\,pp from full precision to 4-bit---whereas prompt degradation is catastrophic for
+format-sensitive tasks: SQuAD~v2 exact match falls from ${\sim}$30\% to
+\textbf{2--5\%} at the broken-prompt tier for \emph{every} model and \emph{every}
+edge setting, a near-total collapse (Figure~\ref{fig:collapse}). Architecture, not scale, governs
 robustness to informal prompts: the SSM-Hybrid Falcon-H1-1.5B scores 8.20 on
 MT-Bench versus 4.06 for the same-size Qwen2.5-1.5B, and is essentially immune to
 prompt degradation. Reaching these conclusions first required a
 scoring-artefact audit: we show that two \texttt{llama.cpp}-specific
 output-parsing bugs otherwise masquerade as capability collapse (e.g.\ a
-spurious 0\% SQuAD EM at 4-bit that recovers to 21--31\% once fixed), and we
+spurious 0\% SQuAD EM at 4-bit that recovers to ${\sim}$30\% once fixed), and we
 release corrected scorers so that edge-LLM scores reflect model capability
 rather than interface mismatch.
 
@@ -101,7 +101,7 @@ rather than interface mismatch.
     truthfulness discrimination.
   \item \textbf{Task-type interaction laws}: multiple-choice tasks are robust to
     both axes, span extraction is sensitive to prompts but not quantization, and
-    knowledge-intensive QA hits a recall cliff at the GPU$\to$CPU runtime
+    knowledge-intensive QA loses about half its recall at the GPU$\to$CPU runtime
     boundary.
   \item A \textbf{scoring-artefact diagnosis}: two \texttt{llama.cpp}-specific
     bugs (EOS/stop-token leakage and first-line parsing) that systematically
@@ -127,8 +127,9 @@ implications and limitations (Sections~\ref{sec:discussion}--\ref{sec:conclusion
     P0--P3 (expert$\to$broken, columns) and the five edge-deployment settings
     E0--E4 (full-precision GPU$\to$4-bit CPU, rows). Left: absolute EM;
     right: change relative to the E0-REF baseline (red\,=\,degradation).
-    The P3 column collapses to 0\% for \emph{every} model and \emph{every}
-    edge setting, while the P0 row stays at 20--22\% across all five settings.}
+    The P3 column falls to 2--5\% for \emph{every} model and \emph{every}
+    edge setting (a $\sim$10$\times$ drop from P0), while the P0 row stays at
+    28--30\% across all five settings.}
   \label{fig:collapse}
 \end{figure}
 
@@ -474,18 +475,17 @@ the interpretation of E2--E4 as edge-style conditions.
 \subsection{TruthfulQA-MC1: Quantization-Resilient}
 \label{sec:tqa}
 
-Across all 1,184 qualifying runs (18 models, num\_examples $\geq$ 100),
-TruthfulQA-MC1 mean accuracy at the expert baseline (P0, E0-REF) is 37.9\%;
-it rises slightly at E1-INT8 (39.4\%) before settling at 38.4--40.1\% at
-E2--E4. All cells remain well above the 25.0\% chance baseline.
-Crucially, the P0$\to$P3 drop within any setting is $<$12\,pp, and
-quantization from E0 to E4 changes P0 accuracy by only $-$0.7\,pp---a
-\emph{near-zero interaction} between the two degradation axes for
-this task type.
+Across all 1,088 qualifying runs (16 models, num\_examples $\geq$ 100),
+TruthfulQA-MC1 mean accuracy at the expert baseline (P0, E0-REF) is 39.7\%;
+it is 39.4\% at E1-INT8 and settles at 38.4--40.1\% at E2--E4. All cells remain
+well above the 25.0\% chance baseline. Crucially, quantization from E0 to E4
+changes P0 accuracy by only $-$1.1\,pp, and the P0$\to$P3 drop within any single
+setting stays under 12\,pp---a \emph{near-zero interaction} between the two
+degradation axes for this task type.
 
 One notable pattern (Table~\ref{tab:tqa_grid}): at E2--E4 (CPU/llama.cpp),
 the P1 ``casual'' prompt tier scores \emph{lower} than at E0/E1
-(29.1--31.6\% vs.\ 40.4--41.0\%), while P0 is unaffected.
+(29.1--31.6\% vs.\ 40.6--41.0\%), while P0 is unaffected.
 We attribute this to llama.cpp's lack of a system-level chat template:
 casual prompts that omit explicit format instructions rely on the model's
 instruction-following mode to infer the task, which is not activated by
@@ -509,7 +509,7 @@ the prompt format explicit after conversion.
     \toprule
     Setting & P0 & P1 & P2 & P3 \\
     \midrule
-    E0-REF  & 37.9 & 40.4 & 36.7 & 36.6 \\
+    E0-REF  & 39.7 & 40.6 & 36.6 & 37.6 \\
     E1-INT8 & 39.4 & 41.0 & 35.7 & 37.3 \\
     E2-Q8   & 40.1 & 29.1 & 30.1 & 28.8 \\
     E3-Q5   & 38.4 & 31.6 & 33.0 & 30.1 \\
@@ -522,14 +522,15 @@ the prompt format explicit after conversion.
 \label{sec:collapse}
 
 After correcting for an EOS/stop-token scoring artefact (Section~\ref{sec:discussion}),
-SQuAD v2 EM at P0 is stable at 19.8--22.0\% across all five edge settings,
+SQuAD v2 EM at P0 is stable at 27.8--30.5\% across all five edge settings,
 with no significant capability cliff at the E1$\to$E2 (\texttt{llama.cpp})
 boundary (full grid in appendix Table~\ref{tab:squad_grid};
 the heatmap in Figure~\ref{fig:collapse} visualises the same data).
 The \emph{dominant failure mode is prompt degradation}, not quantization:
-SQuAD EM drops to 0.0\% at P3 for \emph{all} models and settings.
-P1 and P2 show gradual degradation (5.8--12.4\% and $\approx$0\%),
-but the cliff occurs between P2 and P3.
+EM falls to 2--5\% at P3 for \emph{all} models and settings---a near-total
+collapse of roughly $10\times$ from P0. The degradation is monotonic but not
+uniform: P1 still retains 17--21\%, whereas P2 and P3 drop to 3--6\% and 2--5\%,
+so the cliff lies between P1 and P2.
 
 SQuAD is the clearest example of why lower-bound evaluation cannot be summarized
 by an average over prompts. Under P0, the edge settings are surprisingly close:
@@ -541,40 +542,39 @@ needed to answer is still present in the context. This is not a generic
 ``small models are bad'' result. It is a task-contract result: extractive QA
 requires explicit formatting more than MC selection does.
 
-\subsection{NQ-Open: Quantization Collapse at E2--E4}
+\subsection{NQ-Open: Recall Halves at the GPU$\to$CPU Boundary}
 \label{sec:nq}
 
 Natural Questions Open reveals a qualitatively different failure mode from SQuAD.
-Even at E0-REF, mean EM is only 1.3\% (rising to 1.7\% at E1-INT8)---
-reflecting the weak parametric factual recall of sub-2B models without a
-supporting context passage. At E2--E4 (llama.cpp CPU), EM drops to
-\textbf{0.0\%} across \emph{all} prompt tiers (full grid in appendix
-Table~\ref{tab:nq_grid}).
+At E0-REF, mean P0 EM is 8.2\% (8.4\% at E1-INT8), with the strongest models
+(Phi-4-Mini, Llama-3.2-3B, Falcon-H1-1.5B-Deep) reaching 12--18\%. At E2--E4
+(llama.cpp CPU), P0 EM roughly \emph{halves} to \textbf{3.3--3.6\%} across all
+prompt tiers (full grid in appendix Table~\ref{tab:nq_grid}).
 
-The E1$\to$E2 collapse is caused by two compounding factors:
+The E1$\to$E2 drop is caused by two compounding factors:
 (1)~\texttt{llama.cpp} does not apply the model's chat template, so models
 run in raw-completion mode---NQ-Open requires answer recall without a supporting
 passage, which demands active instruction-following; and
-(2)~sub-2B models have inherently limited parametric factual recall,
-which disappears entirely once instruction-following mode is lost.
+(2)~sub-2B models have limited parametric factual recall, which is roughly
+halved once instruction-following mode is lost.
 This finding highlights a key distinction between
 knowledge-intensive open-domain QA and reading comprehension:
 quantization matters for the former even under expert prompting.
 
-The NQ result should be read conservatively: exact match is harsh and the
-near-floor E0/E1 scores show these models store little factual knowledge without
-retrieval. Still, the all-zero E2--E4 block marks a deployment boundary where
-even that residual recall disappears, so small local models are unsuitable as
-standalone factual QA systems without retrieval augmentation.
+The NQ result should be read conservatively: exact match is harsh and the modest
+E0/E1 scores ($\sim$8\%) show these models store limited factual knowledge without
+retrieval. Still, the halving to $\sim$3.5\% at E2--E4 marks a deployment boundary
+where much of that recall is lost, so small local models are weak standalone
+factual QA systems without retrieval augmentation.
 
 \subsection{HaluEval: Binary Classification and Parser Artefacts}
 \label{sec:halueval}
 
 HaluEval provides a binary hallucination-detection counterpoint to SQuAD and
 NQ-Open. Under the corrected first-line parser, HaluEval-General decreases
-from 57.1\% at E0-REF to 43.5\% at E4-Q4, while HaluEval-QA remains in the
-41--47\% range across settings (Table~\ref{tab:halueval_grid}). These results
-show degradation, but not the complete P3-style collapse observed for SQuAD.
+from 52.2\% at E0-REF to 43.5\% at E4-Q4, while HaluEval-QA stays in the
+38--47\% range across settings (Table~\ref{tab:halueval_grid}). These results
+show degradation, but not the near-total P3-style collapse observed for SQuAD.
 
 \begin{table}[t]
   \small\centering
@@ -586,15 +586,15 @@ show degradation, but not the complete P3-style collapse observed for SQuAD.
     \toprule
     Split & E0-REF & E1-INT8 & E2-Q8 & E3-Q5 & E4-Q4 \\
     \midrule
-    General & 57.1 & 51.9 & 50.8 & 46.5 & 43.5 \\
-    QA      & 41.1 & 39.6 & 47.3 & 47.2 & 43.9 \\
+    General & 52.2 & 51.9 & 50.8 & 46.5 & 43.5 \\
+    QA      & 38.2 & 39.6 & 47.3 & 47.2 & 43.9 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 The uncorrected parser marked 50--62\% of E2--E4 responses as ambiguous because
 verbose outputs repeated the task instruction---which contains both ``yes'' and
-``no''---after the answer; first-line parsing recovers 47--51\% accuracy, making
+``no''---after the answer; first-line parsing recovers 44--51\% accuracy, making
 HaluEval a second \texttt{llama.cpp}-specific artefact rather than a capability
 loss. The corrected scores remain close to a weak binary classifier, so the key
 result is methodological: without output-aware parsing, any benchmark whose
@@ -744,10 +744,10 @@ transfer to a lightly engineered local deployment.
 \paragraph{Task type and prompt degradation as primary moderators.}
 Our corrected results show that \emph{prompt quality}, not
 quantization level, is the dominant driver of SQuAD performance collapse.
-SQuAD v2 EM is stable at $\sim$21\% across E0--E4 under expert prompts
-(P0), but collapses to $\sim$0\% at P3 for every architecture and quantization
+SQuAD v2 EM is stable at $\sim$30\% across E0--E4 under expert prompts
+(P0), but falls to 2--5\% at P3 for every architecture and quantization
 setting. TruthfulQA-MC1 shows the opposite pattern: robust to both axes. At P0,
-accuracy changes by less than 1\,pp across E0--E4; the small 4.8\,pp drop in the
+accuracy changes by about 1\,pp across E0--E4; the 5.5\,pp drop in the
 all-tier setting average comes from the P1 casual tier losing its chat template
 on CPU (Section~\ref{sec:tqa}), not from quantization itself.
 This task-format interaction motivates separate lower-bound reporting rather
@@ -766,10 +766,10 @@ Our audit identified two independent scoring bugs with a shared root cause:
 EOS/stop-token strings and repeated prompt instructions after the actual answer.
 For \emph{SQuAD~v2}, surviving stop tokens block exact match and produce a
 spurious 0\% EM at E2$+$; truncating to the first non-empty line and stripping
-EOS tokens recovers 21--31\% EM, consistent with E0-REF. For \emph{HaluEval}, the
+EOS tokens recovers ${\sim}$28--30\% EM, consistent with E0-REF. For \emph{HaluEval}, the
 echoed instruction contains both ``yes'' and ``no'', so a full-text parser marks
 50--62\% of E2--E4 responses \emph{ambiguous}; first-line parsing recovers
-accuracy from ${\sim}$24\% to ${\sim}$47--51\% (mechanics in
+accuracy from ${\sim}$24\% to ${\sim}$44--51\% (mechanics in
 Appendix~\ref{app:details}). Both are the same pitfall at different output
 levels: any \texttt{llama.cpp} evaluation that parses free text without
 first-line truncation will systematically underreport span-extraction \emph{and}
@@ -818,8 +818,8 @@ assessment rather than be read as endorsements of any model for unsupervised use
 
 We introduced PEEL, a benchmark for simultaneously probing LLM performance
 along two real-world degradation axes: edge quantization and prompt quality.
-Evaluating 18 models across 1,184 reference-scored runs and 150 MT-Bench
-judge-scored runs reveals four principal findings:
+Across 1,088 reference-scored runs and 150 MT-Bench
+judge-scored runs, four principal findings emerge:
 (1)~task type is the strongest determinant of robustness---MC tasks degrade
 gracefully while extraction tasks collapse under informal prompts;
 (2)~Falcon-H1-1.5B substantially outperforms same-size Transformers on
@@ -870,17 +870,17 @@ throughput, and a consumer-hardware replication of the corrected SQuAD scores.
 \begin{table}[t]
   \small\centering
   \caption{SQuAD v2 Exact Match (\%) in the 4$\times$5 grid.
-    P0 is stable across all quantization levels; P3 is universally zero.}
+    P0 is stable at 28--30\% across all quantization levels; P3 falls to 2--5\%.}
   \label{tab:squad_grid}
   \begin{tabular}{@{}lcccc@{}}
     \toprule
     Setting & P0 & P1 & P2 & P3 \\
     \midrule
-    E0-REF  & 19.8 & 7.9 & 0.1 & 0.0 \\
-    E1-INT8 & 20.5 & 5.8 & 0.0 & 0.0 \\
-    E2-Q8   & 22.0 & 12.4 & 0.2 & 0.0 \\
-    E3-Q5   & 21.8 & 10.9 & 0.1 & 0.0 \\
-    E4-Q4   & 20.1 & 10.4 & 0.1 & 0.0 \\
+    E0-REF  & 30.5 & 16.8 & 5.6 & 4.7 \\
+    E1-INT8 & 30.4 & 16.6 & 5.6 & 4.7 \\
+    E2-Q8   & 30.5 & 21.1 & 3.4 & 2.4 \\
+    E3-Q5   & 29.7 & 19.4 & 3.1 & 2.2 \\
+    E4-Q4   & 27.8 & 18.8 & 3.0 & 2.3 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -888,18 +888,18 @@ throughput, and a consumer-hardware replication of the corrected SQuAD scores.
 \begin{table}[t]
   \small\centering
   \caption{NQ-Open Exact Match (\%) in the 4$\times$5 grid.
-    E2--E4 are uniformly zero: the E1$\to$E2 boundary marks a complete factual
-    recall collapse for sub-2B models on llama.cpp without a chat template.}
+    P0 recall roughly halves at the E1$\to$E2 boundary (8\%$\to$3.5\%) as the
+    chat template is lost; prompt degradation halves it again.}
   \label{tab:nq_grid}
   \begin{tabular}{@{}lcccc@{}}
     \toprule
     Setting & P0 & P1 & P2 & P3 \\
     \midrule
-    E0-REF  & 1.3 & 0.0 & 0.0 & 0.0 \\
-    E1-INT8 & 1.7 & 0.0 & 0.0 & 0.0 \\
-    E2-Q8   & 0.0 & 0.0 & 0.0 & 0.0 \\
-    E3-Q5   & 0.0 & 0.0 & 0.0 & 0.0 \\
-    E4-Q4   & 0.0 & 0.0 & 0.0 & 0.0 \\
+    E0-REF  & 8.2 & 3.2 & 3.0 & 3.1 \\
+    E1-INT8 & 8.4 & 3.1 & 3.0 & 3.0 \\
+    E2-Q8   & 3.6 & 1.9 & 1.8 & 1.7 \\
+    E3-Q5   & 3.5 & 1.8 & 1.8 & 1.7 \\
+    E4-Q4   & 3.3 & 1.7 & 1.7 & 1.6 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -911,7 +911,7 @@ Counterintuitively, E1-INT8 (GPU int8) is slower at 35.3\,chars/s due to
 \texttt{bitsandbytes} dequantization overhead. E2--E4 CPU settings achieve
 23.8--31.7\,chars/s without any GPU---practically sufficient for non-real-time
 applications. E4-Q4 reduces memory footprint by ${\sim}4\times$ relative to
-E0-REF BF16 while retaining ${\sim}$87\% of TruthfulQA accuracy at P0.
+E0-REF BF16 while retaining ${\sim}$97\% of TruthfulQA accuracy at P0.
 
 \begin{table}[t]
   \small\centering
@@ -984,7 +984,7 @@ used for QA/classification aggregates.
     \toprule
     Component & Runs & Notes \\
     \midrule
-    Reference-scored tasks & 1,184 & 200 examples per run after filtering \\
+    Reference-scored tasks & 1,088 & 200 examples per run after filtering \\
     MT-Bench & 150 & 80 questions; P0/P3 only \\
     IFEval~\citep{ifeval2023} & 45 & Reported in released artifacts, not central in main text \\
     Safety & 75 model--setting pairs & Keyword/refusal classifier over safe and unsafe prompts \\
@@ -1044,9 +1044,11 @@ The safety analysis is based on a keyword/refusal classifier with three labels:
 reports refusal rates rather than attack success rates because ambiguous
 responses are common in small edge models. For unsafe prompts, a mean refusal
 rate of 6.5\% (max 35.4\% across model--setting pairs) means the large majority
-of unsafe requests are either complied with or ambiguous. We additionally report
-over-refusal on safe control prompts as a diagnostic. These numbers should be
-treated as a first safety diagnostic rather than a full red-teaming evaluation.
+of unsafe requests are either complied with or ambiguous. On safe control
+prompts, over-refusal is low on average but unstable across pairs (mean 3.5\%,
+max 32.8\%), confirming that a few configurations swing toward over-refusal while
+most under-refuse. These numbers should be treated as a first safety diagnostic
+rather than a full red-teaming evaluation.
 
 \subsection{Failure Case Taxonomy}
 
