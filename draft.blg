@@ -25,45 +25,45 @@ Warning--empty journal in quip2024
 Warning--empty journal in quantsys2025
 Warning--empty journal in ifeval2023
 Warning--empty journal in promptbench2023
-You've used 29 entries,
+You've used 30 entries,
             2840 wiz_defined-function locations,
-            703 strings with 8309 characters,
-and the built_in function-call counts, 15968 in all, are:
-= -- 1225
-> -- 971
+            706 strings with 8468 characters,
+and the built_in function-call counts, 16728 in all, are:
+= -- 1276
+> -- 1028
 < -- 0
-+ -- 366
-- -- 331
-* -- 1060
-:= -- 2939
-add.period$ -- 95
-call.type$ -- 29
-change.case$ -- 218
-chr.to.int$ -- 30
-cite$ -- 49
-duplicate$ -- 1095
-empty$ -- 972
-format.name$ -- 417
-if$ -- 2961
++ -- 387
+- -- 351
+* -- 1118
+:= -- 3068
+add.period$ -- 99
+call.type$ -- 30
+change.case$ -- 230
+chr.to.int$ -- 31
+cite$ -- 50
+duplicate$ -- 1145
+empty$ -- 1018
+format.name$ -- 440
+if$ -- 3103
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 239
-newline$ -- 128
-num.names$ -- 116
-pop$ -- 601
+missing$ -- 251
+newline$ -- 133
+num.names$ -- 120
+pop$ -- 632
 preamble$ -- 1
-purify$ -- 206
+purify$ -- 216
 quote$ -- 0
-skip$ -- 487
+skip$ -- 509
 stack$ -- 0
-substring$ -- 325
-swap$ -- 398
+substring$ -- 336
+swap$ -- 422
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 261
+type$ -- 270
 warning$ -- 20
-while$ -- 116
+while$ -- 120
 width$ -- 0
-write$ -- 309
+write$ -- 321
 (There were 20 warnings)

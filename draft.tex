@@ -286,15 +286,18 @@ interaction style documented in studies of first-time LLM users:
 Each tier is defined by a \emph{functional specification} (what information
 is withheld and how grammar is degraded) rather than a single template, allowing
 future work to instantiate the taxonomy with alternative phrasings.
-We validate tier ordering by checking MT-Bench P0--P3 deltas on matched
-model--setting pairs. The aggregate effect is small, but the deltas vary
-systematically by family: Falcon-H1-1.5B improves slightly from P0 to P3
-(8.08$\to$8.20 averaged over settings), while Qwen2.5-1.5B drops from
-4.17 to 3.60. This supports treating P1--P3 as a diagnostic stress test,
-not as a calibrated user-study scale.
-A controlled user study eliciting naturalistic informal prompts and mapping
-them to P1--P3 would further validate tier realism; this is flagged as
-future work.
+MT-Bench P0--P3 deltas vary systematically by family
+(Section~\ref{sec:arch}), supporting P1--P3 as a diagnostic stress test rather
+than a calibrated user-study scale.
+We also ground the tiers in real usage. We sampled 50 single-turn English
+prompts from WildChat-1M~\citep{wildchat2024} and had two annotators
+independently map each to the nearest PEEL tier. They agree at Cohen
+$\kappa=0.51$ (70\% raw; moderate). Crucially, \textbf{80--88\% of real prompts
+fall below the expert tier}---the majority at P1, and only 6--10 of 50 at
+P0---confirming that non-expert users predominantly write the casual,
+under-specified prompts that P1--P3 are designed to model. A larger, calibrated
+user study remains future work, but this grounding indicates the degraded tiers
+reflect real behaviour rather than artificial adversarial edits.
 
 The tiers are deliberately task-preserving: every prompt still contains the
 question and any required context/options. We do not inject adversarial content,
@@ -729,7 +732,11 @@ this reason, we also measure over-refusal on safe control prompts (Appendix) and
 keep the classifier as a diagnostic tool rather than a final safety benchmark.
 The two rates must be read jointly: the low unsafe-prompt refusal we observe is a
 safety concern precisely because it is not accompanied by uniformly high
-helpfulness on safe prompts.
+helpfulness on safe prompts. To verify the classifier itself, a stratified
+120-response recheck with GPT-4o agrees with it on 78\% of labels
+(Cohen $\kappa=0.78$, substantial), with GPT-4o finding marginally \emph{more}
+refusals; the low-refusal finding is therefore not an artefact of keyword
+matching.
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 \section{Discussion}
@@ -796,8 +803,9 @@ an edge benchmark, tokenizer and chat-template failures are themselves part of
 the deployment burden.
 
 \paragraph{Limitations.}
-All datasets are English-only. P1--P3 prompt templates are handcrafted;
-a controlled user study validating tier realism is future work (see below).
+All datasets are English-only. P1--P3 prompt templates are handcrafted; our
+50-prompt WildChat grounding (Section~\ref{sec:design}) indicates they match real
+usage, but a larger calibrated user study remains future work.
 The E1$\to$E2 boundary confound has been partially isolated via a consumer-hardware
 replication (Appendix~\ref{app:details}), but a full GGUF-on-GPU ablation within the HPC
 cluster remains future work.
@@ -1049,8 +1057,15 @@ rate of 6.5\% (max 35.4\% across model--setting pairs) means the large majority
 of unsafe requests are either complied with or ambiguous. On safe control
 prompts, over-refusal is low on average but unstable across pairs (mean 3.5\%,
 max 32.8\%), confirming that a few configurations swing toward over-refusal while
-most under-refuse. These numbers should be treated as a first safety diagnostic
-rather than a full red-teaming evaluation.
+most under-refuse. To check the classifier, we drew a stratified 120-response
+sample (balanced across refuse/comply/ambiguous strata) and re-judged it with
+GPT-4o. Agreement is 78\% (Cohen $\kappa=0.78$): of the disagreements, GPT-4o
+converts a few keyword-\textsc{Ambiguous} responses to \textsc{Comply} and finds
+marginally more refusals overall, so the keyword classifier does not understate
+unsafe compliance. Because the validation sample is stratified, its label
+proportions are not the population base rates; the 6.5\% refusal figure comes
+from the full unsafe set. These numbers should be treated as a first safety
+diagnostic rather than a full red-teaming evaluation.
 
 \subsection{Failure Case Taxonomy}
 

@@ -1,4 +1,4 @@
-\begin{thebibliography}{29}
+\begin{thebibliography}{30}
 \providecommand{\natexlab}[1]{#1}
 
 \bibitem[{Anthony et~al.(2024)}]{mamba_empirical2024}
@@ -126,6 +126,12 @@ Wang, A.; et~al. 2019.
 Xiao, G.; et~al. 2025.
 \newblock A Systematic Characterization of LLM Quantization for Efficient
   Inference.
+
+\bibitem[{Zhao et~al.(2024)Zhao, Ren, Hessel, Cardie, Choi, and
+  Deng}]{wildchat2024}
+Zhao, W.; Ren, X.; Hessel, J.; Cardie, C.; Choi, Y.; and Deng, Y. 2024.
+\newblock WildChat: 1M ChatGPT Interaction Logs in the Wild.
+\newblock In \emph{ICLR}.
 
 \bibitem[{Zheng et~al.(2023)Zheng, Chiang, Sheng et~al.}]{mtbench2023}
 Zheng, L.; Chiang, W.-L.; Sheng, Y.; et~al. 2023.
