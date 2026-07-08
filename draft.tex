@@ -203,9 +203,12 @@ and sub-1-bit BitNet~\citep{bitnet2024} represent emerging families optimized
 for efficient inference. \citet{mamba_empirical2024} show Mamba matches
 Transformers on many tasks but underperforms on knowledge-intensive benchmarks;
 \citet{hymba2024} demonstrate that hybrid SSM+attention architectures outperform
-same-size Transformers on standard NLP tasks. PEEL is the first study to measure
-the prompt-quality robustness and edge quantization tolerance of the SSM-Hybrid
-family (Falcon-H1) jointly.
+same-size Transformers on standard NLP tasks. Falcon-H1 is a recent
+SSM-Hybrid line that appears especially attractive for local deployment, yet its
+behaviour under degraded prompts, GGUF conversion, and CPU-only inference has not
+been systematically characterized. PEEL is the first study to measure the
+prompt-quality robustness and edge quantization tolerance of the Falcon-H1
+family jointly.
 
 These families matter for edge benchmarking because their design targets
 favourable behaviour under constrained decoding, not only lower memory. Standard
@@ -293,8 +296,10 @@ MT-Bench P0--P3 deltas vary systematically by family
 (Section~\ref{sec:arch}), supporting P1--P3 as a diagnostic stress test rather
 than a calibrated user-study scale.
 We also ground the tiers in real usage. We sampled 50 single-turn English
-prompts from WildChat-1M~\citep{wildchat2024} and had two annotators
-independently map each to the nearest PEEL tier. They agree at Cohen
+prompts from WildChat-1M~\citep{wildchat2024} and had two fluent annotators
+independently map each to the nearest PEEL tier. A preliminary non-native pilot
+pass was used only to refine the rubric and is excluded from the agreement
+statistics. The two retained annotators agree at Cohen
 $\kappa=0.51$ (70\% raw; moderate). Crucially, \textbf{80--88\% of real prompts
 fall below the expert tier}---the majority at P1, and only 6--10 of 50 at
 P0---confirming that non-expert users predominantly write the casual,
@@ -470,11 +475,10 @@ The HPC setting is used for reproducibility and queue management, not to claim
 that E2--E4 are high-end server deployments. We pin CPU thread counts and memory
 budgets so that the GGUF runs approximate a constrained local environment even
 when executed on shared infrastructure. To check that this abstraction is not
-misleading, we additionally ran a consumer-workstation replication for selected
-Falcon-H1 and Qwen models; the corrected SQuAD scores and throughput trends are
-consistent with the HPC GGUF results (Appendix~\ref{app:details}). This
-replication is not used to inflate the main aggregate counts, but it supports
-the interpretation of E2--E4 as edge-style conditions.
+misleading, we additionally ran a consumer-workstation sanity check for selected
+Falcon-H1 and Qwen models (Appendix~\ref{app:details}). We use it only to
+confirm that CPU-only GGUF inference is practical on consumer hardware; the main
+numerical claims use the reproducible HPC runs.
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 \section{Results}
@@ -637,6 +641,9 @@ E2+ decline is concentrated in families whose chat template \texttt{llama.cpp}
 does not apply (notably Phi, which falls from ${\sim}$8 at E0/E1 to ${\sim}$4 at
 E2--E4); robustly-served families change little. Informal prompting has little
 effect: the P0$\to$P3 drop is at most 0.21 points at any single setting.
+Because Phi is a dense Transformer rather than an SSM-Hybrid model, this
+GPU-to-CPU collapse points to the runtime-interface boundary itself---especially
+missing chat-template handling---rather than to Falcon-H1-specific architecture.
 
 This MT-Bench pattern contrasts with SQuAD. Open-ended instruction following is
 less dependent on exact output form, so informal prompts usually reduce score
@@ -797,9 +804,9 @@ raw outputs and run a parser audit before ranking models.
 \paragraph{Practical recommendations.}
 For \emph{practitioners}: prefer multiple-choice or classification outputs over
 extractive spans when running \texttt{llama.cpp} Q4/Q5; favour Falcon-H1
-SSM-Hybrid models, which offer better instruction-following and prompt robustness
-than same-size dense Transformers at no extra memory cost; and re-test safety
-refusal after deployment conversion, since quantization does not produce a
+SSM-Hybrid models when 1.5B-scale instruction following is the target, because
+they strongly outperform the same-size Qwen baseline without extra memory cost;
+and re-test safety refusal after deployment conversion, since quantization does not produce a
 monotonic safety trend. For \emph{benchmark builders}: report prompt-tier matched
 results rather than a single prompt-averaged mean, keep judge-scored MT-Bench
 separate from reference-scored tasks, and document missing cells explicitly---in
@@ -810,9 +817,10 @@ the deployment burden.
 All datasets are English-only. P1--P3 prompt templates are handcrafted; our
 50-prompt WildChat grounding (Section~\ref{sec:design}) indicates they match real
 usage, but a larger calibrated user study remains future work.
-The E1$\to$E2 boundary confound has been partially isolated via a consumer-hardware
-replication (Appendix~\ref{app:details}), but a full GGUF-on-GPU ablation within the HPC
-cluster remains future work.
+The E1$\to$E2 boundary confound remains the largest open ablation: the Phi
+MT-Bench collapse at the GPU-to-CPU boundary and the SQuAD/NQ parser failures
+both implicate chat-template/runtime handling, but a full GGUF-on-GPU ablation
+within the HPC cluster remains future work.
 Finally, the current safety analysis uses keyword-based refusal detection. It is
 useful for detecting instability across model--setting pairs, but it should not
 be treated as a substitute for human red teaming or policy-specific safety
@@ -863,7 +871,7 @@ reproducibility and future lower-bound benchmarking research.
 The main text presents SQuAD~v2 as a heatmap (Figure~\ref{fig:collapse}) and
 summarises the other reference-scored grids in prose. For completeness we give
 the full $4\times5$ grids here, together with the TruthfulQA heatmap, decode
-throughput, and a consumer-hardware replication of the corrected SQuAD scores.
+throughput, and a consumer-hardware sanity check for the GGUF/CPU pathway.
 
 \begin{figure}[t]
   \centering
@@ -947,16 +955,19 @@ E0-REF BF16 while retaining ${\sim}$97\% of TruthfulQA accuracy at P0.
 \end{table}
 
 \paragraph{Consumer-hardware replication.}
-To validate the corrected scores, we ran a supplementary local evaluation on an
-Intel i7-13700KF workstation (8 threads, CPU-only \texttt{llama.cpp} b8937)
-covering Falcon-H1 (our primary SSM-Hybrid family) and Qwen2.5 (Transformer
-reference). Using the fixed scorer, \textbf{Falcon-H1-0.5B} achieved 14--16\%
-EM (Q8\_0/Q4) and \textbf{Falcon-H1-1.5B} achieved 22\% EM (Q4)---consistent
-with the corrected HPC scores (31\%/30.5\% for the same models at E2--E4, with
-differences attributable to output verbosity).
-Qwen2.5-0.5B similarly reached 20--26\% EM locally vs.\ 24--30\% corrected
-HPC. Throughput on the consumer CPU was 29--94 chars/s for Falcon-H1
-(vs.\ 24--32 chars/s on HPC), with Q4 faster than Q8 due to memory bandwidth.
+We ran a supplementary local evaluation on an Intel i7-13700KF workstation
+(8 threads, CPU-only \texttt{llama.cpp} b8937) covering Falcon-H1 (our primary
+SSM-Hybrid family) and Qwen2.5 (Transformer reference). This run predates the
+final HPC scorer/export audit and is therefore treated as a hardware sanity
+check rather than as a numerical replication of the corrected SQuAD table.
+The corrected HPC SQuAD P0 scores for Falcon-H1-0.5B are 37.1/43.9/33.8\% EM
+at E2/E3/E4, and the corresponding Falcon-H1-1.5B scores are
+41.8/42.7/41.2\%. The local run produced lower absolute EM
+(Falcon-H1-0.5B: 14--16\%; Falcon-H1-1.5B: 22\%), so we do not use it to
+support any accuracy claim. Its useful role is narrower: it confirms that the
+same GGUF/CPU pathway runs on consumer hardware with practical throughput.
+Throughput on the consumer CPU was 29--94 chars/s for Falcon-H1 (vs.\
+24--32 chars/s on HPC), with Q4 faster than Q8 due to memory bandwidth.
 
 \subsection{Prompt Tier Operationalization}
 
