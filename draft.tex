@@ -26,7 +26,7 @@
 \maketitle
 
 \begin{abstract}
-Small language models are increasingly promoted as practical alternatives to cloud-scale LLMs for users with limited hardware access, privacy concerns, or edge deployment needs. Yet most evaluations assume idealized conditions: expert-written prompts, clean benchmark inputs, and full-precision inference on powerful infrastructure. In practice, ordinary users often provide ambiguous or poorly structured prompts, while edge deployment commonly relies on compressed or quantized models. This paper studies whether small language models remain reliable when both user input and deployment conditions are imperfect. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), an evaluation protocol for measuring model reliability as prompt quality and deployment conditions degrade. PEEL varies prompt quality, from expert-formatted to colloquially broken prompts, and deployment quality, from full-precision inference to aggressive low-bit quantization. We evaluate 16 small and efficient language models across reading comprehension, open-domain question answering, truthfulness discrimination, instruction following, and multi-turn dialogue. Our results show that quantization alone is not the dominant source of failure once output-scoring artefacts are handled: at expert prompts, TruthfulQA accuracy changes by about one point from full precision to 4-bit. Prompt degradation is far more damaging, especially for span-based reading comprehension, where SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across every model and deployment setting---a near-total, prompt-driven collapse. Architecture, not scale, governs robustness to informal prompts: a 1.5B SSM-Hybrid model scores 8.20 on MT-Bench versus 4.06 for a same-size Transformer and is essentially immune to prompt degradation. Finally, safety alignment is fragile at this scale, with models refusing only 6.5\% of unsafe prompts on average. PEEL highlights the gap between clean benchmark assumptions and ordinary-user edge conditions, and provides a practical protocol for lower-bound evaluation of small language models.
+Small language models are increasingly promoted as practical alternatives to cloud-scale LLMs for users with limited hardware access, privacy concerns, or edge deployment needs. Yet most evaluations assume idealized conditions: expert-written prompts, clean benchmark inputs, and full-precision inference on powerful infrastructure. In practice, ordinary users often provide ambiguous or poorly structured prompts, while edge deployment commonly relies on compressed or quantized models. This paper studies whether small language models remain reliable when both user input and deployment conditions are imperfect. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), an evaluation protocol for measuring model reliability as prompt quality and deployment conditions degrade. PEEL varies prompt quality, from expert-formatted to colloquially broken prompts, and deployment quality, from full-precision inference to aggressive low-bit quantization. We evaluate 16 small and efficient language models across reading comprehension, open-domain question answering, truthfulness discrimination, instruction following, and multi-turn dialogue. Our results show that quantization alone is not the dominant source of failure once output-scoring artefacts are handled: at expert prompts, TruthfulQA accuracy changes by about one point from full precision to 4-bit. Prompt degradation is far more damaging, especially for span-based reading comprehension, where SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across every model and deployment setting---a near-total, prompt-driven collapse. At matched 1.5B scale, an SSM-Hybrid model scores 8.20 on MT-Bench versus 4.06 for a same-size Transformer and is essentially immune to prompt degradation, though this prompt robustness tracks instruction-tuning quality more than architecture. Finally, safety alignment is fragile at this scale, with models refusing only 6.5\% of unsafe prompts on average. PEEL highlights the gap between clean benchmark assumptions and ordinary-user edge conditions, and provides a practical protocol for lower-bound evaluation of small language models.
 \end{abstract}
 
 
@@ -81,10 +81,11 @@ artefacts are corrected---at expert prompts, TruthfulQA-MC1 accuracy changes by
 about 1\,pp from full precision to 4-bit---whereas prompt degradation is catastrophic for
 format-sensitive tasks: SQuAD~v2 exact match falls from ${\sim}$30\% to
 \textbf{2--5\%} at the broken-prompt tier for \emph{every} model and \emph{every}
-edge setting, a near-total collapse (Figure~\ref{fig:collapse}). Architecture, not scale, governs
-robustness to informal prompts: the SSM-Hybrid Falcon-H1-1.5B scores 8.20 on
-MT-Bench versus 4.06 for the same-size Qwen2.5-1.5B, and is essentially immune to
-prompt degradation. Reaching these conclusions first required a
+edge setting, a near-total collapse (Figure~\ref{fig:collapse}). At matched
+scale, the SSM-Hybrid Falcon-H1-1.5B scores 8.20 on MT-Bench versus 4.06 for the
+same-size Qwen2.5-1.5B and is essentially immune to prompt degradation; prompt
+robustness, however, tracks instruction-tuning quality more than architecture
+(Gemma and Phi are equally stable). Reaching these conclusions first required a
 scoring-artefact audit: we show that two \texttt{llama.cpp}-specific
 output-parsing bugs otherwise masquerade as capability collapse (e.g.\ a
 spurious 0\% SQuAD EM at 4-bit that recovers to ${\sim}$30\% once fixed), and we
@@ -106,9 +107,11 @@ rather than interface mismatch.
   \item A \textbf{scoring-artefact diagnosis}: two \texttt{llama.cpp}-specific
     bugs (EOS/stop-token leakage and first-line parsing) that systematically
     underreport accuracy, together with reproducible fixes.
-  \item An \textbf{architecture finding}: Falcon-H1 (SSM-Hybrid) is near-immune
-    to prompt degradation, whereas dense Transformers of equal size degrade
-    markedly.
+  \item An \textbf{architecture/quality finding}: at matched 1.5B scale the
+    SSM-Hybrid Falcon-H1 far outscores a dense Transformer (8.20 vs.\ 4.06
+    MT-Bench) and, like the other strong instruction-tuned families, resists
+    prompt degradation---prompt robustness tracks model quality more than
+    architecture.
   \item A \textbf{safety finding}: sub-2B edge models refuse only 6.5\% of unsafe
     prompts on average (max 35.4\%), exposing fragile alignment under edge
     deployment.
@@ -615,23 +618,25 @@ We therefore treat parser specification as part of the benchmark protocol.
 
 We evaluate MT-Bench (80 multi-turn questions, 8 categories) with GPT-4o-mini
 as judge at all five edge settings and two prompt tiers (P0, P3), totalling
-150 scored runs. Coverage is not perfectly rectangular: InternLM and Phi have
+156 scored runs. Coverage is not perfectly rectangular: InternLM and Phi have
 partial setting coverage due to tokenizer and chat-template failures.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{Figures/fig3_mtbench_family_bar.pdf}
   \caption{MT-Bench scores at E0-REF/P0 (solid) and P3 (transparent) per model,
-    colored by family. Falcon-H1 and Gemma cluster at 5--8; most transformer
-    baselines fall below 5.}
+    colored by family. The strongest models (Phi-3.5, Falcon-H1-1.5B) reach
+    ${\sim}$8 at E0-REF, with Gemma, InternLM, and Phi-4 close behind; the
+    weakest baselines (Qwen, SmolLM, TinyLlama) fall below 4.}
   \label{fig:mtbench_bar}
 \end{figure}
 
 Setting-level means (appendix Table~\ref{tab:app_mtbench_setting})
-range from 4.64 (E4-Q4, P0) to 5.12 (E1-INT8, P0), a
-modest 0.49-point spread, confirming that instruction-following \emph{quality}
-is largely resilient to quantization---the E3/E4 drop is real but small.
-The P0$\to$P3 drop is at most 0.26 points at any single setting.
+range from 4.63 (E4-Q4, P0) to 5.65 (E0-REF, P0), a ${\sim}$1-point spread. The
+E2+ decline is concentrated in families whose chat template \texttt{llama.cpp}
+does not apply (notably Phi, which falls from ${\sim}$8 at E0/E1 to ${\sim}$4 at
+E2--E4); robustly-served families change little. Informal prompting has little
+effect: the P0$\to$P3 drop is at most 0.21 points at any single setting.
 
 This MT-Bench pattern contrasts with SQuAD. Open-ended instruction following is
 less dependent on exact output form, so informal prompts usually reduce score
@@ -645,32 +650,30 @@ reference scoring.
 \subsection{Architecture Family Comparison on MT-Bench}
 \label{sec:arch}
 
-Figure~\ref{fig:mtbench_bar} reveals a bimodal distribution.
-At E0-REF/P0, Falcon-H1 and Gemma occupy the high-scoring cluster---in fact
-Gemma-3-1B posts the single highest family mean (7.40)---while all other
-families score below 5.5. We therefore do \emph{not} claim that Falcon-H1 is the
-strongest model overall; our architecture claim is narrower and twofold.
-First, at the \emph{matched} 1.5B scale, Falcon-H1-1.5B scores \textbf{8.20}
-vs.\ Qwen2.5-1.5B at \textbf{4.06} (a 4.14-point gap), isolating architecture
-from parameter count. Second, and central to PEEL, Falcon-H1 is distinctively
-robust to prompt degradation, as we quantify next.
+At E0-REF/P0, several families reach the top band: Phi-3.5 and Falcon-H1-1.5B
+both score ${\sim}$8.2, with Gemma-3-1B (family mean 7.40) and Phi-4 close
+behind, while Qwen, SmolLM, and TinyLlama sit below 4. We therefore do
+\emph{not} claim Falcon-H1 is strongest overall. Our sharpest architecture
+result is a \emph{matched-scale} one: at 1.5B parameters, Falcon-H1-1.5B scores
+\textbf{8.20} versus Qwen2.5-1.5B at \textbf{4.06} (a 4.14-point gap), isolating
+architecture from parameter count.
 
-The prompt-sensitivity gap is equally striking.
-Across the full matched grid, Falcon-H1 models lose only $\mathbf{0.11}$ points
-from P0 to P3 as a family average, and the flagship Falcon-H1-1.5B improves
-slightly (8.08$\to$8.20 averaged over settings; +0.075 at E0-REF).
-In contrast, Qwen2.5-1.5B drops from 4.17 to 3.60 ($-$0.57), and the Llama/
-TinyLlama group drops by 0.22 on average.
-The finding suggests that Falcon-H1's hybrid selective-state mechanism
-provides \emph{structural robustness} to informal prompt framing.
+Prompt degradation barely moves judged quality for the stronger families. From
+P0 to P3, Falcon-H1 loses only $\mathbf{0.11}$ points as a family average (the
+flagship Falcon-H1-1.5B is flat, 8.08$\to$8.20 over settings), and Gemma,
+InternLM, and Phi are similarly stable ($|\Delta|\le0.11$). The clearest
+degradation is among weaker Transformer baselines: Qwen2.5-1.5B drops from
+4.17 to 3.60 ($-$0.57) and Llama by 0.30. Prompt robustness therefore tracks
+\emph{instruction-following quality} more than a single architecture: Falcon-H1
+is robust, but so are the strong dense Transformers (Gemma, Phi).
 
-We phrase this as evidence of architecture-dependent robustness rather than a
-proof of mechanism. The experiment does not ablate Falcon-H1's internal modules,
-so it cannot show that the SSM component alone causes the gain. What it does
-show is that, under the same tasks, judge, prompt tiers, and deployment settings,
-the Falcon-H1 family occupies a different region of the MT-Bench distribution
-from most dense Transformer baselines. That is the relevant benchmark-level
-claim: architecture family changes the lower-bound behavior observed by users.
+We avoid a mechanistic claim. The experiment does not ablate Falcon-H1's
+internal modules, and because non-SSM families (Gemma, Phi) are equally
+prompt-robust, the data do not support attributing robustness to the SSM
+component. The defensible benchmark-level statement is narrower: at matched
+scale and under identical tasks, judge, tiers, and settings, Falcon-H1 reaches
+the top band and resists prompt degradation, whereas a same-size dense
+Transformer (Qwen2.5-1.5B) does neither.
 
 \begin{table}[t]
   \small\centering
@@ -681,13 +684,14 @@ claim: architecture family changes the lower-bound behavior observed by users.
     \toprule
     Family & P0 & P3 & $\Delta$ (P0$\to$P3) \\
     \midrule
-    Gemma       & 7.40 & 7.29 & $-$0.11 \\
-    Falcon-H1   & 6.45 & 6.34 & $-$0.11 \\
+    Gemma       & 7.40 & 7.28 & $-$0.11 \\
     InternLM    & 6.78 & 6.69 & $-$0.09 \\
-    Llama/TinyLlama & 3.73 & 3.51 & $-$0.22 \\
-    Phi         & 3.74 & 3.73 & $-$0.01 \\
+    Falcon-H1   & 6.44 & 6.33 & $-$0.11 \\
+    Phi         & 5.65 & 5.70 & $+$0.04 \\
+    Llama       & 4.32 & 4.03 & $-$0.30 \\
     Qwen        & 3.61 & 3.34 & $-$0.27 \\
     SmolLM      & 3.09 & 2.90 & $-$0.19 \\
+    TinyLlama   & 2.55 & 2.49 & $-$0.06 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -830,7 +834,7 @@ assessment rather than be read as endorsements of any model for unsupervised use
 
 We introduced PEEL, a benchmark for simultaneously probing LLM performance
 along two real-world degradation axes: edge quantization and prompt quality.
-Across 1,088 reference-scored runs and 150 MT-Bench
+Across 1,088 reference-scored runs and 156 MT-Bench
 judge-scored runs, four principal findings emerge:
 (1)~task type is the strongest determinant of robustness---MC tasks degrade
 gracefully while extraction tasks collapse under informal prompts;
@@ -997,7 +1001,7 @@ used for QA/classification aggregates.
     Component & Runs & Notes \\
     \midrule
     Reference-scored tasks & 1,088 & 200 examples per run after filtering \\
-    MT-Bench & 150 & 80 questions; P0/P3 only \\
+    MT-Bench & 156 & 80 questions; P0/P3 only \\
     IFEval~\citep{ifeval2023} & 45 & Reported in released artifacts, not central in main text \\
     Safety & 75 model--setting pairs & Keyword/refusal classifier over safe and unsafe prompts \\
     \bottomrule
@@ -1021,11 +1025,11 @@ chat-template failures.
     \toprule
     Setting & P0 & P3 \\
     \midrule
-    E0-REF  & 5.00 & 4.87 \\
-    E1-INT8 & 5.12 & 4.86 \\
+    E0-REF  & 5.65 & 5.54 \\
+    E1-INT8 & 5.48 & 5.28 \\
     E2-Q8   & 5.02 & 4.92 \\
     E3-Q5   & 4.79 & 4.58 \\
-    E4-Q4   & 4.64 & 4.54 \\
+    E4-Q4   & 4.63 & 4.54 \\
     \bottomrule
   \end{tabular}
 \end{table}
