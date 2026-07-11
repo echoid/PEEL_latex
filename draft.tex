@@ -1,5 +1,8 @@
-﻿\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
 \usepackage[submission]{aaai2027}  % DO NOT CHANGE THIS
+% The serif, sans-serif, and monospaced fonts are loaded automatically by
+% aaai2027.sty (newtxtext, helvet, courier). DO NOT add \usepackage{times},
+% \usepackage{helvet}, \usepackage{courier}, or any other font package.
 \usepackage[hyphens]{url}  % DO NOT CHANGE THIS
 \usepackage{graphicx} % DO NOT CHANGE THIS
 \urlstyle{rm} % DO NOT CHANGE THIS
@@ -7,232 +10,373 @@
 \usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
 \usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
 \frenchspacing  % DO NOT CHANGE THIS
+%
+% These are recommended to typeset algorithms but not required. See the subsubsection on algorithms. Remove them if you don't have algorithms in your paper.
+\usepackage{algorithm}
+\usepackage{algorithmic}
 
+%
+% These are recommended to typeset listings but not required. See the subsubsection on listing. Remove this block if you don't have listings in your paper.
+\usepackage{newfloat}
+\usepackage{listings}
+\DeclareCaptionStyle{ruled}{labelfont=normalfont,labelsep=colon,strut=off} % DO NOT CHANGE THIS
+\lstset{%
+	basicstyle={\footnotesize\ttfamily},% footnotesize acceptable for monospace
+	numbers=left,numberstyle=\footnotesize,xleftmargin=2em,% show line numbers, remove this entire line if you don't want the numbers.
+	aboveskip=0pt,belowskip=0pt,%
+	showstringspaces=false,tabsize=2,breaklines=true}
+\floatstyle{ruled}
+\newfloat{listing}{tb}{lst}{}
+\floatname{listing}{Listing}
+
+%
+% Recommended for better-looking tables
 \usepackage{booktabs}
-\usepackage{multirow}
-\usepackage{amsmath}
-\usepackage{xcolor}
 
-\pdfinfo{/TemplateVersion (2027.1)}
+%
+% Keep the \pdfinfo as shown here. There's no need
+% for you to add the /Title and /Author tags.
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
 
-\setcounter{secnumdepth}{1}
+% DISALLOWED PACKAGES
+% \usepackage{authblk} -- This package is specifically forbidden
+% \usepackage{balance} -- This package is specifically forbidden
+% \usepackage{CJK} -- This package is specifically forbidden
+% \usepackage{float} -- This package is specifically forbidden
+% \usepackage{flushend} -- This package is specifically forbidden
+% \usepackage{fullpage} -- This package is specifically forbidden
+% \usepackage{geometry} -- This package is specifically forbidden
+% \usepackage{hyperref} -- This package is specifically forbidden
+% \usepackage{navigator} -- This package is specifically forbidden
+% (or any other package that embeds links such as navigator or hyperref)
+% \usepackage{indentfirst} -- This package is specifically forbidden
+% \usepackage{layout} -- This package is specifically forbidden
+% \usepackage{multicol} -- This package is specifically forbidden
+% \usepackage{nameref} -- This package is specifically forbidden
+% \usepackage{savetrees} -- This package is specifically forbidden
+% \usepackage{setspace} -- This package is specifically forbidden
+% \usepackage{stfloats} -- This package is specifically forbidden
+% \usepackage{tabu} -- This package is specifically forbidden
+% \usepackage{titlesec} -- This package is specifically forbidden
+% \usepackage{tocbibind} -- This package is specifically forbidden
+% \usepackage{ulem} -- This package is specifically forbidden
+% \usepackage{wrapfig} -- This package is specifically forbidden
+% DISALLOWED COMMANDS
+% \nocopyright -- Your paper will not be published if you use this command
+% \addtolength -- This command may not be used
+% \balance -- This command may not be used
+% \baselinestretch -- Your paper will not be published if you use this command
+% \clearpage -- No page breaks of any kind may be used for the final version of your paper
+% \columnsep -- This command may not be used
+% \newpage -- No page breaks of any kind may be used for the final version of your paper
+% \pagebreak -- No page breaks of any kind may be used for the final version of your paper
+% \pagestyle -- This command may not be used
+% \tiny -- This is not an acceptable font size.
+% \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
+% \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
+
+\setcounter{secnumdepth}{0} %May be changed to 1 or 2 if section numbers are desired.
+
+% The file aaai2027.sty is the style file for AAAI Press
+% proceedings, working notes, and technical reports.
+%
+
+% Title
+
+% Your title must be in mixed case, not sentence case.
+% That means all verbs (including short verbs like be, is, using,and go),
+% nouns, adverbs, adjectives should be capitalized, including both words in hyphenated terms, while
+% articles, conjunctions, and prepositions are lower case unless they
+% directly follow a colon or long dash
 
 \title{Can Small Language Models Serve Ordinary Users? A Lower-Bound Benchmark under Non-Expert Prompts and Edge Constraints}
 
-\author{Anonymous Submission}
-\affiliations{Anonymous Institution}
+\author{
+    %Authors
+    % All authors must be in the same font size and format.
+    Written by AAAI Press Staff\textsuperscript{\rm 1}\thanks{With help from the AAAI Publications Committee.}\\
+    AAAI Style Contributions by Peter Patel Schneider,
+    Sunil Issar,\\
+    J. Scott Penberthy,
+    George Ferguson,
+    Hans Guesgen,
+    Francisco Cruz\equalcontrib\corresponding,
+    Marc Pujol-Gonzalez\equalcontrib\corresponding
+}
+\affiliations{
+    %Afiliations
+    \textsuperscript{\rm 1}Association for the Advancement of Artificial Intelligence\\
+    % If you have multiple authors and multiple affiliations
+    % use superscripts in text and roman font to identify them.
+    % For example,
+
+    % Sunil Issar\textsuperscript{\rm 2},
+    % J. Scott Penberthy\textsuperscript{\rm 3},
+    % George Ferguson\textsuperscript{\rm 4}\corresponding,
+    % Hans Guesgen\textsuperscript{\rm 5}
+    % Note that the comma should be placed after the superscript
+
+    1101 Pennsylvania Ave, NW Suite 300\\
+    Washington, DC 20004 USA\\
+    % email address must be in roman text type, not monospace or sans serif
+    proceedings-questions@aaai.org
+%
+% See more examples next
+}
+
+%Example, Single Author, ->> remove \iffalse,\fi and place them surrounding AAAI title to use it
+\iffalse
+\title{My Publication Title --- Single Author}
+\author {
+    Author Name
+}
+\affiliations{
+    Affiliation\\
+    Affiliation Line 2\\
+    name@example.com
+}
+\fi
+
+\iffalse
+%Example, Multiple Authors, ->> remove \iffalse,\fi and place them surrounding AAAI title to use it
+\title{My Publication Title --- Multiple Authors}
+\author {
+    % Authors
+    First Author Name\textsuperscript{\rm 1,\rm 2}\equalcontrib,
+    Second Author Name\textsuperscript{\rm 2}\equalcontrib,
+    Third Author Name\textsuperscript{\rm 1}\corresponding
+}
+\affiliations {
+    % Affiliations
+    \textsuperscript{\rm 1}Affiliation 1\\
+    \textsuperscript{\rm 2}Affiliation 2\\
+    firstAuthor@affiliation1.com, secondAuthor@affilation2.com, thirdAuthor@affiliation1.com
+}
+\fi
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Small language models are increasingly promoted as practical alternatives to cloud-scale LLMs for users with limited hardware access, privacy concerns, or edge deployment needs. Yet most evaluations assume idealized conditions: expert-written prompts, clean benchmark inputs, and full-precision inference on powerful infrastructure. In practice, ordinary users often provide ambiguous or poorly structured prompts, while edge deployment commonly relies on compressed or quantized models. This paper studies whether small language models remain reliable when both user input and deployment conditions are imperfect. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), an evaluation protocol for measuring model reliability as prompt quality and deployment conditions degrade. PEEL varies prompt quality, from expert-formatted to colloquially broken prompts, and deployment quality, from full-precision inference to aggressive low-bit quantization. We evaluate 16 small and efficient language models across reading comprehension, open-domain question answering, truthfulness discrimination, instruction following, and multi-turn dialogue. Our results show that quantization alone is not the dominant source of failure once output-scoring artefacts are handled: at expert prompts, TruthfulQA accuracy changes by about one point from full precision to 4-bit. Prompt degradation is far more damaging, especially for span-based reading comprehension, where SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across every model and deployment setting---a near-total, prompt-driven collapse. At matched 1.5B scale, an SSM-Hybrid model scores 8.20 on MT-Bench versus 4.06 for a same-size Transformer and is essentially immune to prompt degradation, though this prompt robustness tracks instruction-tuning quality more than architecture. Finally, safety alignment is fragile at this scale, with models refusing only 6.5\% of unsafe prompts on average. PEEL highlights the gap between clean benchmark assumptions and ordinary-user edge conditions, and provides a practical protocol for lower-bound evaluation of small language models.
+Small language models are increasingly promoted as low-cost, private, and edge-deployable alternatives to cloud-scale LLMs. Yet most evaluations assume favorable conditions: expert-written prompts, clean benchmark inputs, and high-precision inference. This overlooks the lower-bound regime in which small models are often used by non-expert users and deployed under quantized or compressed settings. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a two-axis protocol for evaluating small language models as prompt quality and deployment quality degrade. PEEL varies prompts from expert-formatted instructions to colloquial and broken inputs, and varies deployment from full precision to low-bit quantization. We evaluate 16 small and efficient models across reading comprehension, open-domain question answering, truthfulness, instruction following, and multi-turn dialogue. Our results show that prompt degradation is often more damaging than quantization. After controlling for output-scoring artefacts, TruthfulQA accuracy changes by only about one point from full precision to 4-bit inference under expert prompts. In contrast, SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across all models and deployment settings. We also find that prompt robustness is strongly shaped by post-training quality: at matched 1.5B scale, the strongest instruction-tuned hybrid model scores 8.20 on MT-Bench, compared with 4.06 for a same-size Transformer. Finally, safety alignment remains fragile, with models refusing only 6.5\% of unsafe prompts on average. PEEL exposes the gap between clean benchmark performance and ordinary-user edge reliability, and provides a practical protocol for lower-bound evaluation.
+
 \end{abstract}
 
-
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{Figures/edgepipeline.pdf}
+\caption{
+Overview of PEEL, which evaluates sub-4B models across prompt-quality
+tiers (P0--P3) and edge settings (E0--E4), measuring accuracy, hallucination,
+safety, quality, latency, and throughput.
+}
+    \label{fig:peel-framework}
+\end{figure}
 \section{Introduction}
 \label{sec:intro}
 
-Large language models (LLMs) have transformed natural language processing, but
-their gains are driven by scale, data, and compute that make deployment outside
-the cloud costly, latency-bound, and often privacy-invasive. Small language
-models (SLMs) have emerged as a practical alternative: with fewer parameters and
-lower memory requirements, they run on low-power and edge devices, improving
-privacy, response time, and cloud independence. In this sense SLMs are not merely
-smaller LLMs but a mechanism for broadening access to language technology under
-realistic hardware and connectivity constraints.
+Small language models (SLMs) are increasingly positioned as practical alternatives to cloud-scale large language models (LLMs). With fewer parameters and lower memory requirements, they can run on consumer laptops, mobile devices, and other resource-constrained hardware, reducing dependence on cloud APIs for latency-sensitive, low-cost, and privacy-sensitive applications. This makes SLMs attractive not only as smaller models, but also as a possible mechanism for broadening access to language technologies under realistic hardware, connectivity, and privacy constraints.
 
-Yet this accessibility promise remains incomplete, because most evaluations
-measure SLMs under idealized conditions: expert-written prompts, clean benchmark
-inputs, and full-precision inference. Such conditions describe an upper bound on
-capability, not how ordinary users actually interact. Many users lack
-prompt-engineering expertise and provide vague, colloquial, or malformed
-instructions, while relying on compressed or quantized models forced on them by
-limited hardware, cost, or connectivity. A model that excels with expert prompts
-on full-precision infrastructure may fail once it is both quantized and queried
-informally. We argue that evaluation should therefore report not only upper-bound
-benchmark performance but also \emph{lower-bound reliability}: how models behave
-when user input and deployment conditions degrade together.
+However, this accessibility promise remains only partially tested. Most evaluations measure small models under favorable conditions: expert-written prompts, clean benchmark inputs, and high-precision inference on well-supported infrastructure. These settings estimate an upper bound on model capability, but they do not reflect many real uses of local or edge-deployed models. Non-expert users may provide vague, colloquial, underspecified, or malformed prompts. At the same time, edge deployment often relies on compressed or quantized models because of limited memory, cost, energy, or connectivity. A model that performs well with expert prompts under full-precision inference may fail once it is both queried informally and deployed under constrained runtime conditions.
 
-Existing benchmarks each cover part of this space but not its interaction. Broad
-capability suites such as HELM~\citep{helm2022}, MMLU~\citep{mmlu2021}, and
-MT-Bench~\citep{mtbench2023} assume expert prompts and production-quality
-inference. PalmBench~\citep{palmbench2024} targets on-device deployment but
-fixes the prompting protocol, while prompt-robustness studies such as
-PromptBench~\citep{promptbench2023} and RobustAlpacaEval~\citep{ralpaca2024}
-perturb prompts without varying the deployment stack. Quantization work such as
-GPTQ~\citep{gptq2022}, LLM.int8()~\citep{llmint8}, and
-GGUF/\texttt{llama.cpp}~\citep{gguf} makes local inference practical but reports
-accuracy under fixed expert prompts. The field therefore has strong evidence for
-how quantization behaves when prompting is held fixed, and for how prompting
-behaves when serving is held fixed, but little evidence for their joint
-effect---precisely the regime an ordinary user on an edge device occupies.
+We argue that SLM evaluation should therefore report not only upper-bound benchmark performance, but also \emph{lower-bound reliability}: how models behave when user input quality and deployment quality degrade together. This regime is especially important because the users and settings most likely to benefit from SLMs are also those least represented by idealized evaluation protocols.
 
-We close this gap with \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge
-\textbf{E}valuation \textbf{L}adder), a two-dimensional protocol that crosses
-five edge-deployment settings (full-precision GPU to 4-bit CPU) with four
-prompt-quality tiers (expert to broken). Building on the idea that worst-case
-prompt performance is a meaningful lower bound on model reliability~\citep{ralpaca2024},
-PEEL extends lower-bound evaluation to a second axis: it measures the worst-case
-realistic performance when \emph{both} prompt quality and deployment quality are
-stressed at once. Evaluating 16 models across six tasks, we find that the two
-axes are not symmetric. Quantization is largely benign once output-scoring
-artefacts are corrected---at expert prompts, TruthfulQA-MC1 accuracy changes by
-about 1\,pp from full precision to 4-bit---whereas prompt degradation is catastrophic for
-format-sensitive tasks: SQuAD~v2 exact match falls from ${\sim}$30\% to
-\textbf{2--5\%} at the broken-prompt tier for \emph{every} model and \emph{every}
-edge setting, a near-total collapse (Figure~\ref{fig:collapse}). At matched
-scale, the SSM-Hybrid Falcon-H1-1.5B scores 8.20 on MT-Bench versus 4.06 for the
-same-size Qwen2.5-1.5B and is essentially immune to prompt degradation; prompt
-robustness, however, tracks instruction-tuning quality more than architecture
-(Gemma and Phi are equally stable). Reaching these conclusions first required a
-scoring-artefact audit: we show that two \texttt{llama.cpp}-specific
-output-parsing bugs otherwise masquerade as capability collapse (e.g.\ a
-spurious 0\% SQuAD EM at 4-bit that recovers to ${\sim}$30\% once fixed), and we
-release corrected scorers so that edge-LLM scores reflect model capability
-rather than interface mismatch.
+Existing evaluations cover parts of this space, but rarely their interaction. General LLM benchmarks measure broad capability under standardized prompts and stable inference settings. Edge and on-device benchmarks move evaluation closer to resource-constrained deployment, but typically hold prompting conditions fixed. Conversely, prompt-robustness studies perturb prompt quality while leaving the serving stack largely unchanged. As a result, we have limited evidence about the joint effect of non-expert prompting and edge deployment constraints---precisely the regime occupied by ordinary users running small models locally.
+
+We close this gap with \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a two-axis evaluation protocol for lower-bound assessment of small language models. PEEL crosses four prompt-quality tiers, from expert task instructions to broken ordinary-user prompts, with five edge-deployment settings, from full-precision GPU inference to aggressive low-bit local inference. Across this ladder, PEEL evaluates task accuracy, hallucination discrimination, safety refusal, multi-turn instruction-following quality, latency, and throughput. PEEL asks a deployment-facing question: what remains reliable when both the user and the serving stack are imperfect?
+
+We evaluate 16 sub-4B models across eight model families, covering extractive reading comprehension, open-domain question answering, truthfulness, hallucination discrimination, safety behavior, and multi-turn instruction following. Our central finding is that small models do not simply become weaker under edge constraints; they become more conditional. Reliability depends sharply on task format, prompt quality, chat-template fidelity, and the scoring assumptions used to interpret outputs. Across models and deployment settings, prompt degradation is often more damaging than bit-width reduction. On SQuAD~v2, exact match falls from roughly 30\% under expert prompts to \textbf{2--5\%} under broken prompts across every edge setting, indicating a near-total prompt-driven collapse in span-based reading comprehension. In contrast, after controlling for output-scoring artefacts, TruthfulQA-MC1 changes by only about one point from full precision to 4-bit inference under expert prompts. These results suggest that, for many practical SLM deployments, the main reliability bottleneck is not quantization alone, but the interaction between task format, user prompt quality, and runtime assumptions.
 
 \paragraph{Contributions.}
+This paper makes the following contributions:
 \begin{itemize}
-  \item A \textbf{2D lower-bound evaluation framework} (PEEL) crossing five
-    edge-deployment settings with four prompt-quality tiers, defining a
-    measurable notion of lower-bound deployment reliability.
-  \item A \textbf{four-tier prompt taxonomy} (P0--P3) with hand-crafted,
-    task-preserving templates for reading comprehension, open-domain QA, and
-    truthfulness discrimination.
-  \item \textbf{Task-type interaction laws}: multiple-choice tasks are robust to
-    both axes, span extraction is sensitive to prompts but not quantization, and
-    knowledge-intensive QA loses about half its recall at the GPU$\to$CPU runtime
-    boundary.
-  \item A \textbf{scoring-artefact diagnosis}: two \texttt{llama.cpp}-specific
-    bugs (EOS/stop-token leakage and first-line parsing) that systematically
-    underreport accuracy, together with reproducible fixes.
-  \item An \textbf{architecture/quality finding}: at matched 1.5B scale the
-    SSM-Hybrid Falcon-H1 far outscores a dense Transformer (8.20 vs.\ 4.06
-    MT-Bench) and, like the other strong instruction-tuned families, resists
-    prompt degradation---prompt robustness tracks model quality more than
-    architecture.
-  \item A \textbf{safety finding}: sub-2B edge models refuse only 6.5\% of unsafe
-    prompts on average (max 35.4\%), exposing fragile alignment under edge
-    deployment.
+\item \textbf{Lower-bound framing.} We formulate ordinary-user edge deployment as a lower-bound reliability problem, where prompt and deployment quality degrade jointly.
+\item \textbf{PEEL protocol and benchmark.} We introduce a two-axis protocol that crosses prompt-quality tiers with edge-deployment settings, and evaluate 16 sub-4B models across QA, truthfulness, hallucination, safety, and dialogue tasks.
+\item \textbf{Prompt--edge reliability analysis.} We show that prompt degradation can dominate bit-width reduction for format-sensitive tasks, while multiple-choice truthfulness is relatively stable once scoring artefacts are handled.
+\item \textbf{Reproducible artifacts.} We release PEEL prompts, deployment configurations, scoring scripts, and result grids for future lower-bound evaluation of edge-deployed SLMs.
 \end{itemize}
 
-The remainder of the paper reviews related work (Section~\ref{sec:related}),
-details the PEEL design (Sections~\ref{sec:design}--\ref{sec:models}), presents
-results across the six tasks (Section~\ref{sec:results}), and discusses
-implications and limitations (Sections~\ref{sec:discussion}--\ref{sec:conclusion}).
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig1_squad_heatmap.pdf}
-  \caption{\textbf{Prompt quality, not quantization, drives failure.}
-    SQuAD~v2 exact match (\%) across the four prompt-quality tiers
-    P0--P3 (expert$\to$broken, columns) and the five edge-deployment settings
-    E0--E4 (full-precision GPU$\to$4-bit CPU, rows). Left: absolute EM;
-    right: change relative to the E0-REF baseline (red\,=\,degradation).
-    The P3 column falls to 2--5\% for \emph{every} model and \emph{every}
-    edge setting (a $\sim$10$\times$ drop from P0), while the P0 row stays at
-    28--30\% across all five settings.}
-  \label{fig:collapse}
-\end{figure}
+
+% \section{Introduction}
+% \label{sec:intro}
+
+% Large language models (LLMs) have rapidly reshaped natural language processing,
+% with strong capabilities in language understanding, generation, and reasoning.
+% This progress has been accelerated by open and increasingly capable model
+% families, including LLaMA~\cite{llama3}, Gemma~\cite{gemma2},
+% DeepSeek~\cite{deepseekv3,deepseekv2}, and Falcon/Falcon-H1
+% models~\cite{falconh1r,falconh1,falcon}. Yet much of this progress is still
+% driven by scale: larger models, larger training corpora, and larger inference
+% budgets. As a result, deploying LLMs outside cloud infrastructure remains
+% expensive, latency-bound, energy-intensive, and often undesirable for privacy-
+% sensitive applications.
+
+% Small language models (SLMs) and edge-oriented LLMs have emerged as a practical
+% response to these constraints~\cite{slm,llm_edge}. With fewer parameters and
+% lower memory requirements, they can run on consumer laptops, mobile devices, and
+% other resource-constrained hardware, reducing dependence on cloud APIs while
+% improving latency, privacy, and local controllability. Recent compact model
+% families such as TinyLlama, Phi, Gemma, and Falcon-H1 show that small models can
+% deliver useful performance in domain-specific or instruction-following settings
+% while requiring substantially less memory and compute~\cite{TinyLlama,phi4,
+% gemma2,falconegde}. In this sense, SLMs are not merely smaller versions of LLMs:
+% they are a mechanism for broadening access to language technology under realistic
+% hardware, connectivity, and privacy constraints.
+
+% However, the accessibility promise of SLMs remains only partially tested. Most
+% evaluations measure small models under idealized conditions: expert-written
+% prompts, clean benchmark inputs, and full-precision inference on well-supported
+% infrastructure. These conditions describe an upper bound on capability, not the
+% conditions under which many users actually interact with local models. Ordinary
+% users may provide vague, colloquial, or malformed prompts, while edge deployment
+% often requires compressed or quantized models because of limited memory, cost, or
+% connectivity. A model that performs well with expert prompts on full-precision
+% hardware may fail once it is both quantized and queried informally.
+
+% We argue that SLM evaluation should therefore report not only upper-bound
+% benchmark performance, but also \emph{lower-bound reliability}: how models behave
+% when user input quality and deployment conditions degrade together.
+
+% Existing benchmarks each cover part of this space, but not its interaction.
+% Broad capability suites such as HELM~\cite{helm2022}, MMLU~\cite{mmlu2021},
+% and MT-Bench~\cite{mtbench2023} primarily measure upper-bound capability under
+% expert or standardized prompts and well-supported inference stacks. Edge and
+% on-device benchmarks such as PalmBench~\cite{li2025palmbench} and
+% MobileAIBench~\cite{Mobileaibench} bring evaluation closer to resource-
+% constrained deployment, but typically hold the prompting protocol fixed.
+% Conversely, prompt-robustness studies such as PromptBench~\cite{zhu2023promptrobust}
+% and RobustAlpacaEval~\cite{ralpaca2024} perturb prompts while leaving the
+% serving stack largely fixed. Recent work on SLM evaluation processes, such as
+% JudgeBoard~\cite{smlbenchmark}, further improves standardized reasoning
+% assessment, but does not ask how small models behave when ordinary-user prompts
+% and edge deployment constraints degrade at the same time.
+
+% % A parallel line of systems work makes such deployment increasingly feasible.
+% % Quantization and local-inference methods such as GPTQ~\cite{gptq2022},
+% % LLM.int8()~\cite{llmint8}, and GGUF/\texttt{llama.cpp}~\cite{gguf} reduce
+% % memory and compute requirements enough to run capable models on commodity
+% % hardware. Yet these studies usually report accuracy under fixed, expert-style
+% % prompts. The field therefore has strong evidence for how quantization behaves
+% % when prompting is held fixed, and for how prompting behaves when serving is held
+% % fixed, but much less evidence for their joint effect---precisely the regime an
+% % ordinary user on an edge device occupies.
+
+% We close this gap with \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge
+% \textbf{E}valuation \textbf{L}adder), a two-dimensional protocol that crosses
+% five edge-deployment settings, from full-precision GPU inference to 4-bit CPU
+% inference, with four prompt-quality tiers, from expert task instructions to
+% broken ordinary-user prompts. Building on the view that worst-case prompt
+% performance is a meaningful lower bound on model reliability~\cite{ralpaca2024},
+% PEEL asks a deployment-facing question: what remains reliable when both the user
+% and the serving stack are imperfect?
+
+% Our central finding is that small models do not simply become weaker at the
+% edge; they become more conditional. Their reliability depends sharply on the
+% task format, the prompt's ability to specify the interaction contract, and the
+% runtime's fidelity to the model's expected chat interface. Across 16 sub-4B
+% models, including recent SLM families such as Falcon-H1, Gemma, Phi, Qwen, and
+% TinyLlama, prompt degradation is often more damaging than bit-width reduction:
+% on SQuAD~v2, exact match falls from roughly 30\% under expert prompts to
+% \textbf{2--5\%} under broken prompts across every edge setting, while
+% TruthfulQA-MC1 changes by only about one point from full precision to 4-bit
+% under expert prompts.
+
+% \paragraph{Contributions.}
+% \begin{itemize}
+%   \item \textbf{A lightweight automated PEEL benchmark.} To enable comprehensive
+%   lower-bound evaluation of edge SLMs, we develop an automated benchmarking
+%   framework that jointly orchestrates prompt degradation, edge-deployment
+%   settings, model inference, runtime-aware output normalization, scoring, and
+%   result aggregation.
+
+%   \item \textbf{A broad SLM and Falcon-H1 stress test.} We evaluate 16 sub-4B
+%   models across eight families, including a focused study of the recent
+%   SSM-Hybrid Falcon-H1 family and common SLM baselines such as Gemma, Phi, Qwen,
+%   Llama, InternLM, SmolLM, and TinyLlama. The evaluation spans SQuAD~v2,
+%   NQ-Open, TruthfulQA-MC1, HaluEval, safety refusal prompts, and MT-Bench,
+%   covering extractive QA, open-domain QA, truthfulness, hallucination
+%   discrimination, safety behavior, and multi-turn instruction following.
+
+%   \item \textbf{A prompt--edge reliability analysis.} We show that edge SLM
+%   reliability is highly conditional: prompt degradation can dominate bit-width
+%   reduction for format-sensitive tasks, while multiple-choice truthfulness is
+%   comparatively stable under quantization.
+
+%   \item \textbf{Reproducible artifacts for edge-SLM evaluation.} We release the
+%   PEEL prompts, deployment configurations, scoring scripts, and result grids to
+%   help future evaluations distinguish model failures from local-runtime and
+%   scoring artifacts.
+% \end{itemize}
+
+
+
+% \begin{figure}[t]
+%   \centering
+%   \includegraphics[width=\columnwidth]{Figures/fig1_squad_heatmap.pdf}
+%   \caption{\textbf{Prompt quality, not quantization, drives failure.}
+%     SQuAD~v2 exact match (\%) across the four prompt-quality tiers
+%     P0--P3 (expert$\to$broken, columns) and the five edge-deployment settings
+%     E0--E4 (full-precision GPU$\to$4-bit CPU, rows). Left: absolute EM;
+%     right: change relative to the E0-REF baseline (red\,=\,degradation).
+%     The P3 column falls to 2--5\% for \emph{every} model and \emph{every}
+%     edge setting (a $\sim$10$\times$ drop from P0), while the P0 row stays at
+%     28--30\% across all five settings.}
+%   \label{fig:collapse}
+% \end{figure}
 
 
 \section{Related Work}
 \label{sec:related}
 
-\paragraph{LLM Benchmarks.}
-HELM~\citep{helm2022} and BIG-Bench~\citep{bigbench2022} establish multitask
-evaluation at scale by collecting diverse tasks, standardizing metrics, and
-making model comparisons reproducible. MMLU~\citep{mmlu2021} and
-SuperGLUE~\citep{superglue2019} remain widely used capability probes because
-they provide stable reference metrics across knowledge, reasoning, and language
-understanding tasks. These benchmarks are intentionally controlled: they remove
-many variables that would otherwise confound model comparison. PEEL keeps
-that reproducibility goal, but changes the target condition. Instead of asking
-which model performs best under ideal benchmark prompts, we ask which conclusions
-survive when the same task is exposed to edge runtime conversion and informal
-prompting.
+\paragraph{Small language models and edge deployment.}
+Large language models have achieved strong performance across reasoning, question answering, and instruction-following tasks, but their memory, compute, and energy costs remain substantial for local or latency-sensitive deployment. This has motivated growing interest in compact and efficient model families, including TinyLlama~\cite{TinyLlama}, Phi~\cite{phi4}, Gemma~\cite{gemma2}, Qwen~\cite{qwen2025}, Llama-3.2~\cite{llama3}, and Falcon-H1~\cite{falconh1}. These models aim to preserve useful language capabilities while reducing inference cost.
 
-PalmBench~\citep{palmbench2024} is closest in spirit because it considers
-on-device deployment. However, it primarily evaluates capability under a fixed
-prompting protocol. HELM-style evaluation similarly offers broad task coverage
-but does not treat prompt literacy as an experimental axis. \citet{multiprompt2024}
-argue that single-prompt evaluation is unstable and propose multi-prompt
-strategies, but their goal is more reliable capability estimation rather than a
-lower-bound stress test. PEEL differs by deliberately pairing a deployment
-axis with a prompt-quality axis, so that a model's reported score is not only a
-property of weights and task, but also of the way the model is likely to be used.
 
-\paragraph{Quantization Effects on Accuracy.}
-GPTQ~\citep{gptq2022} and GGUF/\texttt{llama.cpp}~\citep{gguf} achieve
-practical 4-bit deployment with modest accuracy loss on standard benchmarks.
-SqueezeLLM~\citep{squeezellm2023} and QuIP\#~\citep{quip2024} push further.
-\citet{edgellm2025} evaluate energy and accuracy of quantized LLMs on ARM
-edge platforms; \citet{quantsys2025} provide a systematic characterization
-across quantization strategies and bit-widths; and MobileQuant~\citep{mobilequant2024}
-and EdgeFM~\citep{edgefm2023} target on-device and mobile deployment directly.
-All of these studies hold prompt quality
-fixed at expert level, leaving the interaction with informal user prompts
-unstudied.
+Recently, small language models (SLMs) have shown great potential in alleviating these issues
+while achieving performance comparable to LLMs for domain-specific problems [1~\cite{phi}, 27~\cite{bellagente2024stablelm216b}, 118~\cite{OLMo}, 146~\cite{mobilellm}, 227,
+281, 339~\cite{gemma2}, 342~\cite{MobiLlama}, 359~\cite{slmsurvey}, 407\cite{qwen2025}, 444~\cite{TinyLlama}]. 
 
-The implementation path also matters: the same nominal bit width behaves
-differently depending on calibration, kernel, tokenizer handling, and whether the
-serving stack applies the model's chat wrappers. These details are usually
-treated as engineering choices outside the benchmark, yet we show they can decide
-whether a low score reflects model weakness or a runtime artefact---motivating
-deployment settings as first-class experimental conditions rather than
-undocumented preprocessing.
 
-\paragraph{Prompt Robustness.}
-RobustAlpacaEval~\citep{ralpaca2024} measures how model rankings shift under
-paraphrase. PromptBench~\citep{promptbench2023} applies adversarial character-
-and word-level perturbations to expose fragility. Neither study couples prompt
-robustness to edge deployment constraints.
+A parallel line of work studies edge and on-device LLM deployment, motivated by latency, privacy, bandwidth, and cost constraints~\cite{llm_edge,smlbenchmark,Mobileaibench,li2025palmbench}. Existing studies have explored model compression, efficient inference engines, split execution, and hardware-aware optimization for mobile and edge devices. This work makes local LLM deployment increasingly feasible, but typically focuses on efficiency and deployability rather than user-facing reliability under imperfect interaction conditions.
 
-PEEL instead adopts a user-skill framing---P0 expert, P1 casual, P2 unframed,
-P3 broken---that captures a different failure source than paraphrase or
-adversarial edits: ordinary users omit output constraints or blur
-context/question delimiters. Such omissions interact strongly with reference
-metrics; on SQuAD~v2, dropping the extraction instruction turns span extraction
-into open-ended conversation. The P0--P3 axis thus isolates a practical
-robustness notion that paraphrase tests do not.
 
-\paragraph{Novel Architectures.}
-State-space models (Mamba~\citep{mamba2023}, Falcon-H1~\citep{falconh12025})
-and sub-1-bit BitNet~\citep{bitnet2024} represent emerging families optimized
-for efficient inference. \citet{mamba_empirical2024} show Mamba matches
-Transformers on many tasks but underperforms on knowledge-intensive benchmarks;
-\citet{hymba2024} demonstrate that hybrid SSM+attention architectures outperform
-same-size Transformers on standard NLP tasks. Falcon-H1 is a recent
-SSM-Hybrid line that appears especially attractive for local deployment, yet its
-behaviour under degraded prompts, GGUF conversion, and CPU-only inference has not
-been systematically characterized. PEEL is the first study to measure the
-prompt-quality robustness and edge quantization tolerance of the Falcon-H1
-family jointly.
 
-These families matter for edge benchmarking because their design targets
-favourable behaviour under constrained decoding, not only lower memory. Standard
-leaderboards can hide this: two models with similar parameters and reference
-accuracy may respond very differently to a broken prompt or to a runtime that
-omits chat wrappers. We therefore treat architecture family as a central
-moderator rather than a model-table descriptor.
+\paragraph{Benchmarking LLMs and edge LLMs.}
+General-purpose LLM benchmarks evaluate broad language capabilities, including knowledge, reasoning, question answering, instruction following, and dialogue quality. Widely used benchmarks and evaluation suites include MMLU~\cite{mmlu2021}, HELM~\cite{helm2022}, SQuAD~v2~\cite{squad2}, Natural Questions~\cite{naturalquestions}, TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval}, and MT-Bench~\cite{mtbench2023}. Recent SLM-oriented evaluation work, such as JudgeBoard~\cite{smlbenchmark}, further improves standardized assessment of small-model reasoning and generation quality.
 
-\paragraph{Safety and Alignment for Small Edge Models.}
-Safety evaluation is commonly performed on cloud-served chat models whose
-alignment layers, system prompts, and refusal behavior are part of a managed
-product. Edge deployments weaken this assumption. A local model may be used
-without a system prompt, converted to a different runtime, or quantized in a way
-that changes refusal phrasing. PEEL does not claim to provide a full
-red-teaming benchmark; our safety component is a diagnostic refusal analysis
-over safe and unsafe prompts. Its purpose is to test whether deployment
-conversion preserves a basic safety/helpfulness trade-off. The answer in our
-current data is mixed: unsafe refusal is far from reliable, while safe-prompt
-over-refusal is non-trivial. This supports a broader lesson shared with the rest
-of the benchmark: deployment evaluation should include behavioral checks, not
-only task accuracy.
+Recent mobile and edge benchmarks, including MobileAIBench~\cite{Mobileaibench}, PalmBench~\cite{li2025palmbench}, MELT~\cite{melt}, and related edge-LLM benchmarking efforts, move evaluation closer to resource-constrained deployment by measuring latency, throughput, memory use, energy consumption, and device compatibility. However, general benchmarks typically assume clean prompts and stable inference infrastructure, while edge benchmarks often hold prompting protocols fixed.
 
-% â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+\paragraph{Quantization and local inference.}
+Post-training quantization reduces the memory and computation required for LLM inference by representing model weights, and sometimes activations, at lower precision. Methods such as GPTQ~\cite{gptq2022}, LLM.int8()~\cite{llmint8}, AWQ~\cite{awq}, and group-wise quantization~\cite{groupwisequant} show that LLMs can often be compressed to 8-bit, 4-bit, or lower precision with limited average benchmark degradation. Lightweight inference engines and deployment frameworks such as \texttt{llama.cpp}/GGUF~\cite{gguf} and MLC-LLM~\cite{mlc} further enable quantized models to run on CPUs, mobile devices, and heterogeneous edge hardware.
+
+These systems are central to practical SLM deployment, but most quantization studies evaluate accuracy under fixed, expert-style prompts. They therefore provide strong evidence about how bit-width affects model outputs when prompting is controlled, but less evidence about how quantization interacts with non-expert prompting, chat-template mismatch, and output-scoring assumptions.
+
+
+\paragraph{Prompt robustness, hallucination, and safety.}
+Language models are highly sensitive to prompt wording, formatting, and task specification. Prompt-robustness benchmarks such as PromptBench~\cite{zhu2023promptrobust} and RobustAlpacaEval~\cite{ralpaca2024} show that prompt perturbations can substantially affect model performance, and that worst-case prompt performance can provide a meaningful lower bound on reliability. This is especially relevant to non-expert users, who may not know how to write precise task instructions or preserve benchmark-specific answer formats.
+
+Trustworthiness is also central to user-facing SLM deployment. Prior work has studied truthfulness, hallucination, toxicity, and unsafe instruction following through benchmarks such as TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval}, and safety-oriented refusal tests. These issues are particularly important for small local models, which may have weaker instruction tuning and safety alignment while also bypassing cloud-side safety layers.
+
+Prior work has separately advanced small-model deployment, quantized local inference, standardized capability evaluation, edge benchmarking, prompt robustness, and trustworthiness assessment. However, these lines of work usually vary one dimension at a time: deployment studies often fix prompts, while prompt-robustness studies often fix the serving stack. PEEL connects these dimensions by jointly varying prompt quality and deployment quality, measuring how task accuracy, hallucination discrimination, safety refusal, dialogue quality, latency, and throughput change under ordinary-user edge conditions.
+
+
 \section{Benchmark Design}
+
+Typically, LMs that exhibit emergent abilities are classified as LLMs. However, the categorization
+of SLMs remains unclear. Studies vary in their contexts: some define SLMs as models with fewer
+than one billion parameters [227], while others consider the term “small language model” relative
+to the larger counterparts [186, 333, 375], with no consensus on a unified definition in the current
+landscape of LLMs. Research suggests SLMs for mobile devices, typically possessing around 6 GB
+of memory, consist of sub-billion parameter models [227], whereas others classify models with up
+to 10 billion parameters as small, noting their lack of emergent abilities [107]. Given their use in
+resource-constrained environments and for specific tasks, we propose a generalized definition:
+Given specific tasks and resource constraints, we define SLMs as falling within a range where the lower
+bound is the minimum size at which the model exhibits emergent abilities for a specialized task, and
+the upper bound is the largest size manageable within limited resource conditions. This definition
+
 \label{sec:design}
 
 \subsection{The 2D Degradation Space}
@@ -255,7 +399,7 @@ effect.
 \paragraph{Edge Deployment Settings (E0--E4).}
 \begin{itemize}
   \item \textbf{E0-REF}: BF16, HuggingFace \texttt{transformers}, GPU.
-  \item \textbf{E1-INT8}: 8-bit static quantization via \texttt{bitsandbytes}~\citep{llmint8}, GPU.
+  \item \textbf{E1-INT8}: 8-bit static quantization via \texttt{bitsandbytes}~\cite{llmint8}, GPU.
   \item \textbf{E2-Q8}: Q8\_0 GGUF via \texttt{llama.cpp}, CPU.
   \item \textbf{E3-Q5}: Q5\_K\_M GGUF via \texttt{llama.cpp}, CPU.
   \item \textbf{E4-Q4}: Q4\_K\_M GGUF via \texttt{llama.cpp}, CPU.
@@ -273,7 +417,7 @@ subcomparisons.
 
 \paragraph{Prompt Quality Tiers (P0--P3).}
 We define four tiers aligned with realistic user archetypes drawn from
-AI-literacy and human-computer interaction literature~\citep{sclar2023,multiprompt2024}.
+AI-literacy and human-computer interaction literature~\cite{sclar2023,multiprompt2024}.
 The tiers span the spectrum from expert benchmark-style prompting to the informal
 interaction style documented in studies of first-time LLM users:
 \begin{itemize}
@@ -296,7 +440,7 @@ MT-Bench P0--P3 deltas vary systematically by family
 (Section~\ref{sec:arch}), supporting P1--P3 as a diagnostic stress test rather
 than a calibrated user-study scale.
 We also ground the tiers in real usage. We sampled 50 single-turn English
-prompts from WildChat-1M~\citep{wildchat2024} and had two fluent annotators
+prompts from WildChat-1M~\cite{wildchat2024} and had two fluent annotators
 independently map each to the nearest PEEL tier. A preliminary non-native pilot
 pass was used only to refine the rubric and is excluded from the agreement
 statistics. The two retained annotators agree at Cohen
@@ -343,28 +487,28 @@ Table~\ref{tab:prompts} illustrates all four tiers for the SQuAD v2 task.
 We select tasks that expose different output contracts. SQuAD v2 requires
 extractive spans and a special unanswerable marker; NQ-Open requires factual
 recall without context; TruthfulQA-MC1 requires selecting among explicit
-options; HaluEval requires binary judgment; and MT-Bench~\citep{mtbench2023}
+options; HaluEval requires binary judgment; and MT-Bench~\cite{mtbench2023}
 evaluates open-ended
 multi-turn instruction following. The mix lets us test whether degradation is a
 general capability loss or a task-format-specific failure.
 
-\paragraph{Reading Comprehension -- SQuAD v2~\citep{squad2}.}
+\paragraph{Reading Comprehension -- SQuAD v2~\cite{squad2}.}
 Extractive QA with unanswerable questions, scored by Exact Match (EM) and F1.
 Unanswerable questions require outputting the literal string
 \textit{``unanswerable''}, making format adherence part of the evaluation signal.
 
-\paragraph{Open-Domain QA -- Natural Questions Open~\citep{nqopen}.}
+\paragraph{Open-Domain QA -- Natural Questions Open~\cite{nqopen}.}
 Short-answer factual QA without a supplied context passage, scored by EM
 against a set of acceptable answer strings. Tests parametric knowledge retention
 under prompt simplification.
 
-\paragraph{Truthfulness Discrimination -- TruthfulQA-MC1~\citep{truthfulqa}.}
+\paragraph{Truthfulness Discrimination -- TruthfulQA-MC1~\cite{truthfulqa}.}
 Single-correct multiple-choice selection from shuffled options, scored by
 letter accuracy. We use a generative MC1 protocol (model selects a letter)
 rather than log-likelihood scoring, making evaluation fully model-agnostic and
 compatible with all runners.
 
-HaluEval~\citep{halueval2023} is included at P0 for hallucination detection
+HaluEval~\cite{halueval2023} is included at P0 for hallucination detection
 baselines; the judge-style instruction is intrinsic to its prompt and is not
 tier-degradable. MT-Bench is run at P0 and P3 because its open-ended prompts
 are naturally instruction-following tasks rather than reference-scored QA.
@@ -1013,7 +1157,7 @@ used for QA/classification aggregates.
     \midrule
     Reference-scored tasks & 1,088 & 200 examples per run after filtering \\
     MT-Bench & 156 & 80 questions; P0/P3 only \\
-    IFEval~\citep{ifeval2023} & 45 & Reported in released artifacts, not central in main text \\
+    IFEval~\cite{ifeval2023} & 45 & Reported in released artifacts, not central in main text \\
     Safety & 75 model--setting pairs & Keyword/refusal classifier over safe and unsafe prompts \\
     \bottomrule
   \end{tabular}
