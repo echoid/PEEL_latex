@@ -179,193 +179,239 @@ safety, quality, latency, and throughput.
 
 Small language models (SLMs) are increasingly positioned as practical alternatives to cloud-scale large language models (LLMs). With fewer parameters and lower memory requirements, they can run on consumer laptops, mobile devices, and other resource-constrained hardware, reducing dependence on cloud APIs for latency-sensitive, low-cost, and privacy-sensitive applications. This makes SLMs attractive not only as smaller models, but also as a possible mechanism for broadening access to language technologies under realistic hardware, connectivity, and privacy constraints.
 
-However, this accessibility promise remains only partially tested. Most evaluations measure small models under favorable conditions: expert-written prompts, clean benchmark inputs, and high-precision inference on well-supported infrastructure. These settings estimate an upper bound on model capability, but they do not reflect many real uses of local or edge-deployed models. Non-expert users may provide vague, colloquial, underspecified, or malformed prompts. At the same time, edge deployment often relies on compressed or quantized models because of limited memory, cost, energy, or connectivity. A model that performs well with expert prompts under full-precision inference may fail once it is both queried informally and deployed under constrained runtime conditions.
+Yet broad access changes what evaluation should measure. For ordinary users, a model's practical value is not determined only by its best-case benchmark score under expert prompting and full-precision inference, but by what capability remains when interaction and deployment conditions are imperfect. Prior robustness work similarly argues that worst-case or perturbed prompt performance provides an important reliability signal, rather than a nuisance variation to be averaged away~\cite{zhu2023promptrobust,ralpaca2024}. This perspective is especially important for SLMs: non-expert users may provide vague, colloquial, underspecified, or malformed prompts, while local deployment often relies on compressed or quantized inference because of limited memory, cost, energy, or connectivity. A model that appears capable under ideal prompts and server-class inference may therefore fail in the very regime where SLMs are meant to be useful.
 
-We argue that SLM evaluation should therefore report not only upper-bound benchmark performance, but also \emph{lower-bound reliability}: how models behave when user input quality and deployment quality degrade together. This regime is especially important because the users and settings most likely to benefit from SLMs are also those least represented by idealized evaluation protocols.
+We argue that SLM evaluation should report not only upper-bound benchmark performance, but also \emph{lower-bound reliability}: how models behave when user input quality and deployment quality degrade together. Existing evaluations cover parts of this space, but rarely their interaction. General LLM benchmarks measure broad capability under standardized prompts and stable inference settings. Edge and on-device benchmarks move evaluation closer to resource-constrained deployment, but typically hold prompting conditions fixed. Conversely, prompt-robustness studies perturb prompt quality while leaving the serving stack largely unchanged. As a result, we have limited evidence about the joint effect of non-expert prompting and edge deployment constraints---precisely the regime occupied by ordinary users running small models locally.
 
-Existing evaluations cover parts of this space, but rarely their interaction. General LLM benchmarks measure broad capability under standardized prompts and stable inference settings. Edge and on-device benchmarks move evaluation closer to resource-constrained deployment, but typically hold prompting conditions fixed. Conversely, prompt-robustness studies perturb prompt quality while leaving the serving stack largely unchanged. As a result, we have limited evidence about the joint effect of non-expert prompting and edge deployment constraints---precisely the regime occupied by ordinary users running small models locally.
+We close this gap with \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a two-axis evaluation protocol for lower-bound assessment of small language models. PEEL crosses four prompt-quality tiers, from expert task instructions to broken ordinary-user prompts, with five edge-deployment settings, from full-precision GPU inference to aggressive low-bit local inference. Across this ladder, PEEL evaluates task accuracy, hallucination discrimination, safety behavior, multi-turn instruction-following quality, latency, and throughput. It asks a deployment-facing question: what remains reliable when both the user and the serving stack are imperfect?
 
-We close this gap with \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a two-axis evaluation protocol for lower-bound assessment of small language models. PEEL crosses four prompt-quality tiers, from expert task instructions to broken ordinary-user prompts, with five edge-deployment settings, from full-precision GPU inference to aggressive low-bit local inference. Across this ladder, PEEL evaluates task accuracy, hallucination discrimination, safety behaviour, multi-turn instruction-following quality, latency, and throughput. PEEL asks a deployment-facing question: what remains reliable when both the user and the serving stack are imperfect?
-
-We evaluate 16 sub-4B models across eight model families, covering extractive reading comprehension, open-domain question answering, truthfulness, hallucination discrimination, safety behavior, and multi-turn instruction following. Our central finding is that small models do not simply become weaker under edge constraints; they become more conditional. Reliability depends sharply on task format, prompt quality, runtime-interface fidelity, and the scoring assumptions used to interpret outputs. Across models and deployment settings, prompt degradation is often more damaging than bit-width reduction. On SQuAD~v2, exact match falls from roughly 30\% under expert prompts to \textbf{2--5\%} under broken prompts across every edge setting, indicating a near-total prompt-driven collapse in span-based reading comprehension. In contrast, after controlling for output-scoring artefacts, TruthfulQA-MC1 changes by only about one point from full precision to 4-bit inference under expert prompts. These results suggest that, for many practical SLM deployments, the main reliability bottleneck is not quantization alone, but the interaction between task format, user prompt quality, and runtime assumptions.
+We evaluate 16 sub-4B models across eight model families, covering extractive reading comprehension, open-domain question answering, truthfulness, hallucination discrimination, safety behavior, and multi-turn instruction following. Our central finding is that small models do not simply become weaker under edge constraints; they become more conditional. Reliability depends sharply on task format, prompt quality, runtime-interface fidelity, and the scoring assumptions used to interpret outputs. Across models and deployment settings, prompt degradation is often more damaging than bit-width reduction. On SQuAD~v2, exact match falls from roughly 30\% under expert prompts to \textbf{2--5\%} under broken prompts across every edge setting, indicating a near-total prompt-driven collapse in span-based reading comprehension. In contrast, after controlling for output-scoring artifacts, TruthfulQA-MC1 changes by only about one point from full precision to 4-bit inference under expert prompts. These results suggest that, for many practical SLM deployments, the main reliability bottleneck is not quantization alone, but the interaction between task format, user prompt quality, and runtime assumptions.
 
 \paragraph{Contributions.}
 This paper makes the following contributions:
 \begin{itemize}
 \item \textbf{Lower-bound framing.} We formulate ordinary-user edge deployment as a lower-bound reliability problem, where prompt and deployment quality degrade jointly.
+
 \item \textbf{PEEL protocol and benchmark.} We introduce a two-axis protocol that crosses prompt-quality tiers with edge-deployment settings, and evaluate 16 sub-4B models across QA, truthfulness, hallucination, safety, and dialogue tasks.
-\item \textbf{Prompt--edge reliability analysis.} We show that prompt degradation can dominate bit-width reduction for format-sensitive tasks, while multiple-choice truthfulness is relatively stable once scoring artefacts are handled.
+
+\item \textbf{Prompt--edge reliability analysis.} We show that prompt degradation can dominate bit-width reduction for format-sensitive tasks, while multiple-choice truthfulness is relatively stable once scoring artifacts are handled.
+
 \item \textbf{Reproducible artifacts.} We release PEEL prompts, deployment configurations, scoring scripts, and result grids for future lower-bound evaluation of edge-deployed SLMs.
 \end{itemize}
 
-
-
-% \section{Introduction}
-% \label{sec:intro}
-
-% Large language models (LLMs) have rapidly reshaped natural language processing,
-% with strong capabilities in language understanding, generation, and reasoning.
-% This progress has been accelerated by open and increasingly capable model
-% families, including LLaMA~\cite{llama3}, Gemma~\cite{gemma2},
-% DeepSeek~\cite{deepseekv3,deepseekv2}, and Falcon/Falcon-H1
-% models~\cite{falconh1r,falconh1,falcon}. Yet much of this progress is still
-% driven by scale: larger models, larger training corpora, and larger inference
-% budgets. As a result, deploying LLMs outside cloud infrastructure remains
-% expensive, latency-bound, energy-intensive, and often undesirable for privacy-
-% sensitive applications.
-
-% Small language models (SLMs) and edge-oriented LLMs have emerged as a practical
-% response to these constraints~\cite{slm,llm_edge}. With fewer parameters and
-% lower memory requirements, they can run on consumer laptops, mobile devices, and
-% other resource-constrained hardware, reducing dependence on cloud APIs while
-% improving latency, privacy, and local controllability. Recent compact model
-% families such as TinyLlama, Phi, Gemma, and Falcon-H1 show that small models can
-% deliver useful performance in domain-specific or instruction-following settings
-% while requiring substantially less memory and compute~\cite{TinyLlama,phi4,
-% gemma2,falconegde}. In this sense, SLMs are not merely smaller versions of LLMs:
-% they are a mechanism for broadening access to language technology under realistic
-% hardware, connectivity, and privacy constraints.
-
-% However, the accessibility promise of SLMs remains only partially tested. Most
-% evaluations measure small models under idealized conditions: expert-written
-% prompts, clean benchmark inputs, and full-precision inference on well-supported
-% infrastructure. These conditions describe an upper bound on capability, not the
-% conditions under which many users actually interact with local models. Ordinary
-% users may provide vague, colloquial, or malformed prompts, while edge deployment
-% often requires compressed or quantized models because of limited memory, cost, or
-% connectivity. A model that performs well with expert prompts on full-precision
-% hardware may fail once it is both quantized and queried informally.
-
-% We argue that SLM evaluation should therefore report not only upper-bound
-% benchmark performance, but also \emph{lower-bound reliability}: how models behave
-% when user input quality and deployment conditions degrade together.
-
-% Existing benchmarks each cover part of this space, but not its interaction.
-% Broad capability suites such as HELM~\cite{helm2022}, MMLU~\cite{mmlu2021},
-% and MT-Bench~\cite{mtbench2023} primarily measure upper-bound capability under
-% expert or standardized prompts and well-supported inference stacks. Edge and
-% on-device benchmarks such as PalmBench~\cite{li2025palmbench} and
-% MobileAIBench~\cite{Mobileaibench} bring evaluation closer to resource-
-% constrained deployment, but typically hold the prompting protocol fixed.
-% Conversely, prompt-robustness studies such as PromptBench~\cite{zhu2023promptrobust}
-% and RobustAlpacaEval~\cite{ralpaca2024} perturb prompts while leaving the
-% serving stack largely fixed. Recent work on SLM evaluation processes, such as
-% JudgeBoard~\cite{smlbenchmark}, further improves standardized reasoning
-% assessment, but does not ask how small models behave when ordinary-user prompts
-% and edge deployment constraints degrade at the same time.
-
-% % A parallel line of systems work makes such deployment increasingly feasible.
-% % Quantization and local-inference methods such as GPTQ~\cite{gptq2022},
-% % LLM.int8()~\cite{llmint8}, and GGUF/\texttt{llama.cpp}~\cite{gguf} reduce
-% % memory and compute requirements enough to run capable models on commodity
-% % hardware. Yet these studies usually report accuracy under fixed, expert-style
-% % prompts. The field therefore has strong evidence for how quantization behaves
-% % when prompting is held fixed, and for how prompting behaves when serving is held
-% % fixed, but much less evidence for their joint effect---precisely the regime an
-% % ordinary user on an edge device occupies.
-
-% We close this gap with \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge
-% \textbf{E}valuation \textbf{L}adder), a two-dimensional protocol that crosses
-% five edge-deployment settings, from full-precision GPU inference to 4-bit CPU
-% inference, with four prompt-quality tiers, from expert task instructions to
-% broken ordinary-user prompts. Building on the view that worst-case prompt
-% performance is a meaningful lower bound on model reliability~\cite{ralpaca2024},
-% PEEL asks a deployment-facing question: what remains reliable when both the user
-% and the serving stack are imperfect?
-
-% Our central finding is that small models do not simply become weaker at the
-% edge; they become more conditional. Their reliability depends sharply on the
-% task format, the prompt's ability to specify the interaction contract, and the
-% runtime's fidelity to the model's expected chat interface. Across 16 sub-4B
-% models, including recent SLM families such as Falcon-H1, Gemma, Phi, Qwen, and
-% TinyLlama, prompt degradation is often more damaging than bit-width reduction:
-% on SQuAD~v2, exact match falls from roughly 30\% under expert prompts to
-% \textbf{2--5\%} under broken prompts across every edge setting, while
-% TruthfulQA-MC1 changes by only about one point from full precision to 4-bit
-% under expert prompts.
-
-% \paragraph{Contributions.}
-% \begin{itemize}
-%   \item \textbf{A lightweight automated PEEL benchmark.} To enable comprehensive
-%   lower-bound evaluation of edge SLMs, we develop an automated benchmarking
-%   framework that jointly orchestrates prompt degradation, edge-deployment
-%   settings, model inference, runtime-aware output normalization, scoring, and
-%   result aggregation.
-
-%   \item \textbf{A broad SLM and Falcon-H1 stress test.} We evaluate 16 sub-4B
-%   models across eight families, including a focused study of the recent
-%   SSM-Hybrid Falcon-H1 family and common SLM baselines such as Gemma, Phi, Qwen,
-%   Llama, InternLM, SmolLM, and TinyLlama. The evaluation spans SQuAD~v2,
-%   NQ-Open, TruthfulQA-MC1, HaluEval, safety refusal prompts, and MT-Bench,
-%   covering extractive QA, open-domain QA, truthfulness, hallucination
-%   discrimination, safety behavior, and multi-turn instruction following.
-
-%   \item \textbf{A prompt--edge reliability analysis.} We show that edge SLM
-%   reliability is highly conditional: prompt degradation can dominate bit-width
-%   reduction for format-sensitive tasks, while multiple-choice truthfulness is
-%   comparatively stable under quantization.
-
-%   \item \textbf{Reproducible artifacts for edge-SLM evaluation.} We release the
-%   PEEL prompts, deployment configurations, scoring scripts, and result grids to
-%   help future evaluations distinguish model failures from local-runtime and
-%   scoring artifacts.
-% \end{itemize}
-
-
-
-% \begin{figure}[t]
-%   \centering
-%   \includegraphics[width=\columnwidth]{Figures/fig1_squad_heatmap.pdf}
-%   \caption{\textbf{Prompt quality, not quantization, drives failure.}
-%     SQuAD~v2 exact match (\%) across the four prompt-quality tiers
-%     P0--P3 (expert$\to$broken, columns) and the five edge-deployment settings
-%     E0--E4 (full-precision GPU$\to$4-bit CPU, rows). Left: absolute EM;
-%     right: change relative to the E0-REF baseline (red\,=\,degradation).
-%     The P3 column falls to 2--5\% for \emph{every} model and \emph{every}
-%     edge setting (a $\sim$10$\times$ drop from P0), while the P0 row stays at
-%     28--30\% across all five settings.}
-%   \label{fig:collapse}
-% \end{figure}
-
+【shoule we mention this is also a first work study falcon h1 series？】
 
 \section{Related Work}
 \label{sec:related}
 
-\paragraph{Small language models and edge deployment.}
-Large language models have achieved strong performance across reasoning, question answering, and instruction-following tasks, but their memory, compute, and energy costs remain substantial for local or latency-sensitive deployment. This has motivated growing interest in compact and efficient model families, including TinyLlama~\cite{TinyLlama}, Phi~\cite{phi4}, Gemma~\cite{gemma2}, Qwen~\cite{qwen2025}, Llama-3.2~\cite{llama3}, and Falcon-H1~\cite{falconh1}. These models aim to preserve useful language capabilities while reducing inference cost.
+我觉得这里我们应该介绍falcon H1 最近很有潜力。。。
 
+\paragraph{Small language models, edge deployment, and quantization.}
+Large language models have achieved strong performance across reasoning, question answering, and instruction-following tasks, but their memory, compute, and energy costs remain substantial for local or latency-sensitive deployment. This has motivated growing interest in compact and efficient model families, including TinyLlama~\cite{TinyLlama}, Phi~\cite{phi4}, Gemma~\cite{gemma2}, Qwen~\cite{qwen2025}, Llama-3.2~\cite{llama3}, and Falcon-H1~\cite{falconh1}. Recent small language models (SLMs) further show that useful performance can be achieved in domain-specific or resource-constrained settings~\cite{bellagente2024stablelm216b,OLMo,mobilellm,MobiLlama,slmsurvey}. A parallel line of work studies edge and on-device LLM deployment, motivated by latency, privacy, bandwidth, and cost constraints~\cite{llm_edge,Mobileaibench,li2025palmbench}. Existing studies have explored model compression, efficient inference engines, split execution, and hardware-aware optimization for mobile and edge devices. Post-training quantization methods such as GPTQ~\cite{gptq2022}, LLM.int8()~\cite{llmint8}, and related weight-only or group-wise quantization methods reduce memory and computation by representing model weights, and sometimes activations, at lower precision. Lightweight inference engines and deployment frameworks such as \texttt{llama.cpp}/GGUF~\cite{gguf} further enable quantized models to run on CPUs, mobile devices, and heterogeneous edge hardware. This work makes local SLM deployment increasingly feasible, but typically evaluates efficiency or accuracy under fixed, expert-style prompts, leaving less evidence about how quantization interacts with non-expert prompting, chat-template mismatch, and output-scoring assumptions.
 
-Recently, small language models (SLMs) have shown great potential in alleviating
-these issues while achieving useful performance for domain-specific or
-resource-constrained settings~\cite{phi4,bellagente2024stablelm216b,OLMo,
-mobilellm,gemma2,MobiLlama,slmsurvey,qwen2025,TinyLlama}.
+\paragraph{Benchmarking, prompt robustness, and trustworthiness.}
+Recent SLM-oriented evaluation work, such as JudgeBoard~\cite{smlbenchmark}, improves standardized assessment of small-model reasoning and generation quality. Mobile and edge benchmarks, including MobileAIBench~\cite{Mobileaibench}, PalmBench~\cite{li2025palmbench}, and related edge-LLM benchmarking efforts, move evaluation closer to resource-constrained deployment by measuring latency, throughput, memory use, energy consumption, and device compatibility. However, general benchmarks typically assume clean prompts and stable inference infrastructure, while edge benchmarks often hold prompting protocols fixed. In parallel, prompt-robustness benchmarks such as PromptBench~\cite{zhu2023promptrobust} and RobustAlpacaEval~\cite{ralpaca2024} show that language models are highly sensitive to prompt wording, formatting, and task specification, and that worst-case prompt performance can provide a meaningful lower bound on reliability. Trustworthiness is also central to user-facing SLM deployment: prior work has studied truthfulness, hallucination, toxicity, and unsafe instruction following through benchmarks such as TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval2023}, and safety-oriented refusal tests. These issues are particularly important for small local models, which may have weaker instruction tuning and safety alignment while also bypassing cloud-side safety layers.
 
+Prior work has separately advanced small-model deployment, quantized local inference, standardized capability evaluation, edge benchmarking, prompt robustness, and trustworthiness assessment. However, these lines of work usually vary one dimension at a time: deployment studies often fix prompts, while prompt-robustness studies often fix the serving stack. PEEL connects these dimensions by jointly varying prompt quality and deployment quality, measuring how task accuracy, hallucination discrimination, safety behavior, dialogue quality, latency, and throughput change under ordinary-user edge conditions.
 
-A parallel line of work studies edge and on-device LLM deployment, motivated by latency, privacy, bandwidth, and cost constraints~\cite{llm_edge,smlbenchmark,Mobileaibench,li2025palmbench}. Existing studies have explored model compression, efficient inference engines, split execution, and hardware-aware optimization for mobile and edge devices. This work makes local LLM deployment increasingly feasible, but typically focuses on efficiency and deployability rather than user-facing reliability under imperfect interaction conditions.
-
-
-
-\paragraph{Benchmarking LLMs and edge LLMs.}
-General-purpose LLM benchmarks evaluate broad language capabilities, including knowledge, reasoning, question answering, instruction following, and dialogue quality. Widely used benchmarks and evaluation suites include MMLU~\cite{mmlu2021}, HELM~\cite{helm2022}, SQuAD~v2~\cite{squad2}, Natural Questions~\cite{nqopen}, TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval2023}, and MT-Bench~\cite{mtbench2023}. Recent SLM-oriented evaluation work, such as JudgeBoard~\cite{smlbenchmark}, further improves standardized assessment of small-model reasoning and generation quality.
-
-Recent mobile and edge benchmarks, including MobileAIBench~\cite{Mobileaibench}, PalmBench~\cite{li2025palmbench}, and related edge-LLM benchmarking efforts, move evaluation closer to resource-constrained deployment by measuring latency, throughput, memory use, energy consumption, and device compatibility. However, general benchmarks typically assume clean prompts and stable inference infrastructure, while edge benchmarks often hold prompting protocols fixed.
-
-\paragraph{Quantization and local inference.}
-Post-training quantization reduces the memory and computation required for LLM inference by representing model weights, and sometimes activations, at lower precision. Methods such as GPTQ~\cite{gptq2022}, LLM.int8()~\cite{llmint8}, and related weight-only or group-wise quantization methods show that LLMs can often be compressed to 8-bit, 4-bit, or lower precision with limited average benchmark degradation. Lightweight inference engines and deployment frameworks such as \texttt{llama.cpp}/GGUF~\cite{gguf} further enable quantized models to run on CPUs, mobile devices, and heterogeneous edge hardware.
-
-These systems are central to practical SLM deployment, but most quantization studies evaluate accuracy under fixed, expert-style prompts. They therefore provide strong evidence about how bit-width affects model outputs when prompting is controlled, but less evidence about how quantization interacts with non-expert prompting, chat-template mismatch, and output-scoring assumptions.
-
-
-\paragraph{Prompt robustness, hallucination, and safety.}
-Language models are highly sensitive to prompt wording, formatting, and task specification. Prompt-robustness benchmarks such as PromptBench~\cite{zhu2023promptrobust} and RobustAlpacaEval~\cite{ralpaca2024} show that prompt perturbations can substantially affect model performance, and that worst-case prompt performance can provide a meaningful lower bound on reliability. This is especially relevant to non-expert users, who may not know how to write precise task instructions or preserve benchmark-specific answer formats.
-
-Trustworthiness is also central to user-facing SLM deployment. Prior work has studied truthfulness, hallucination, toxicity, and unsafe instruction following through benchmarks such as TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval2023}, and safety-oriented refusal tests. These issues are particularly important for small local models, which may have weaker instruction tuning and safety alignment while also bypassing cloud-side safety layers.
-
-Prior work has separately advanced small-model deployment, quantized local inference, standardized capability evaluation, edge benchmarking, prompt robustness, and trustworthiness assessment. However, these lines of work usually vary one dimension at a time: deployment studies often fix prompts, while prompt-robustness studies often fix the serving stack. PEEL connects these dimensions by jointly varying prompt quality and deployment quality, measuring how task accuracy, hallucination discrimination, safety behaviour, dialogue quality, latency, and throughput change under ordinary-user edge conditions.
 
 
 \section{Benchmark Design}
 
+
+To evaluate the LLMs on mobile devices, we created the \name framework, which focuses on the following three aspects:
+%
+
+\paragraph{1) Benchmark Automation.} 
+We designed an automated framework comprising an \textbf{Evaluator}, \textbf{Scheduler} and \textbf{Profiling and Monitor} modules, designed to handle experimental prompt datasets, evaluate quantized models, and schedule profiling across various metrics. The framework's workflow is illustrated in Fig.~\ref{fig:intro}.
+
+%We developed an automated framework which consist of \textbf{Evaluator}, and \textbf{Profiling and Monitor} to automatically input the experimental prompt datasets, evaluate the quantized models and scheduling the profiling and evaluate the models across different metrics,that uses Android Graphic Inspector (AGI)~\cite{AGI_tool}, Xcode profiler, and Nvidia Visual profilers to 
+
+%trace execution data and analyze runtime behavior across platforms when benchmarking LLM performance and resource utilization on edge and mobile devices. The framework requires USB debugging to connect to Android phones and iPhones.
+
+%
+
+\paragraph{2) Resource Utilization.} Our primary focus is on the resource demands of different models across various platforms—such as CPU, GPU, and memory that significantly impact user experience. 
+%
+Our study goes beyond resource demands, aiming to quantify the impact of different quantization techniques on both performance and resource efficiency across various state-of-the-art models. 
+%
+
+\paragraph{3) Model Accuracy.} %While a model's architecture mostly dominates its outputs, we observe variations when applying different quantization methods on diverse devices.
+%
+%To validate the quantized LLMs and quantify the accuracy degradation due to compression, we evaluate the \textit{\textbf{knowledge and answering}} accuracy of models using \textit{Exact Match} and 
+%\textit{F1 score} compared with original models. We also test these models on conventional tasks with open-sourced datasets SQuAD and Natural Questions ~\citep{Rajpurkar2016SQuAD10, NQ_Google}.
+%
+While a model's architecture primarily determines its output, we observe variations across devices when different quantization methods are applied. To validate quantized LLMs and assess accuracy degradation caused by compression, we evaluate models using \textit{Exact Match} and \textit{F1 score}, comparing their \textbf{\textit{knowledge and answering}} accuracy against original models. Additionally, we test these models on standard tasks with open-source datasets such as SQuAD and Natural Questions~\citep{Rajpurkar2016SQuAD10, NQ_Google}. 
+Moreover, we also investigate the potential issues of toxicity and the generation of erroneous or randomized outputs that always occur in compressed models and have not been thoroughly studied in previous work~\citep{MELTing_2024}.
+%
+
+
+
+
+\subsection{Metrics and Datasets}
+\label{ssec: metric}
+
+% We focus more on the efficiency of quantized LLMs on resource-constrained mobile devices, evaluating throughput, resource utilization (CPU, GPU, and memory), inference latency, and energy efficiency.
+%
+% However, compressed LLMs often exhibit ``hallucination'', producing inaccurate, irrelevant, or fabricated information. These erroneous outputs significantly impair user experience, particularly when using quantized models.
+%
+Table~\ref{tab:metric} summarizes all the metrics used in our benchmark.
+To evaluate the accuracy and correctness of quantized LLMs, we use popular \textit{Question-Answering} datasets such as SQuAD~\citep{Rajpurkar2016SQuAD10} and Natural Questions (NQ)~\citep{NQ_Google}, comparing their performance with that of the original, non-quantized models. Additionally, we employ comprehensive benchmarks for different tasks, including MTBench~\citep{MTBenchArena_2023} 
+%and MMLU~\citep{MMLU}, 
+to compare their language understanding and reasoning capabilities across different quantizations.
+%
+%
+Also, we measured \textit{toxicity} by calculating \textbf{toxic score} by using Perspective API~\citep{perspectiveapi} and TET~\citep{realistic_toxic_ACL2024}, and evaluate \textit{hallucination} in each quantized LLM using HaluEval~\citep{Halueval_EMNLP23} and TruthfulQA~\citep{truthfulQA} benchmarks. The Appendix~\ref{app:datasets} and Appendix~\ref{app:toxichalu} provides some examples of these datasets for benchmarking.
+\iffalse
+%
+\begin{itemize}
+    
+    \item \textbf{Natural Questions} contains real user questions submitted to Google search, with answers provided by annotators from Wikipedia. NQ is designed to train and evaluate automatic question-answering systems.
+    \item \textbf{MMLU} (Massive Multitask Language Understanding) is a benchmark created to measure the knowledge acquired during pretraining by evaluating models exclusively in zero-shot and few-shot settings. 
+    \item \textbf{HaluEval} A collection of LLMs generated datasets and human-annotated examples of hallucinations. 
+    \item \textbf{TruthfulQA}  A benchmark to measure whether a language model is truthful in generating answers to questions. 
+    
+\end{itemize}
+\fi
+These widely-recognized datasets ensure that our experiments and metrics are both convincing and reproducible.
+%
+
+
+
+
+\subsection{Choice of LLMs} Change to our case【need to change】
+
+We have identified and converted several popular models for benchmarking on edge and mobile devices using model weights from their official Huggingface or GitHub repositories. These models are converted into experimental formats such as GGUF and K-quant for Llama.cpp~\cite{llama_cpp} or compiled using TVM~\cite{TVM_OSDI2018} for MLC frameworks~\cite{MLC_LLM, MLC_repo}. 
+%
+Given that mobile devices typically do not exceed 8GB of memory, it is impractical to test too large models, as they would surpass these devices' memory capacity.
+%
+In our benchmark, we evaluated the various LLMs, including Llama-2-7b-chat~\cite{Llama2_2023}, Llama-3-8B-Instruct~\cite{Touvron2023Llama2O} Microsoft Phi2~\cite{abdin2024phi3_2023}, Mistral-7B-Instruct~\cite{Mistral2023}, RedPajama-INCITE-Chat-7B~\cite{together2023redpajama}, Vicuna~\cite{vicuna2023}), TinyLlama-1.1B-Chat-v1.0~\cite{tinyllama_2024}, and Qwen2~\cite{qwen}. The prebuilt weights for these models are readily available in the MLC repository, which also offers options for compilation in various configurations.
+
+While the frameworks offer some pre-compiled models through Huggingface or official repositories, certain models still require quantization and compilation for our experiments by ourselves.
+
+\iffalse
+\begin{table}[ht]
+\small
+\centering
+
+\caption{Mobile and edge devices for evaluation.}
+\label{tab:platform}
+\begin{tabular}{cccc}
+\hline
+\textbf{Device} & \textbf{SoC} & \textbf{Memory (GB)}  & \textbf{Framework Support}   \\ \hline
+\textbf{iOS} &  &  \\ \hline
+iPhone 12 Pro & A14 Bionic & 6GB & MLC\\
+iPhone 15 Pro & A17 Bionic & 8GB & MLC \\ 
+iPhone 16 Pro & A18 Pro& 8GB & MLC\\ \hline
+\textbf{Android} & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} \\ \hline
+Pixel 4 & Snapdragon 855 & 6GB & MLC/llama.cpp\\
+Pixel 5a & Snapdragon 765G & 6GB & MLC/llama.cpp\\
+Pixel 7 & Exynos 5300 & 8GB & MLC/llama.cpp\\
+S22 Ultra & Snapdragon 8 Gen 1 & 8GB & MLC/llama.cpp\\ \hline
+\textbf{Ubuntu} &  &  \\ \hline
+Orange Pi 5 & RK3588 & 8GB & MLC/llama.cpp\\
+Jetson Orin Nano & NVIDIA Orin & 8GB &  MLC/llama.cpp
+\\
+\hline
+
+\end{tabular}
+
+\end{table}
+\fi
+
+\iffalse
+
+\subsection{Infrastructure}
+
+Our benchmarking framework's infrastructure includes essential components that automate device interactions, model execution, data collection, and performance evaluation. It features both software and hardware elements such as devices, system drivers, performance profilers, automated data collection tools, and mobile phone user interfaces~(UIs), representing a significant engineering effort, as shown in Appendix~\ref{ssec: devices} Table~\ref{tab:platform}.
+%
+\fi
+
+
+\subsubsection{Mobile Devices}
+
+
+We evaluate the LLMs on a range of devices with varying hardware capabilities, as listed in Table~\ref{tab:platform} in Appendix, including Google Pixel 4~(\textbf{P4}), Pixel 5a~(\textbf{P5}), Pixel 7~(\textbf{P7}), iPhone 12 Pro~(\textbf{IP12}), iPhone 15 Pro~(\textbf{IP15}), S22 Ultra~(\textbf{S22U}), Orange Pi 5~(\textbf{OP5})~\cite{OrangePi}, and Nvidia Jetson Orin Nano~(\textbf{Nano})~\cite{NV_Jetson_Nano}, covering mainstream operating systems.
+
+
+\subsubsection{Inference Engine}
+
+We use two frameworks, MLC-LLM~\citep{MLC_LLM, MLC_repo} and llama.cpp~\citep{llama_cpp}, as inference engines to execute LLMs on devices. Although many frameworks claim compatibility with mobile devices, they often lack support for popular platforms or models.
+%
+MLC-LLM~\citep{MLC_LLM, MLC_repo} and llama.cpp~\citep{llama_cpp} are two of the most popular frameworks that support a wide range of platforms and models. Unfortunately, llama.cpp~\citep{llama_cpp} is still incompatible with iPhone. 
+%
+Both frameworks utilize default nucleus sampling and identical LLM decoding hyperparameters to ensure consistency: \textit{temperature} is set to 0.2, $Top-S = 0.9$. 
+
+
+\subsubsection{Quantization}
+
+The built-in quantization programs of frameworks primarily quantized the different models. 
+Both of MLC and llama.cpp provides tools for users to quantize the models.
+MLC supports various quantization levels, including non-quantized float-16 (q0f16) and float-32 (q0f32), 3-bit quantization (q3f16\_1), 4-bit quantization (q4f16\_1), and 4-bit AWQ (q4f16\_awq). The format qAfB(\_id) denotes 'A' as the number of bits for weight storage and 'B' as the number of bits for activation storage.
+%
+llama.cpp supports quantization using its GGUF format, which employs a type of group-wise quantization known as K-quant and supports more quantization methods~(1.5-bit, 2-bit, 3-bit, 4-bit, 5-bit, 6-bit).
+%
+
+
+
+\subsubsection{Prompt Input}
+
+The prompt input is managed by the \textbf{Evaluator}, which extracts tested prompt texts from datasets based on the evaluation tasks. For Linux edge devices, prompts are transferred from \textbf{Scheduler} via USB serial ports, and benchmark scripts are executed through the Command Line Interface (CLI).
+%
+For iPhones and Android phones, custom-developed apps—built on MLC's examples~\cite{MLC_LLM}—automatically fetch prompts and simulate touch events to interact with the applications.
+%
+Prompt texts are from datasets listed in~\ref{ssec: metric}.
+
+\subsubsection{Benchmark Automation}
+
+%Our framework automatically controls the workflow and receive the profiling measurement through several interfaces.
+%
+%Control operations are primarily managed through mobile apps and official profiling tools, including Xcode Instruments for iOS and AGI for Android.
+%
+%Due to the limitations of the built-in Android Studio profilers in monitoring GPU usage, we have employed the Android GPU Inspector (AGI) tool~\cite{AGI_tool}, developed by the Android team, to track resource utilization metrics such as CPU, GPU, memory, energy, and latency. Raw data traces are extracted from AGI and transferred via ADB.
+%
+%iOS primarily used Xcode's profiling tools and a custom plugin to measure GPU utilization. The GPU measurement plugin, a derivative development based on the IOKit plugin~\cite{GPU_2018}, displays real-time GPU utilization within the app. 
+%
+%Xcode offers a comprehensive performance analysis tool, \textbf{\textit{Instruments}}, which measures CPU utilization, memory usage, execution time, and energy consumption.
+%
+Our benchmarking framework automates workflows and collects profiling data via multiple interfaces, coordinating programs on both PC hosts and mobile/edge devices. The \textbf{Evaluator}  extracts prompts from datasets and evaluates outputs using mainstream benchmark datasets as illustrated in Figure~\ref{fig:intro}. While frameworks provide limited pre-compiled models, quantizating own models is often required.
+
+The \textbf{Scheduler} evaluates quantized models with prompt input from \textbf{Evaluator}, and monitors resource usage through profiling tools like Xcode Instruments for iOS and Android GPU Inspector (AGI) for Android. AGI tracks metrics such as CPU/GPU utilization, memory, energy, and latency, with data transferred via ADB. For iOS, a custom GPU plugin built on IOKit~\cite{GPU_2018} complements Xcode's profiling capabilities.
+%
+On edge devices, btop is used for Orange Pi, and jetson-stats for Nvidia Jetson Nano. Both are lightweight and non-intrusive. Apple and Google profiling tools access battery data from the PMU, ensuring precise energy measurements without disrupting device operation.
+%
+These official tools from Apple and Google are built-in utilities for system monitoring that provide accurate battery usage data directly from the Power Management Unit (PMU). On Ubuntu-based edge devices, Orange Pi uses btop~\citep{btop} for CPU and GPU utilization stats, while Nvidia Jetson Nano employs the built-in jetson-stats tool. Both methods are non-intrusive and do not disrupt device communication.
+
+
+
+\subsubsection{GPU Driver}
+
+Although MLC-LLM~\cite{MLC_LLM, MLC_repo} and llama.cpp~\cite{llama_cpp} support various drivers; OpenCL is the preferred and most mature GPU driver commonly used for both Android phones and Ubuntu-based edge computing devices.
+%
+The iPhone utilizes Apple's proprietary Metal driver, which is well supported by both MLC~\cite{MLC_LLM} and TVM~\cite{TVM_OSDI2018}.
+%
+Nvidia Jetson Nano device leverages its own CUDA with highly optimized driver~\cite{NV_Jetson_Nano}.
+
+
+\subsubsection{Equipments}
+
+%We developed a \textbf{all-in-one} framework for evaluating mobile LLMs across quantization. 
+In addition to resource usage, we also look into energy efficiency, a critical factor impacting user experience.
+%
+We employ two 
+%complementary 
+devices to comprehensively evaluate the effects of quantization on power consumption and the distribution of device temperature.
+%
+For thermal behavior analysis, we utilize the FLIR C5 thermal imaging camera~\cite{flir_C5}. 
+%and a professional USB power meter for accurate power consumption measurements.
+%
+We also employed a professional USB-based power consumption instruments from Klein Tools to measure the power consumed by each of the tested devices.
+%
+This enables us to investigate the energy efficiency and thermal behavior of mobile platforms across different models and quantization methods, which are crucial factors affecting user experience.
+
+
+
+General-purpose LLM benchmarks evaluate broad language capabilities, including knowledge, reasoning, question answering, instruction following, and dialogue quality. Widely used benchmarks and evaluation suites include MMLU~\cite{mmlu2021}, HELM~\cite{helm2022}, SQuAD~v2~\cite{squad2}, Natural Questions~\cite{nqopen}, TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval2023}, and MT-Bench~\cite{mtbench2023}. 
 \label{sec:design}
 
 \subsection{The 2D Degradation Space}
