@@ -213,425 +213,657 @@ General evaluation suites such as HELM~\cite{helm2022}, MMLU~\cite{mmlu2021}, SQ
 Trustworthiness is central to user-facing SLM deployment because local models may have weaker instruction tuning and safety alignment while also bypassing cloud-side safety layers. Prior benchmarks study truthfulness, hallucination, toxicity, and unsafe instruction following through resources such as TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval2023}, and safety-oriented refusal tests. PEEL incorporates these dimensions, but also treats scoring fidelity as part of benchmark design: local runtimes can alter output formatting, stop-token behavior, and chat-template handling, which can make parser failures look like model failures. This motivates our audit-oriented evaluation protocol, where benchmark scores are interpreted only after checking the runtime and scoring assumptions behind them.
 
 
+% \section{\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder}
+% \subsection{Pipeline Overview}
+% \label{sec:pipeline}
+
+% Figure~\ref{fig:peel-framework} gives an overview of \textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder(PEEL). The framework
+% evaluates small language models across a two-dimensional degradation ladder:
+% prompt quality and edge-deployment quality. This design reflects ordinary local
+% deployment, where users may provide weak prompts and the model may run through
+% quantized or lightweight inference backends. PEEL consists of four stages.
+
+% \begin{itemize}
+%     \item \textbf{Dataset and model selection.}
+%     PEEL begins with benchmark datasets and small model families that cover
+%     core user-facing capabilities, including question answering, truthfulness,
+%     hallucination discrimination, safety behavior, and multi-turn dialogue.
+%     The selected models span diverse compact architectures and parameter scales,
+%     from extremely small models to 3B-scale SLMs.
+
+%     \item \textbf{Prompt ladder construction.}
+%     Each task is instantiated under multiple prompt-quality tiers, ranging from
+%     expert benchmark-style instructions to casual, under-specified, and broken
+%     ordinary-user prompts. This ladder measures how reliability changes as task
+%     specification becomes weaker.
+
+%     \item \textbf{Edge ladder construction.}
+%     Each model is evaluated under multiple deployment settings, ranging from
+%     reference high-precision GPU inference to increasingly compressed local
+%     inference. This ladder measures how reliability changes as deployment
+%     becomes more resource constrained.
+
+%     \item \textbf{Scheduling, scoring, and profiling.}
+%     PEEL schedules inference across all dataset--model--prompt--edge
+%     combinations, normalizes outputs in a runtime-aware manner, and computes
+%     task-specific reliability and efficiency metrics, including accuracy,
+%     hallucination, safety, dialogue quality, latency, and throughput.
+% \end{itemize}
+
+% The resulting prompt--edge grid allows PEEL to identify whether failures are
+% driven primarily by prompt degradation, deployment degradation, or the
+% interaction between the two.
+
+
+% \begin{table}[t]
+% \centering
+% \caption{Metrics used in PEEL. Latency and throughput are measured under each edge setting; task metrics are computed after runtime-aware output normalization.}
+% \label{tab:metrics}
+% \small
+% \begin{tabularx}{\columnwidth}{@{}lX@{}}
+% \toprule
+% \textbf{Metric} & \textbf{Definition} \\
+% \midrule
+% Exact Match (EM) &
+% Whether the normalized prediction exactly matches a gold answer. \\
+
+% F1 &
+% Token-level overlap between the normalized prediction and gold answer. \\
+
+% Accuracy &
+% Percentage of examples answered correctly under task-specific scoring. \\
+
+% Hallucination Accuracy &
+% Percentage of HaluEval examples correctly classified as hallucinated or non-hallucinated. \\
+
+% Safety Refusal Rate &
+% Percentage of unsafe prompts for which the model refuses harmful assistance. \\
+
+% MT-Bench Score &
+% LLM-judge score measuring multi-turn instruction-following quality. \\
+
+% Latency &
+% Wall-clock time required to generate a response for one prompt. \\
+
+% Throughput &
+% Number of output tokens generated per second. \\
+% \bottomrule
+% \end{tabularx}
+% \end{table}
+
+
+% \subsection{Metrics and Datasets}
+% \label{sec:metric}
+
+% Table~\ref{tab:metrics} summarizes the datasets and metrics used in PEEL. We
+% select tasks that cover both standard language-model capability and
+% user-facing reliability under degraded prompts and edge deployment settings.
+% Rather than relying on a single aggregate score, PEEL evaluates each model
+% across six complementary dimensions: question-answering accuracy, truthfulness,
+% hallucination discrimination, safety refusal, multi-turn dialogue quality, and
+% runtime efficiency.
+
+% For reading comprehension, we use SQuAD~v2~\cite{Rajpurkar2016SQuAD10}, where
+% models must extract answer spans or identify unanswerable questions. We report
+% Exact Match (EM) and F1, which capture format-sensitive correctness under
+% different prompt-quality tiers. For open-domain question answering, we use
+% Natural Questions Open (NQ-Open)~\cite{NQ_Google} and report answer accuracy
+% after standard answer normalization. These two datasets allow us to measure how
+% prompt degradation affects both context-grounded and knowledge-based QA.
+
+% To evaluate factual reliability, we use TruthfulQA~\cite{truthfulQA} and
+% HaluEval~\cite{Halueval_EMNLP23}. TruthfulQA measures whether models select
+% truthful answers rather than common misconceptions, while HaluEval evaluates
+% whether models can distinguish hallucinated from non-hallucinated responses. We
+% report task-specific accuracy for both benchmarks. These datasets are included
+% because small or quantized models may preserve surface fluency while becoming
+% less reliable in factual or hallucination-sensitive settings.
+
+% To evaluate safety behavior, we use a set of unsafe instruction prompts and
+% measure the safety refusal rate, i.e., the proportion of unsafe requests for
+% which the model refuses or avoids providing harmful assistance. This metric is
+% particularly important for local SLM deployment, where models may operate
+% without cloud-side safety filters. For open-ended multi-turn instruction
+% following, we use MT-Bench~\cite{MTBenchArena_2023} and report LLM-judge scores
+% as a proxy for dialogue quality and instruction-following ability.
+
+% Finally, PEEL records deployment efficiency for each edge setting, including
+% latency and throughput. These metrics allow us to compare reliability changes
+% against practical runtime cost. Together, the selected datasets and metrics
+% provide a reproducible evaluation suite for measuring how SLM behavior changes
+% across prompt degradation, edge degradation, and their interaction.
+
+
+% To evaluate the accuracy and correctness of quantized LLMs, we use popular \textit{Question-Answering} datasets such as SQuAD~\citep{Rajpurkar2016SQuAD10} and Natural Questions (NQ)~\citep{NQ_Google}, comparing their performance with that of the original, non-quantized models. Additionally, we employ comprehensive benchmarks for different tasks, including MTBench~\citep{MTBenchArena_2023} 
+% %and MMLU~\citep{MMLU}, 
+% to compare their language understanding and reasoning capabilities across different quantizations.
+% %
+% %
+% Also, we measured \textit{toxicity} by calculating \textbf{toxic score} by using Perspective API~\citep{perspectiveapi} and TET~\citep{realistic_toxic_ACL2024}, and evaluate \textit{hallucination} in each quantized LLM using HaluEval~\citep{Halueval_EMNLP23} and TruthfulQA~\citep{truthfulQA} benchmarks.
+
+
+
+% \begin{itemize}
+%     \vspace{-1ex}
+%     \item \textbf{Natural Questions} contains real user questions submitted to Google search, with answers provided by annotators from Wikipedia. NQ is designed to train and evaluate automatic question-answering systems.
+%     \item \textbf{MMLU} (Massive Multitask Language Understanding) is a benchmark created to measure the knowledge acquired during pretraining by evaluating models exclusively in zero-shot and few-shot settings. 
+%     \item \textbf{HaluEval} A collection of LLMs generated datasets and human-annotated examples of hallucinations. 
+%     \item \textbf{TruthfulQA}  A benchmark to measure whether a language model is truthful in generating answers to questions. 
+%     \vspace{-1ex}
+% \end{itemize}
+
+% These widely-recognized datasets ensure that our experiments and metrics are both convincing and reproducible.
+% \subsection{Datasets}
+
+% We select tasks that expose different output contracts. SQuAD v2 requires
+% extractive spans and a special unanswerable marker; NQ-Open requires factual
+% recall without context; TruthfulQA-MC1 requires selecting among explicit
+% options; HaluEval requires binary judgment; and MT-Bench~\cite{mtbench2023}
+% evaluates open-ended
+% multi-turn instruction following. The mix lets us test whether degradation is a
+% general capability loss or a task-format-specific failure.
+
+% \paragraph{Reading Comprehension -- SQuAD v2~\cite{squad2}.}
+% Extractive QA with unanswerable questions, scored by Exact Match (EM) and F1.
+% Unanswerable questions require outputting the literal string
+% \textit{``unanswerable''}, making format adherence part of the evaluation signal.
+
+% \paragraph{Open-Domain QA -- Natural Questions Open~\cite{nqopen}.}
+% Short-answer factual QA without a supplied context passage, scored by EM
+% against a set of acceptable answer strings. Tests parametric knowledge retention
+% under prompt simplification.
+
+% \paragraph{Truthfulness Discrimination -- TruthfulQA-MC1~\cite{truthfulqa}.}
+% Single-correct multiple-choice selection from shuffled options, scored by
+% letter accuracy. We use a generative MC1 protocol (model selects a letter)
+% rather than log-likelihood scoring, making evaluation fully model-agnostic and
+% compatible with all runners.
+
+% HaluEval~\cite{halueval2023} is included at P0 for hallucination detection
+% baselines; the judge-style instruction is intrinsic to its prompt and is not
+% tier-degradable. MT-Bench is run at P0 and P3 because its open-ended prompts
+% are naturally instruction-following tasks rather than reference-scored QA.
+
+% \subsection{choice of slms}
+
+% \begin{table}[t]
+%   \small
+%   \centering
+%   \caption{Models evaluated in PEEL.
+%     $^\ddagger$SSM-Hybrid (Mamba-2 + attention layers).}
+%   \label{tab:models}
+%   \begin{tabular}{@{}llc@{}}
+%     \toprule
+%     Model & Family & Params \\
+%     \midrule
+%     Falcon-H1-90M$^\ddagger$      & Falcon-H1~\cite{falconh1}   & 0.09B \\
+%     Falcon-H1-0.5B$^\ddagger$     & Falcon-H1~\cite{falconh1}   & 0.5B \\
+%     Falcon-H1-0.6B$^\ddagger$     & Falcon-H1~\cite{falconh1}   & 0.6B \\
+%     Falcon-H1-1.5B$^\ddagger$     & Falcon-H1~\cite{falconh1}   & 1.5B \\
+%     Falcon-H1-1.5B-Deep$^\ddagger$& Falcon-H1~\cite{falconh1}   & 1.5B \\
+%     Gemma-3-1B                    & Gemma~\cite{gemmateam2025gemma3technicalreport}       & 1.0B \\
+%     InternLM2.5-1.8B              & InternLM~\cite{cai2024internlm2}    & 1.8B \\
+%     Llama-3.2-1B                 & Llama~\cite{llama_3_2}        & 1.0B \\
+%     Llama-3.2-3B                 & Llama~\cite{llama_3_2}         & 3.0B \\
+%     Phi-3.5-Mini                  & Phi~\cite{abdin2024phi3_2023}         & 3.8B \\
+%     Phi-4-Mini                    & Phi~\cite{phi4}         & 3.8B \\
+%     Qwen2.5-0.5B                 & Qwen~\cite{qwen2025}         & 0.5B \\
+%     Qwen2.5-1.5B                    & Qwen~\cite{qwen2025}        & 1.5B \\
+%     SmolLM2-360M                  & SmolLM~\cite{allal2025smollm2smolgoesbig}      & 0.36B \\
+%     SmolLM2-1.7B                 & SmolLM~\cite{allal2025smollm2smolgoesbig}      & 1.7B \\
+%     TinyLlama-1.1B               & TinyLlama~\cite{tinyllama_2024}    & 1.1B \\
+%     \bottomrule
+%   \end{tabular}
+% \end{table}
+
+% \subsection{PEEL-EDGE setting}
+
+% We use two frameworks, MLC-LLM~\citep{MLC_LLM, MLC_repo} and llama.cpp~\citep{llama_cpp}, as inference engines to execute LLMs on devices. Although many frameworks claim compatibility with mobile devices, they often lack support for popular platforms or models.
+% %
+% MLC-LLM~\citep{MLC_LLM, MLC_repo} and llama.cpp~\citep{llama_cpp} are two of the most popular frameworks that support a wide range of platforms and models. Unfortunately, llama.cpp~\citep{llama_cpp} is still incompatible with iPhone. 
+% %
+% Both frameworks utilize default nucleus sampling and identical LLM decoding hyperparameters to ensure consistency: \textit{temperature} is set to 0.2, $Top-S = 0.9$. 
+
+
+% The built-in quantization programs of frameworks primarily quantized the different models. 
+% Both of MLC and llama.cpp provides tools for users to quantize the models.
+% MLC supports various quantization levels, including non-quantized float-16 (q0f16) and float-32 (q0f32), 3-bit quantization (q3f16\_1), 4-bit quantization (q4f16\_1), and 4-bit AWQ (q4f16\_awq). The format qAfB(\_id) denotes 'A' as the number of bits for weight storage and 'B' as the number of bits for activation storage.
+% %
+% llama.cpp supports quantization using its GGUF format, which employs a type of group-wise quantization known as K-quant and supports more quantization methods~(1.5-bit, 2-bit, 3-bit, 4-bit, 5-bit, 6-bit).
+% %
+
+
+
+% PEEL evaluates every combination of a five-level \emph{edge deployment
+% axis} and a four-level \emph{prompt quality axis}, forming a 4$\times$5 grid.
+% Figure~\ref{fig:collapse} shows a populated instance; Appendix
+% Figure~\ref{fig:space} gives a schematic overview.
+
+% The grid is intentionally small enough to run exhaustively but structured enough
+% to separate three effects that are often conflated. First, E0$\to$E1 isolates
+% GPU-side precision reduction while retaining the HuggingFace inference stack.
+% Second, E1$\to$E2 crosses from the HuggingFace/chat-template path into a
+% CPU-oriented GGUF runtime. Third, E2$\to$E4 varies local quantization strength
+% inside the same runtime family. On the prompt axis, P0$\to$P3 progressively
+% removes task scaffolding. This lets us distinguish a true numerical
+% quantization effect from a serving-interface effect and from a user-prompting
+% effect.
+
+% \paragraph{Edge Deployment Settings (E0--E4).}
+% \begin{itemize}
+%   \item \textbf{E0-REF}: BF16, HuggingFace \texttt{transformers}, GPU.
+%   \item \textbf{E1-INT8}: 8-bit static quantization via \texttt{bitsandbytes}~\cite{llmint8}, GPU.
+%   \item \textbf{E2-Q8}: Q8\_0 GGUF via \texttt{llama.cpp}, CPU.
+%   \item \textbf{E3-Q5}: Q5\_K\_M GGUF via \texttt{llama.cpp}, CPU.
+%   \item \textbf{E4-Q4}: Q4\_K\_M GGUF via \texttt{llama.cpp}, CPU.
+% \end{itemize}
+% E2--E4 use CPU-only inference to simulate consumer edge hardware with no
+% discrete GPU.
+
+% We treat these settings as \emph{deployment conditions}, not only as bit widths.
+% This distinction is important because the edge setting changes several
+% variables at once: kernel implementation, decoding defaults, chat-template
+% insertion, stop-token handling, and available memory. Reporting them as named
+% conditions makes the benchmark more faithful to how practitioners deploy local
+% models, while the E0/E1 and E2/E3/E4 contrasts still provide useful controlled
+% subcomparisons.
+
+
+% \subsection{PEEL-Prompt Quality Tiers (P0--P3) setting}
+% We define four tiers aligned with realistic user archetypes drawn from
+% AI-literacy and human-computer interaction literature~\cite{sclar2023,multiprompt2024}.
+% The tiers span the spectrum from expert benchmark-style prompting to the informal
+% interaction style documented in studies of first-time LLM users:
+% \begin{itemize}
+%   \item \textbf{P0 -- Expert}: Structured, instruction-following prompt
+%     identical to standard benchmark format. Explicit task description, labelled
+%     fields, output format constraint.
+%   \item \textbf{P1 -- Casual}: Simplified but grammatically correct. Removes
+%     technical terminology and output format instructions.
+%   \item \textbf{P2 -- Naive}: Minimal content only; no task framing; relies on
+%     the model to infer the task type from context alone.
+%   \item \textbf{P3 -- Broken}: Colloquial, abbreviated, syntactically informal.
+%     Typical of a first-time LLM user with no prompting background.
+% \end{itemize}
+
+% \paragraph{Prompt-tier internal validity.}
+% Each tier is defined by a \emph{functional specification} (what information
+% is withheld and how grammar is degraded) rather than a single template, allowing
+% future work to instantiate the taxonomy with alternative phrasings.
+% MT-Bench P0--P3 deltas vary systematically by family
+% (Section~\ref{sec:arch}), supporting P1--P3 as a diagnostic stress test rather
+% than a calibrated user-study scale.
+% We also ground the tiers in real usage. We sampled 50 single-turn English
+% prompts from WildChat-1M~\cite{wildchat2024} and had two fluent annotators
+% independently map each to the nearest PEEL tier. A preliminary non-native pilot
+% pass was used only to refine the rubric and is excluded from the agreement
+% statistics. The two retained annotators agree at Cohen
+% $\kappa=0.51$ (70\% raw; moderate). Crucially, \textbf{80--88\% of real prompts
+% fall below the expert tier}---the majority at P1, and only 6--10 of 50 at
+% P0---confirming that non-expert users predominantly write the casual,
+% under-specified prompts that P1--P3 are designed to model. A larger, calibrated
+% user study remains future work, but this grounding indicates the degraded tiers
+% reflect real behaviour rather than artificial adversarial edits.
+
+% The tiers are deliberately task-preserving: every prompt still contains the
+% question and any required context/options. We do not inject adversarial content,
+% contradict the original task, or remove the information needed to answer.
+% Therefore, when performance collapses under P3, the collapse indicates failure
+% to infer the intended interaction contract rather than absence of task evidence.
+% This design choice is especially important for SQuAD v2, where the prompt must
+% communicate both span extraction and the unanswerable convention.
+
+% Table~\ref{tab:prompts} illustrates all four tiers for the SQuAD v2 task.
+
+% \begin{table}[t]
+%   \small
+%   \centering
+%   \caption{Prompt templates for SQuAD v2 across quality tiers.
+%     \texttt{\{ctx\}} and \texttt{\{q\}} are filled at run time.}
+%   \label{tab:prompts}
+%   \begin{tabular}{@{}lp{5.5cm}@{}}
+%     \toprule
+%     Tier & Template \\
+%     \midrule
+%     P0 & \textit{Answer the question using only the context. If the answer is
+%          not in the context, say `unanswerable'. Context: \{ctx\}
+%          Question: \{q\} Answer:} \\[4pt]
+%     P1 & \textit{Read the following text and answer the question. If the text
+%          doesn't have the answer, say so. Text: \{ctx\} Q: \{q\} A:} \\[4pt]
+%     P2 & \textit{\{q\} $\backslash$n$\backslash$n Here is some info: \{ctx\}} \\[4pt]
+%     P3 & \textit{pls help, \{q\}?? info: \{ctx\}} \\
+%     \bottomrule
+%   \end{tabular}
+% \end{table}
+
+
+% \subsubsection{Benchmark Automation}
+% Our benchmarking framework automates workflows and collects profiling data via multiple interfaces, coordinating programs on both PC hosts and mobile/edge devices. The \textbf{Evaluator}  extracts prompts from datasets and evaluates outputs using mainstream benchmark datasets as illustrated in Figure~\ref{fig:intro}. While frameworks provide limited pre-compiled models, quantizating own models is often required.
+
+% The \textbf{Scheduler} evaluates quantized models with prompt input from \textbf{Evaluator}, and monitors resource usage through profiling tools like Xcode Instruments for iOS and Android GPU Inspector (AGI) for Android. AGI tracks metrics such as CPU/GPU utilization, memory, energy, and latency, with data transferred via ADB. For iOS, a custom GPU plugin built on IOKit~\cite{GPU_2018} complements Xcode's profiling capabilities.
+% %
+% On edge devices, btop is used for Orange Pi, and jetson-stats for Nvidia Jetson Nano. Both are lightweight and non-intrusive. Apple and Google profiling tools access battery data from the PMU, ensuring precise energy measurements without disrupting device operation.
+% %
+% These official tools from Apple and Google are built-in utilities for system monitoring that provide accurate battery usage data directly from the Power Management Unit (PMU). On Ubuntu-based edge devices, Orange Pi uses btop~\citep{btop} for CPU and GPU utilization stats, while Nvidia Jetson Nano employs the built-in jetson-stats tool. Both methods are non-intrusive and do not disrupt device communication. 改成我们自己的setting？并且说我们提供web demo？
+
+
+
+% % \subsection{Evaluation Protocol}
+
+% % Reference-scored tasks use fully offline metrics. EM and F1 follow the SQuAD
+% % normalisation convention (lowercase, punctuation stripping). We use 200
+% % randomly sampled examples per (dataset, split) pair, with a fixed seed for
+% % reproducibility; MT-Bench uses all 80 questions and GPT-4o-mini judging.
+% % Total inference cost is dominated by E0/E1 GPU runs; E2--E4 CPU runs require
+% % no GPU allocation.
+
+% % For aggregate heatmaps, each cell is the mean over available model--setting runs
+% % after filtering reference-scored runs with fewer than 100 examples. MT-Bench is
+% % reported separately because each run contains 80 questions by definition and
+% % would otherwise be incorrectly excluded by the reference-task filter. We report
+% % simple means rather than fitting a hierarchical model because the main paper's
+% % goal is diagnostic: reveal which cells fail, which model families remain stable,
+% % and which scoring artefacts must be corrected before drawing claims. Appendix
+% % tables provide the coverage counts needed to interpret missing or partially
+% % covered cells.
+
+% % \paragraph{Statistical reporting.}
+% % For headline comparisons we report 95\% confidence intervals from a
+% % nonparametric bootstrap over \emph{models} (10{,}000 resamples), which captures
+% % the large between-model heterogeneity here (median per-cell half-width
+% % ${\pm}2.4$\,pp). Non-overlapping intervals therefore indicate an effect visible
+% % across the model population---a deliberately conservative test given the wide
+% % between-model variance.
+
+% % We also audit every result before including it in the claims matrix. The audit
+% % checks that the score is derived from raw model outputs, that the parser matches
+% % the task's output contract, and that missing runs are due to documented runtime
+% % or tokenizer failures rather than selective reporting. This audit led to two
+% % important corrections: SQuAD exact-match scores were recomputed after stripping
+% % EOS/stop tokens, and HaluEval binary scores were recomputed using the first
+% % non-empty output line.
+
+% % % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+% % \section{Models and Experimental Setup}
+% % \label{sec:models}
+
+% % \subsection{Model Selection}
+
+% % We evaluate 16 models spanning eight brand families (Falcon-H1,
+% % Gemma, InternLM, Llama, Phi, Qwen, SmolLM, TinyLlama) across the
+% % 0.09B--3.8B parameter range (Table~\ref{tab:models}).
+
+% % The model set is organized around three comparison roles. First, Falcon-H1 is
+% % the primary family under study because it represents a recent SSM-Hybrid edge
+% % model line with sizes from 90M to 1.5B parameters. Including 0.5B, 0.6B, 1.5B,
+% % and a deeper 1.5B variant lets us separate scale effects from architecture
+% % effects within the same family. Second, Qwen, Llama, SmolLM,
+% % TinyLlama, Gemma, Phi, and InternLM serve as external baselines that reviewers
+% % will recognize from small-model and edge-LLM literature. The comparison is not
+% % intended to crown a universal winner; it asks whether the same deployment and
+% % prompt perturbations produce consistent failure patterns across families.
+
+% % We prioritize the 0.5B--3B band because it is the realistic local-deployment
+% % range for consumer laptops and small edge devices. Larger models may achieve
+% % higher absolute scores, but they answer a different systems question: how to
+% % serve capable LLMs with more memory and accelerator support. PEEL instead
+% % focuses on the regime where memory pressure makes quantization necessary and
+% % where users are likely to run models through lightweight local runtimes.
+
+
+
+% \subsection{Deployment Configurations}
+
+% GPU settings (E0, E1) run on NVIDIA A100 SXM4 (40\,GB) accelerators on an
+% institutional HPC cluster.
+% CPU settings (E2--E4) use \texttt{llama.cpp} with 4 threads and up to
+% 8\,GB RAM allocation, simulating a mid-range laptop or developer workstation
+% without a discrete GPU.
+% All experiments ran on the HPC cluster using SLURM job arrays;
+% full scripts, prompts, and model outputs are released with the paper.
+
+% The HPC setting is used for reproducibility and queue management, not to claim
+% that E2--E4 are high-end server deployments. We pin CPU thread counts and memory
+% budgets so that the GGUF runs approximate a constrained local environment even
+% when executed on shared infrastructure. To check that this abstraction is not
+% misleading, we additionally ran a consumer-workstation sanity check for selected
+% Falcon-H1 and Qwen models (Appendix~\ref{app:details}). We use it only to
+% confirm that CPU-only GGUF inference is practical on consumer hardware; the main
+% numerical claims use the reproducible HPC runs.
+
 \section{\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder}
+\label{sec:peel}
+
 \subsection{Pipeline Overview}
 \label{sec:pipeline}
 
-Figure~\ref{fig:peel-framework} gives an overview of \textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder(PEEL). The framework
-evaluates small language models across a two-dimensional degradation ladder:
-prompt quality and edge-deployment quality. This design reflects ordinary local
-deployment, where users may provide weak prompts and the model may run through
-quantized or lightweight inference backends. PEEL consists of four stages.
+Figure~\ref{fig:peel-framework} gives an overview of the
+\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder (PEEL).
+PEEL evaluates small language models under two deployment-realistic sources of
+degradation: weaker user prompts and more constrained local inference settings.
+The goal is not to assign a single leaderboard score, but to expose whether
+failures are driven by prompt quality, edge deployment, or their interaction.
 
-\begin{itemize}
-    \item \textbf{Dataset and model selection.}
-    PEEL begins with benchmark datasets and small model families that cover
-    core user-facing capabilities, including question answering, truthfulness,
-    hallucination discrimination, safety behavior, and multi-turn dialogue.
-    The selected models span diverse compact architectures and parameter scales,
-    from extremely small models to 3B-scale SLMs.
+PEEL contains four stages. First, it selects compact model families and
+user-facing benchmark tasks. Second, it instantiates each task under a
+prompt-quality ladder, from expert benchmark instructions to informal
+non-expert prompts. Third, it evaluates each model under an edge-deployment
+ladder, from reference GPU inference to CPU-only GGUF quantization. Finally, it
+runs inference, normalizes runtime-specific outputs, computes task metrics, and
+records efficiency measurements such as latency and decode throughput. The
+result is a prompt--edge grid that allows direct comparison across prompt tiers,
+deployment settings, model families, and task types.
 
-    \item \textbf{Prompt ladder construction.}
-    Each task is instantiated under multiple prompt-quality tiers, ranging from
-    expert benchmark-style instructions to casual, under-specified, and broken
-    ordinary-user prompts. This ladder measures how reliability changes as task
-    specification becomes weaker.
+\subsection{Tasks, Datasets, and Metrics}
+\label{sec:tasks}
 
-    \item \textbf{Edge ladder construction.}
-    Each model is evaluated under multiple deployment settings, ranging from
-    reference high-precision GPU inference to increasingly compressed local
-    inference. This ladder measures how reliability changes as deployment
-    becomes more resource constrained.
-
-    \item \textbf{Scheduling, scoring, and profiling.}
-    PEEL schedules inference across all dataset--model--prompt--edge
-    combinations, normalizes outputs in a runtime-aware manner, and computes
-    task-specific reliability and efficiency metrics, including accuracy,
-    hallucination, safety, dialogue quality, latency, and throughput.
-\end{itemize}
-
-The resulting prompt--edge grid allows PEEL to identify whether failures are
-driven primarily by prompt degradation, deployment degradation, or the
-interaction between the two.
-
+We select tasks that expose different output contracts: extractive spans,
+short factual answers, multiple-choice decisions, binary hallucination
+judgments, safety refusals, and open-ended instruction following. This mix lets
+PEEL distinguish general capability loss from task-format-specific failure.
 
 \begin{table}[t]
 \centering
-\caption{Metrics used in PEEL. Latency and throughput are measured under each edge setting; task metrics are computed after runtime-aware output normalization.}
+\caption{Tasks and metrics used in PEEL. Reference-scored tasks use offline
+metrics after runtime-aware output normalization.}
 \label{tab:metrics}
 \small
-\begin{tabularx}{\columnwidth}{@{}lX@{}}
+\begin{tabularx}{\columnwidth}{@{}llX@{}}
 \toprule
-\textbf{Metric} & \textbf{Definition} \\
+\textbf{Task} & \textbf{Dataset} & \textbf{Metric} \\
 \midrule
-Exact Match (EM) &
-Whether the normalized prediction exactly matches a gold answer. \\
-
-F1 &
-Token-level overlap between the normalized prediction and gold answer. \\
-
-Accuracy &
-Percentage of examples answered correctly under task-specific scoring. \\
-
-Hallucination Accuracy &
-Percentage of HaluEval examples correctly classified as hallucinated or non-hallucinated. \\
-
-Safety Refusal Rate &
-Percentage of unsafe prompts for which the model refuses harmful assistance. \\
-
-MT-Bench Score &
-LLM-judge score measuring multi-turn instruction-following quality. \\
-
-Latency &
-Wall-clock time required to generate a response for one prompt. \\
-
-Throughput &
-Number of output tokens generated per second. \\
+Reading comprehension & SQuAD v2 & Exact Match (EM), token F1 \\
+Open-domain QA & NQ-Open & Exact Match after answer normalization \\
+Truthfulness & TruthfulQA-MC1 & Multiple-choice letter accuracy \\
+Hallucination detection & HaluEval-QA/General & Yes/No accuracy \\
+Instruction following & MT-Bench & LLM-judge score, reported separately \\
+Safety behavior & HarmBench / XSTest & Refusal rate and over-refusal rate \\
+Efficiency & All runs & Latency and decode throughput \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
+For reading comprehension, we use SQuAD v2~\citep{Rajpurkar2016SQuAD10},
+where models must either extract an answer span or output an unanswerable
+marker. For open-domain factual recall, we use NQ-Open~\citep{NQ_Google}.
+Together, these tasks separate context-grounded QA from parametric-knowledge
+QA. For factual reliability, we use TruthfulQA-MC1~\citep{truthfulQA} and
+HaluEval~\citep{Halueval_EMNLP23}. TruthfulQA-MC1 is evaluated with a
+generation-based multiple-choice protocol in which the model outputs the
+letter of the most truthful option. HaluEval is evaluated as a binary
+hallucination judgment task.
 
-\subsection{Metrics and Datasets}
-\label{sec:metric}
+We evaluate safety behavior using unsafe prompts and benign refusal-sensitive
+prompts, reporting harmful-request refusal and over-refusal separately. This is
+important for local SLM deployment because models may run without cloud-side
+safety filters. We also include MT-Bench~\citep{MTBenchArena_2023} to measure
+open-ended multi-turn instruction following. Because MT-Bench relies on an
+LLM judge and has a different output contract from reference-scored tasks, we
+report it separately rather than merging it into the main EM/F1 grids.
 
-Table~\ref{tab:metrics} summarizes the datasets and metrics used in PEEL. We
-select tasks that cover both standard language-model capability and
-user-facing reliability under degraded prompts and edge deployment settings.
-Rather than relying on a single aggregate score, PEEL evaluates each model
-across six complementary dimensions: question-answering accuracy, truthfulness,
-hallucination discrimination, safety refusal, multi-turn dialogue quality, and
-runtime efficiency.
+\subsection{Model Selection}
+\label{sec:models}
 
-For reading comprehension, we use SQuAD~v2~\cite{Rajpurkar2016SQuAD10}, where
-models must extract answer spans or identify unanswerable questions. We report
-Exact Match (EM) and F1, which capture format-sensitive correctness under
-different prompt-quality tiers. For open-domain question answering, we use
-Natural Questions Open (NQ-Open)~\cite{NQ_Google} and report answer accuracy
-after standard answer normalization. These two datasets allow us to measure how
-prompt degradation affects both context-grounded and knowledge-based QA.
-
-To evaluate factual reliability, we use TruthfulQA~\cite{truthfulQA} and
-HaluEval~\cite{Halueval_EMNLP23}. TruthfulQA measures whether models select
-truthful answers rather than common misconceptions, while HaluEval evaluates
-whether models can distinguish hallucinated from non-hallucinated responses. We
-report task-specific accuracy for both benchmarks. These datasets are included
-because small or quantized models may preserve surface fluency while becoming
-less reliable in factual or hallucination-sensitive settings.
-
-To evaluate safety behavior, we use a set of unsafe instruction prompts and
-measure the safety refusal rate, i.e., the proportion of unsafe requests for
-which the model refuses or avoids providing harmful assistance. This metric is
-particularly important for local SLM deployment, where models may operate
-without cloud-side safety filters. For open-ended multi-turn instruction
-following, we use MT-Bench~\cite{MTBenchArena_2023} and report LLM-judge scores
-as a proxy for dialogue quality and instruction-following ability.
-
-Finally, PEEL records deployment efficiency for each edge setting, including
-latency and throughput. These metrics allow us to compare reliability changes
-against practical runtime cost. Together, the selected datasets and metrics
-provide a reproducible evaluation suite for measuring how SLM behavior changes
-across prompt degradation, edge degradation, and their interaction.
-
-
-To evaluate the accuracy and correctness of quantized LLMs, we use popular \textit{Question-Answering} datasets such as SQuAD~\citep{Rajpurkar2016SQuAD10} and Natural Questions (NQ)~\citep{NQ_Google}, comparing their performance with that of the original, non-quantized models. Additionally, we employ comprehensive benchmarks for different tasks, including MTBench~\citep{MTBenchArena_2023} 
-%and MMLU~\citep{MMLU}, 
-to compare their language understanding and reasoning capabilities across different quantizations.
-%
-%
-Also, we measured \textit{toxicity} by calculating \textbf{toxic score} by using Perspective API~\citep{perspectiveapi} and TET~\citep{realistic_toxic_ACL2024}, and evaluate \textit{hallucination} in each quantized LLM using HaluEval~\citep{Halueval_EMNLP23} and TruthfulQA~\citep{truthfulQA} benchmarks.
-
-
-
-\begin{itemize}
-    \vspace{-1ex}
-    \item \textbf{Natural Questions} contains real user questions submitted to Google search, with answers provided by annotators from Wikipedia. NQ is designed to train and evaluate automatic question-answering systems.
-    \item \textbf{MMLU} (Massive Multitask Language Understanding) is a benchmark created to measure the knowledge acquired during pretraining by evaluating models exclusively in zero-shot and few-shot settings. 
-    \item \textbf{HaluEval} A collection of LLMs generated datasets and human-annotated examples of hallucinations. 
-    \item \textbf{TruthfulQA}  A benchmark to measure whether a language model is truthful in generating answers to questions. 
-    \vspace{-1ex}
-\end{itemize}
-
-These widely-recognized datasets ensure that our experiments and metrics are both convincing and reproducible.
-\subsection{Datasets}
-
-We select tasks that expose different output contracts. SQuAD v2 requires
-extractive spans and a special unanswerable marker; NQ-Open requires factual
-recall without context; TruthfulQA-MC1 requires selecting among explicit
-options; HaluEval requires binary judgment; and MT-Bench~\cite{mtbench2023}
-evaluates open-ended
-multi-turn instruction following. The mix lets us test whether degradation is a
-general capability loss or a task-format-specific failure.
-
-\paragraph{Reading Comprehension -- SQuAD v2~\cite{squad2}.}
-Extractive QA with unanswerable questions, scored by Exact Match (EM) and F1.
-Unanswerable questions require outputting the literal string
-\textit{``unanswerable''}, making format adherence part of the evaluation signal.
-
-\paragraph{Open-Domain QA -- Natural Questions Open~\cite{nqopen}.}
-Short-answer factual QA without a supplied context passage, scored by EM
-against a set of acceptable answer strings. Tests parametric knowledge retention
-under prompt simplification.
-
-\paragraph{Truthfulness Discrimination -- TruthfulQA-MC1~\cite{truthfulqa}.}
-Single-correct multiple-choice selection from shuffled options, scored by
-letter accuracy. We use a generative MC1 protocol (model selects a letter)
-rather than log-likelihood scoring, making evaluation fully model-agnostic and
-compatible with all runners.
-
-HaluEval~\cite{halueval2023} is included at P0 for hallucination detection
-baselines; the judge-style instruction is intrinsic to its prompt and is not
-tier-degradable. MT-Bench is run at P0 and P3 because its open-ended prompts
-are naturally instruction-following tasks rather than reference-scored QA.
-
-\subsection{choice of slms}
+PEEL focuses on the realistic local-deployment regime: models from 90M to 3.8B
+parameters. This range is small enough to run on constrained hardware after
+quantization, but broad enough to compare architecture families, parameter
+scales, and deployment sensitivity.
 
 \begin{table}[t]
   \small
   \centering
   \caption{Models evaluated in PEEL.
-    $^\ddagger$SSM-Hybrid (Mamba-2 + attention layers).}
+  $^\ddagger$ denotes SSM-hybrid Falcon-H1 models.}
   \label{tab:models}
   \begin{tabular}{@{}llc@{}}
     \toprule
     Model & Family & Params \\
     \midrule
-    Falcon-H1-90M$^\ddagger$      & Falcon-H1~\cite{falconh1}   & 0.09B \\
-    Falcon-H1-0.5B$^\ddagger$     & Falcon-H1~\cite{falconh1}   & 0.5B \\
-    Falcon-H1-0.6B$^\ddagger$     & Falcon-H1~\cite{falconh1}   & 0.6B \\
-    Falcon-H1-1.5B$^\ddagger$     & Falcon-H1~\cite{falconh1}   & 1.5B \\
-    Falcon-H1-1.5B-Deep$^\ddagger$& Falcon-H1~\cite{falconh1}   & 1.5B \\
-    Gemma-3-1B                    & Gemma~\cite{gemmateam2025gemma3technicalreport}       & 1.0B \\
-    InternLM2.5-1.8B              & InternLM~\cite{cai2024internlm2}    & 1.8B \\
-    Llama-3.2-1B                 & Llama~\cite{llama_3_2}        & 1.0B \\
-    Llama-3.2-3B                 & Llama~\cite{llama_3_2}         & 3.0B \\
-    Phi-3.5-Mini                  & Phi~\cite{abdin2024phi3_2023}         & 3.8B \\
-    Phi-4-Mini                    & Phi~\cite{phi4}         & 3.8B \\
-    Qwen2.5-0.5B                 & Qwen~\cite{qwen2025}         & 0.5B \\
-    Qwen2.5-1.5B                    & Qwen~\cite{qwen2025}        & 1.5B \\
-    SmolLM2-360M                  & SmolLM~\cite{allal2025smollm2smolgoesbig}      & 0.36B \\
-    SmolLM2-1.7B                 & SmolLM~\cite{allal2025smollm2smolgoesbig}      & 1.7B \\
-    TinyLlama-1.1B               & TinyLlama~\cite{tinyllama_2024}    & 1.1B \\
+    Falcon-H1-Tiny-90M$^\ddagger$       & Falcon-H1~\citep{falconh1} & 0.09B \\
+    Falcon-H1-0.5B$^\ddagger$           & Falcon-H1~\citep{falconh1} & 0.5B \\
+    Falcon-H1-Tiny-R-0.6B$^\ddagger$    & Falcon-H1~\citep{falconh1} & 0.6B \\
+    Falcon-H1-1.5B$^\ddagger$           & Falcon-H1~\citep{falconh1} & 1.5B \\
+    Falcon-H1-1.5B-Deep$^\ddagger$      & Falcon-H1~\citep{falconh1} & 1.5B \\
+    Gemma-3-1B                           & Gemma~\citep{gemmateam2025gemma3technicalreport} & 1.0B \\
+    InternLM2.5-1.8B                     & InternLM~\citep{cai2024internlm2} & 1.8B \\
+    Llama-3.2-1B                         & Llama~\citep{llama_3_2} & 1.0B \\
+    Llama-3.2-3B                         & Llama~\citep{llama_3_2} & 3.0B \\
+    Phi-3.5-Mini                         & Phi~\citep{abdin2024phi3_2023} & 3.8B \\
+    Phi-4-Mini                           & Phi~\citep{phi4} & 3.8B \\
+    Qwen2.5-0.5B                         & Qwen~\citep{qwen2025} & 0.5B \\
+    Qwen2.5-1.5B                         & Qwen~\citep{qwen2025} & 1.5B \\
+    SmolLM2-360M                         & SmolLM~\citep{allal2025smollm2smolgoesbig} & 0.36B \\
+    SmolLM2-1.7B                         & SmolLM~\citep{allal2025smollm2smolgoesbig} & 1.7B \\
+    TinyLlama-1.1B                       & TinyLlama~\citep{tinyllama_2024} & 1.1B \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-\subsection{PEEL-EDGE setting}
+The model set has three roles. Falcon-H1 is the primary family of interest
+because it provides recent SSM-hybrid small models across several sizes. Qwen,
+Llama, Gemma, Phi, SmolLM, InternLM, and TinyLlama serve as recognizable
+small-model baselines. We do not use the model set to claim a universal winner;
+rather, we ask whether the same prompt and deployment perturbations produce
+consistent failure patterns across families.
 
-We use two frameworks, MLC-LLM~\citep{MLC_LLM, MLC_repo} and llama.cpp~\citep{llama_cpp}, as inference engines to execute LLMs on devices. Although many frameworks claim compatibility with mobile devices, they often lack support for popular platforms or models.
-%
-MLC-LLM~\citep{MLC_LLM, MLC_repo} and llama.cpp~\citep{llama_cpp} are two of the most popular frameworks that support a wide range of platforms and models. Unfortunately, llama.cpp~\citep{llama_cpp} is still incompatible with iPhone. 
-%
-Both frameworks utilize default nucleus sampling and identical LLM decoding hyperparameters to ensure consistency: \textit{temperature} is set to 0.2, $Top-S = 0.9$. 
+\subsection{Edge Deployment Ladder}
+\label{sec:edge}
 
+PEEL evaluates each model under five named deployment settings, E0--E4. These
+settings are deployment conditions rather than pure bit-width labels, because
+moving from reference GPU inference to local CPU inference changes precision,
+runtime, quantization format, chat-template handling, stop-token behavior, and
+resource budget.
 
-The built-in quantization programs of frameworks primarily quantized the different models. 
-Both of MLC and llama.cpp provides tools for users to quantize the models.
-MLC supports various quantization levels, including non-quantized float-16 (q0f16) and float-32 (q0f32), 3-bit quantization (q3f16\_1), 4-bit quantization (q4f16\_1), and 4-bit AWQ (q4f16\_awq). The format qAfB(\_id) denotes 'A' as the number of bits for weight storage and 'B' as the number of bits for activation storage.
-%
-llama.cpp supports quantization using its GGUF format, which employs a type of group-wise quantization known as K-quant and supports more quantization methods~(1.5-bit, 2-bit, 3-bit, 4-bit, 5-bit, 6-bit).
-%
-
-
-
-PEEL evaluates every combination of a five-level \emph{edge deployment
-axis} and a four-level \emph{prompt quality axis}, forming a 4$\times$5 grid.
-Figure~\ref{fig:collapse} shows a populated instance; Appendix
-Figure~\ref{fig:space} gives a schematic overview.
-
-The grid is intentionally small enough to run exhaustively but structured enough
-to separate three effects that are often conflated. First, E0$\to$E1 isolates
-GPU-side precision reduction while retaining the HuggingFace inference stack.
-Second, E1$\to$E2 crosses from the HuggingFace/chat-template path into a
-CPU-oriented GGUF runtime. Third, E2$\to$E4 varies local quantization strength
-inside the same runtime family. On the prompt axis, P0$\to$P3 progressively
-removes task scaffolding. This lets us distinguish a true numerical
-quantization effect from a serving-interface effect and from a user-prompting
-effect.
-
-\paragraph{Edge Deployment Settings (E0--E4).}
 \begin{itemize}
-  \item \textbf{E0-REF}: BF16, HuggingFace \texttt{transformers}, GPU.
-  \item \textbf{E1-INT8}: 8-bit static quantization via \texttt{bitsandbytes}~\cite{llmint8}, GPU.
-  \item \textbf{E2-Q8}: Q8\_0 GGUF via \texttt{llama.cpp}, CPU.
-  \item \textbf{E3-Q5}: Q5\_K\_M GGUF via \texttt{llama.cpp}, CPU.
-  \item \textbf{E4-Q4}: Q4\_K\_M GGUF via \texttt{llama.cpp}, CPU.
-\end{itemize}
-E2--E4 use CPU-only inference to simulate consumer edge hardware with no
-discrete GPU.
-
-We treat these settings as \emph{deployment conditions}, not only as bit widths.
-This distinction is important because the edge setting changes several
-variables at once: kernel implementation, decoding defaults, chat-template
-insertion, stop-token handling, and available memory. Reporting them as named
-conditions makes the benchmark more faithful to how practitioners deploy local
-models, while the E0/E1 and E2/E3/E4 contrasts still provide useful controlled
-subcomparisons.
-
-
-\subsection{PEEL-Prompt Quality Tiers (P0--P3) setting}
-We define four tiers aligned with realistic user archetypes drawn from
-AI-literacy and human-computer interaction literature~\cite{sclar2023,multiprompt2024}.
-The tiers span the spectrum from expert benchmark-style prompting to the informal
-interaction style documented in studies of first-time LLM users:
-\begin{itemize}
-  \item \textbf{P0 -- Expert}: Structured, instruction-following prompt
-    identical to standard benchmark format. Explicit task description, labelled
-    fields, output format constraint.
-  \item \textbf{P1 -- Casual}: Simplified but grammatically correct. Removes
-    technical terminology and output format instructions.
-  \item \textbf{P2 -- Naive}: Minimal content only; no task framing; relies on
-    the model to infer the task type from context alone.
-  \item \textbf{P3 -- Broken}: Colloquial, abbreviated, syntactically informal.
-    Typical of a first-time LLM user with no prompting background.
+  \item \textbf{E0-REF}: BF16 inference with HuggingFace
+  \texttt{transformers} on GPU. This is the reference capability setting, not
+  an edge deployment.
+  \item \textbf{E1-INT8}: INT8 inference with \texttt{bitsandbytes} on GPU.
+  This isolates GPU-side precision reduction while retaining the HuggingFace
+  inference path.
+  \item \textbf{E2-Q8}: Q8\_0 GGUF inference with \texttt{llama.cpp} on CPU.
+  \item \textbf{E3-Q5}: Q5\_K\_M GGUF inference with \texttt{llama.cpp} on CPU.
+  \item \textbf{E4-Q4}: Q4\_K\_M GGUF inference with \texttt{llama.cpp} on CPU.
 \end{itemize}
 
-\paragraph{Prompt-tier internal validity.}
-Each tier is defined by a \emph{functional specification} (what information
-is withheld and how grammar is degraded) rather than a single template, allowing
-future work to instantiate the taxonomy with alternative phrasings.
-MT-Bench P0--P3 deltas vary systematically by family
-(Section~\ref{sec:arch}), supporting P1--P3 as a diagnostic stress test rather
-than a calibrated user-study scale.
-We also ground the tiers in real usage. We sampled 50 single-turn English
-prompts from WildChat-1M~\cite{wildchat2024} and had two fluent annotators
-independently map each to the nearest PEEL tier. A preliminary non-native pilot
-pass was used only to refine the rubric and is excluded from the agreement
-statistics. The two retained annotators agree at Cohen
-$\kappa=0.51$ (70\% raw; moderate). Crucially, \textbf{80--88\% of real prompts
-fall below the expert tier}---the majority at P1, and only 6--10 of 50 at
-P0---confirming that non-expert users predominantly write the casual,
-under-specified prompts that P1--P3 are designed to model. A larger, calibrated
-user study remains future work, but this grounding indicates the degraded tiers
-reflect real behaviour rather than artificial adversarial edits.
+E2--E4 use CPU-only inference to approximate consumer local deployment without
+a discrete GPU. The E0$\rightarrow$E1 contrast isolates GPU quantization, while
+the E2$\rightarrow$E4 contrast varies quantization strength within the same
+GGUF runtime. The E1$\rightarrow$E2 transition is intentionally treated as a
+deployment transition, not merely a quantization step, because it also changes
+the serving interface.
 
-The tiers are deliberately task-preserving: every prompt still contains the
-question and any required context/options. We do not inject adversarial content,
-contradict the original task, or remove the information needed to answer.
-Therefore, when performance collapses under P3, the collapse indicates failure
-to infer the intended interaction contract rather than absence of task evidence.
-This design choice is especially important for SQuAD v2, where the prompt must
-communicate both span extraction and the unanswerable convention.
+All main experiments are run through reproducible scripts and SLURM job arrays.
+GPU settings use NVIDIA A100 accelerators for throughput and reproducibility.
+CPU settings pin thread counts and memory budgets so that GGUF runs approximate
+constrained local execution even when scheduled on shared infrastructure. We
+therefore interpret E2--E4 as local deployment conditions, while using the HPC
+cluster only for controlled execution and queue management.
 
-Table~\ref{tab:prompts} illustrates all four tiers for the SQuAD v2 task.
+\subsection{Prompt Quality Ladder}
+\label{sec:prompt}
+
+The second PEEL axis is prompt quality. We define four prompt tiers, P0--P3,
+that preserve the underlying task while progressively weakening the user
+instruction. Each tier keeps the question and required evidence, such as
+context passages or answer options, but removes scaffolding or introduces
+informal phrasing.
+
+\begin{itemize}
+  \item \textbf{P0 -- Expert}: Standard benchmark-style instruction with
+  explicit task framing, labeled fields, and output constraints.
+  \item \textbf{P1 -- Casual}: Grammatically correct natural-language prompt
+  with reduced formatting and weaker output constraints.
+  \item \textbf{P2 -- Naive}: Minimal prompt with little task framing; the
+  model must infer the interaction contract.
+  \item \textbf{P3 -- Broken}: Informal, abbreviated, and syntactically weak
+  prompt resembling low-literacy or first-time LLM use.
+\end{itemize}
+
+The prompt tiers are task-preserving rather than adversarial. We do not remove
+the information needed to answer the question, inject contradictory content, or
+change the label space. Therefore, when performance drops under P3, the failure
+indicates difficulty recovering the intended task contract from a weak prompt,
+not absence of evidence.
 
 \begin{table}[t]
   \small
   \centering
-  \caption{Prompt templates for SQuAD v2 across quality tiers.
-    \texttt{\{ctx\}} and \texttt{\{q\}} are filled at run time.}
+  \caption{SQuAD v2 prompt templates across PEEL prompt tiers.
+  \texttt{\{ctx\}} and \texttt{\{q\}} are filled at run time.}
   \label{tab:prompts}
   \begin{tabular}{@{}lp{5.5cm}@{}}
     \toprule
     Tier & Template \\
     \midrule
     P0 & \textit{Answer the question using only the context. If the answer is
-         not in the context, say `unanswerable'. Context: \{ctx\}
-         Question: \{q\} Answer:} \\[4pt]
+    not in the context, say `unanswerable'. Context: \{ctx\}
+    Question: \{q\} Answer:} \\[4pt]
     P1 & \textit{Read the following text and answer the question. If the text
-         doesn't have the answer, say so. Text: \{ctx\} Q: \{q\} A:} \\[4pt]
-    P2 & \textit{\{q\} $\backslash$n$\backslash$n Here is some info: \{ctx\}} \\[4pt]
+    doesn't have the answer, say so. Text: \{ctx\} Q: \{q\} A:} \\[4pt]
+    P2 & \textit{\{q\} \textbackslash n\textbackslash n Here is some info:
+    \{ctx\}} \\[4pt]
     P3 & \textit{pls help, \{q\}?? info: \{ctx\}} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
+We additionally check whether these tiers resemble real user prompts. We sample
+50 single-turn English prompts from WildChat-1M~\citep{wildchat2024} and ask
+two fluent annotators to map each prompt to the nearest PEEL tier. The retained
+annotations achieve Cohen's $\kappa=0.51$ with 70\% raw agreement. Most sampled
+real prompts fall below the expert tier, supporting the use of P1--P3 as a
+diagnostic stress test for non-expert interaction. We do not claim that the
+tiers are a calibrated user-population scale; they are a controlled taxonomy
+for measuring prompt robustness.
 
-\subsubsection{Benchmark Automation}
-Our benchmarking framework automates workflows and collects profiling data via multiple interfaces, coordinating programs on both PC hosts and mobile/edge devices. The \textbf{Evaluator}  extracts prompts from datasets and evaluates outputs using mainstream benchmark datasets as illustrated in Figure~\ref{fig:intro}. While frameworks provide limited pre-compiled models, quantizating own models is often required.
+\subsection{Benchmark Automation and Reproducibility}
+\label{sec:automation}
 
-The \textbf{Scheduler} evaluates quantized models with prompt input from \textbf{Evaluator}, and monitors resource usage through profiling tools like Xcode Instruments for iOS and Android GPU Inspector (AGI) for Android. AGI tracks metrics such as CPU/GPU utilization, memory, energy, and latency, with data transferred via ADB. For iOS, a custom GPU plugin built on IOKit~\cite{GPU_2018} complements Xcode's profiling capabilities.
-%
-On edge devices, btop is used for Orange Pi, and jetson-stats for Nvidia Jetson Nano. Both are lightweight and non-intrusive. Apple and Google profiling tools access battery data from the PMU, ensuring precise energy measurements without disrupting device operation.
-%
-These official tools from Apple and Google are built-in utilities for system monitoring that provide accurate battery usage data directly from the Power Management Unit (PMU). On Ubuntu-based edge devices, Orange Pi uses btop~\citep{btop} for CPU and GPU utilization stats, while Nvidia Jetson Nano employs the built-in jetson-stats tool. Both methods are non-intrusive and do not disrupt device communication. 改成我们自己的setting？并且说我们提供web demo？
+PEEL is implemented as an automated benchmarking framework that uses a unified
+registry for models, deployment settings, prompt tiers, and datasets. Given a
+model, task, prompt tier, and edge setting, PEEL constructs the corresponding
+prompt, dispatches inference to the appropriate backend, records runtime
+measurements, and applies offline task-specific scoring. This design ensures
+that every cell in the prompt--edge grid is evaluated through the same pipeline,
+rather than through ad hoc scripts for individual models or datasets.
 
+The framework separates generation from evaluation. Raw model outputs are saved
+before scoring, and all metrics are computed offline using deterministic
+parsers and task-specific normalization. This separation is important for local
+LLM evaluation because lightweight runtimes may emit prompt echoes, end-of-text
+markers, or verbose continuations that can otherwise lead to scoring artifacts.
+PEEL therefore applies runtime-aware normalization before computing EM, F1,
+multiple-choice accuracy, binary judgment accuracy, safety refusal rates, and
+latency/throughput summaries.
 
-
-% \subsection{Evaluation Protocol}
-
-% Reference-scored tasks use fully offline metrics. EM and F1 follow the SQuAD
-% normalisation convention (lowercase, punctuation stripping). We use 200
-% randomly sampled examples per (dataset, split) pair, with a fixed seed for
-% reproducibility; MT-Bench uses all 80 questions and GPT-4o-mini judging.
-% Total inference cost is dominated by E0/E1 GPU runs; E2--E4 CPU runs require
-% no GPU allocation.
-
-% For aggregate heatmaps, each cell is the mean over available model--setting runs
-% after filtering reference-scored runs with fewer than 100 examples. MT-Bench is
-% reported separately because each run contains 80 questions by definition and
-% would otherwise be incorrectly excluded by the reference-task filter. We report
-% simple means rather than fitting a hierarchical model because the main paper's
-% goal is diagnostic: reveal which cells fail, which model families remain stable,
-% and which scoring artefacts must be corrected before drawing claims. Appendix
-% tables provide the coverage counts needed to interpret missing or partially
-% covered cells.
-
-% \paragraph{Statistical reporting.}
-% For headline comparisons we report 95\% confidence intervals from a
-% nonparametric bootstrap over \emph{models} (10{,}000 resamples), which captures
-% the large between-model heterogeneity here (median per-cell half-width
-% ${\pm}2.4$\,pp). Non-overlapping intervals therefore indicate an effect visible
-% across the model population---a deliberately conservative test given the wide
-% between-model variance.
-
-% We also audit every result before including it in the claims matrix. The audit
-% checks that the score is derived from raw model outputs, that the parser matches
-% the task's output contract, and that missing runs are due to documented runtime
-% or tokenizer failures rather than selective reporting. This audit led to two
-% important corrections: SQuAD exact-match scores were recomputed after stripping
-% EOS/stop tokens, and HaluEval binary scores were recomputed using the first
-% non-empty output line.
-
-% % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-% \section{Models and Experimental Setup}
-% \label{sec:models}
-
-% \subsection{Model Selection}
-
-% We evaluate 16 models spanning eight brand families (Falcon-H1,
-% Gemma, InternLM, Llama, Phi, Qwen, SmolLM, TinyLlama) across the
-% 0.09B--3.8B parameter range (Table~\ref{tab:models}).
-
-% The model set is organized around three comparison roles. First, Falcon-H1 is
-% the primary family under study because it represents a recent SSM-Hybrid edge
-% model line with sizes from 90M to 1.5B parameters. Including 0.5B, 0.6B, 1.5B,
-% and a deeper 1.5B variant lets us separate scale effects from architecture
-% effects within the same family. Second, Qwen, Llama, SmolLM,
-% TinyLlama, Gemma, Phi, and InternLM serve as external baselines that reviewers
-% will recognize from small-model and edge-LLM literature. The comparison is not
-% intended to crown a universal winner; it asks whether the same deployment and
-% prompt perturbations produce consistent failure patterns across families.
-
-% We prioritize the 0.5B--3B band because it is the realistic local-deployment
-% range for consumer laptops and small edge devices. Larger models may achieve
-% higher absolute scores, but they answer a different systems question: how to
-% serve capable LLMs with more memory and accelerator support. PEEL instead
-% focuses on the regime where memory pressure makes quantization necessary and
-% where users are likely to run models through lightweight local runtimes.
-
-
-
-\subsection{Deployment Configurations}
-
-GPU settings (E0, E1) run on NVIDIA A100 SXM4 (40\,GB) accelerators on an
-institutional HPC cluster.
-CPU settings (E2--E4) use \texttt{llama.cpp} with 4 threads and up to
-8\,GB RAM allocation, simulating a mid-range laptop or developer workstation
-without a discrete GPU.
-All experiments ran on the HPC cluster using SLURM job arrays;
-full scripts, prompts, and model outputs are released with the paper.
-
-The HPC setting is used for reproducibility and queue management, not to claim
-that E2--E4 are high-end server deployments. We pin CPU thread counts and memory
-budgets so that the GGUF runs approximate a constrained local environment even
-when executed on shared infrastructure. To check that this abstraction is not
-misleading, we additionally ran a consumer-workstation sanity check for selected
-Falcon-H1 and Qwen models (Appendix~\ref{app:details}). We use it only to
-confirm that CPU-only GGUF inference is practical on consumer hardware; the main
-numerical claims use the reproducible HPC runs.
-
-
+All experiments are launched through resumable scripts over the model--task--
+prompt--edge grid. GPU settings are used for reference and INT8 inference,
+whereas CPU-only GGUF settings are used for local deployment conditions. We also
+provide a local interactive demo built on the same model registry, runner, and
+evaluator interfaces. The demo is intended for inspection and reproducibility;
+the paper's quantitative claims are derived from the scripted benchmark runs.
 
 \section{Results}
 \label{sec:results}
@@ -1333,5 +1565,60 @@ The safety suite measures refusal/compliance patterns with a keyword classifier.
 It is appropriate for detecting deployment instability, but insufficient for
 policy compliance claims. A future version should include human annotation or a
 stronger policy judge.
+
+\subsection{Implementation Details and Artifacts}
+\label{app:implementation}
+
+PEEL uses a registry-driven implementation to keep model, deployment, and
+evaluation metadata consistent across experiments. The model registry records
+the model identifier, family, parameter count, HuggingFace path, GGUF path when
+available, supported quantization levels, and runtime-specific notes. The
+deployment registry defines each edge setting, including backend, precision,
+context length, memory budget, and whether chat-template handling is modified.
+
+Each benchmark run follows the same three-stage execution protocol. First, the
+runner loads examples for a selected dataset and prompt tier, constructs the
+prompt text, and dispatches inference to the selected backend. We support a
+mock runner for pipeline testing, a HuggingFace \texttt{transformers} runner
+for E0/E1 settings, and a \texttt{llama.cpp} runner for CPU GGUF settings.
+Second, PEEL writes raw model outputs and runtime measurements. Third, offline
+evaluators read the saved predictions and compute task metrics. This design
+allows scoring logic to be audited and rerun without repeating expensive model
+inference.
+
+Each run stores three artifacts. The configuration file records the model,
+dataset, prompt tier, edge setting, runner, random seed, decoding parameters,
+and code-version metadata. The prediction file stores one JSON record per
+example, including the prompt, references, generated output, latency, estimated
+token counts, and task metadata. The metric file stores aggregate scores and
+per-example scoring results. These artifacts make the evaluation resumable:
+completed runs can be skipped, failed runs can be rerun, and aggregate tables
+can be rebuilt from metric files without rerunning inference.
+
+Reference-scored tasks use deterministic offline scoring. For SQuAD v2 and
+NQ-Open, PEEL applies standard answer normalization before computing EM and F1.
+For TruthfulQA-MC1, PEEL parses the first valid answer letter from the model
+output and compares it against the shuffled correct option. For HaluEval, PEEL
+maps model outputs to binary yes/no judgments. For IFEval, PEEL checks
+constraint satisfaction programmatically from the instruction metadata. Safety
+runs are evaluated separately using refusal and over-refusal classifiers. MT-
+Bench is also reported separately because it relies on an external LLM judge
+rather than a deterministic reference metric.
+
+Runtime-aware output normalization is necessary for local inference. In our
+runs, \texttt{llama.cpp} outputs can contain end-of-text strings, stop-token
+artifacts, or explanatory continuations after the intended short answer. PEEL
+therefore strips common stop-token markers and, for binary or span-style tasks,
+uses the first non-empty response line before applying task-specific parsers.
+These steps are fixed before aggregation and are applied uniformly across
+models and settings.
+
+The local interactive demo uses the same registry, runners, prompt templates,
+and evaluators as the scripted benchmark. It supports selecting a model, edge
+setting, dataset, prompt tier, and sampling mode; it also provides an
+open-ended generation tab for qualitative inspection. Open-ended prompts are
+not assigned automatic EM/F1 scores because they have no gold references. The
+demo is included to make PEEL easier to inspect and reproduce, but all main
+paper results come from the scripted benchmark pipeline.
 
 \end{document}
