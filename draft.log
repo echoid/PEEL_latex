@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.7.1)  12 JUL 2026 10:43
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.7.1)  12 JUL 2026 14:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -399,56 +399,56 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
 
  <./Figures/edgepipeline.pdf, page is rotated 90 degrees>]
 LaTeX Font Info:    Trying to load font information for TS1+ntxtlf on input lin
-e 195.
+e 193.
 
 (C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/newtx\ts1ntxtlf.fd
 File: ts1ntxtlf.fd 2015/01/18 v1.0 fd file for TS1/ntxtlf
 )
 LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.0pt on input line 195.
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 35
-4.
+(Font)              scaled to size 10.0pt on input line 193.
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 21
+7.
 
 (C:\Users\Epochoid\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 [2{C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/tex-gyre/q-t
-s1.enc}]
+s1.enc}{C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r
+.enc}]
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.95pt on input line 371.
+(Font)              scaled to size 10.95pt on input line 458.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
-(Font)              scaled to size 10.95pt on input line 371.
+(Font)              scaled to size 10.95pt on input line 458.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 374.
+(Font)              <7> on input line 461.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 374.
+(Font)              <5> on input line 461.
 
-Underfull \hbox (badness 10000) in paragraph at lines 391--392
+Underfull \hbox (badness 10000) in paragraph at lines 478--479
 []\T1/ntxtlf/b/n/10 E1-INT8\T1/ntxtlf/m/n/10 : 8-bit static quan-ti-za-tion via
 
  []
 
-[3{C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
-]
+[3]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 459.
+(Font)              <9> on input line 546.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 459.
+(Font)              <6> on input line 546.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
-(Font)              scaled to size 9.0pt on input line 465.
+(Font)              scaled to size 9.0pt on input line 552.
 
-Underfull \hbox (badness 10000) in paragraph at lines 490--493
+Underfull \hbox (badness 10000) in paragraph at lines 577--580
  \T1/ntxtlf/b/n/10 Open-Domain QA -- Nat-u-ral Ques-tions
  []
 
 
-Underfull \hbox (badness 1168) in paragraph at lines 490--493
+Underfull \hbox (badness 1168) in paragraph at lines 577--580
 \T1/ntxtlf/b/n/10 Open (Kwiatkowski et al. 2019). \T1/ntxtlf/m/n/10 Short-answe
 r fac-
  []
 
 
-Underfull \hbox (badness 1796) in paragraph at lines 546--549
+Underfull \hbox (badness 1796) in paragraph at lines 633--636
 \T1/ntxtlf/m/n/10 We eval-u-ate 16 mod-els span-ning eight brand fam-i-
  []
 
@@ -456,82 +456,77 @@ Underfull \hbox (badness 1796) in paragraph at lines 546--549
 <Figures/fig1_squad_heatmap.pdf, id=31, 598.58745pt x 235.90283pt>
 File: Figures/fig1_squad_heatmap.pdf Graphic file (type pdf)
 <use Figures/fig1_squad_heatmap.pdf>
-Package pdftex.def Info: Figures/fig1_squad_heatmap.pdf  used on input line 673
+Package pdftex.def Info: Figures/fig1_squad_heatmap.pdf  used on input line 760
 .
 (pdftex.def)             Requested size: 239.39438pt x 94.34505pt.
- [5 <./Figures/fig1_squad_heatmap.pdf>]
+ [5]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.95> on input line 704.
+(Font)              <10.95> on input line 791.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 704.
-<Figures/fig3_mtbench_family_bar.pdf, id=127, 642.5286pt x 281.2089pt>
+(Font)              <8> on input line 791.
+<Figures/fig3_mtbench_family_bar.pdf, id=37, 642.5286pt x 281.2089pt>
 File: Figures/fig3_mtbench_family_bar.pdf Graphic file (type pdf)
 <use Figures/fig3_mtbench_family_bar.pdf>
 Package pdftex.def Info: Figures/fig3_mtbench_family_bar.pdf  used on input lin
-e 778.
+e 865.
 (pdftex.def)             Requested size: 239.39438pt x 104.7751pt.
- [6 <./Figures/fig3_mtbench_family_bar.pdf>]
+ [6 <./Figures/fig1_squad_heatmap.pdf>]
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/sc' will be
-(Font)              scaled to size 10.0pt on input line 859.
-
-Underfull \vbox (badness 2828) has occurred while \output is active []
-
-<Figures/fig5_safety_heatmap.pdf, id=186, 426.68834pt x 512.6516pt>
+(Font)              scaled to size 10.0pt on input line 946.
+<Figures/fig5_safety_heatmap.pdf, id=131, 426.68834pt x 512.6516pt>
 File: Figures/fig5_safety_heatmap.pdf Graphic file (type pdf)
 <use Figures/fig5_safety_heatmap.pdf>
-Package pdftex.def Info: Figures/fig5_safety_heatmap.pdf  used on input line 87
-0.
+Package pdftex.def Info: Figures/fig5_safety_heatmap.pdf  used on input line 95
+7.
 (pdftex.def)             Requested size: 239.39438pt x 287.63051pt.
  [7{C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-e
-c-tlf-pc.enc} <./Figures/fig5_safety_heatmap.pdf>]
-Underfull \hbox (badness 1215) in paragraph at lines 951--961
+c-tlf-pc.enc} <./Figures/fig3_mtbench_family_bar.pdf>]
+Underfull \hbox (badness 1215) in paragraph at lines 1038--1048
  \T1/ntxtlf/b/n/10 Prac-ti-cal rec-om-men-da-tions. \T1/ntxtlf/m/n/10 For \T1/n
 txtlf/m/it/10 prac-ti-tion-ers\T1/ntxtlf/m/n/10 : pre-fer
  []
 
-[8] (draft.bbl [9])
+[8 <./Figures/fig5_safety_heatmap.pdf>] (draft.bbl [9])
 <Figures/fig1_benchmark_space.pdf, id=261, 497.8694pt x 316.9204pt>
 File: Figures/fig1_benchmark_space.pdf Graphic file (type pdf)
 <use Figures/fig1_benchmark_space.pdf>
 Package pdftex.def Info: Figures/fig1_benchmark_space.pdf  used on input line 1
-022.
+109.
 (pdftex.def)             Requested size: 239.39438pt x 152.38602pt.
 <Figures/fig2_tqa_heatmap.pdf, id=262, 598.58066pt x 235.90283pt>
 File: Figures/fig2_tqa_heatmap.pdf Graphic file (type pdf)
 <use Figures/fig2_tqa_heatmap.pdf>
-Package pdftex.def Info: Figures/fig2_tqa_heatmap.pdf  used on input line 1031.
+Package pdftex.def Info: Figures/fig2_tqa_heatmap.pdf  used on input line 1118.
 
 (pdftex.def)             Requested size: 239.39438pt x 94.34505pt.
 
-Underfull \hbox (badness 1142) in paragraph at lines 1076--1083
+Underfull \hbox (badness 1142) in paragraph at lines 1163--1170
 \T1/ntxtlf/m/n/10 set-tings achieve 23.8--31.7chars/s with-out any GPU---
  []
 
-[10 <./Figures/fig1_benchmark_space.pdf>] [11 <./Figures/fig2_tqa_heatmap.pdf>]
+[10] [11 <./Figures/fig1_benchmark_space.pdf> <./Figures/fig2_tqa_heatmap.pdf>]
 
-Underfull \hbox (badness 2213) in paragraph at lines 1240--1240
+Underfull \hbox (badness 2213) in paragraph at lines 1327--1327
 []\T1/ntxtlf/m/n/9 Model lacks the para-met-ric knowl-edge
  []
 
 
-Underfull \hbox (badness 1005) in paragraph at lines 1254--1262
+Underfull \hbox (badness 1005) in paragraph at lines 1341--1349
 \T1/ntxtlf/m/n/10 con-ver-sa-tion set rather than a 200-example reference-
  []
 
 
-Underfull \hbox (badness 1048) in paragraph at lines 1254--1262
+Underfull \hbox (badness 1048) in paragraph at lines 1341--1349
 \T1/ntxtlf/m/n/10 scored sam-ple. We there-fore do not mix it into the
  []
 
 [12]
-Underfull \hbox (badness 10000) in paragraph at lines 1313--1317
+Underfull \hbox (badness 10000) in paragraph at lines 1400--1404
  \T1/ntxtlf/b/n/10 Safety scope. \T1/ntxtlf/m/n/10 The safety suite mea-sures r
 e-
  []
 
-[13
-
-] (draft.aux)
+[13] (draft.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2020/03/25>
@@ -540,11 +535,11 @@ L3 programming layer <2020/03/25>
 Here is how much of TeX's memory you used:
  7849 strings out of 467871
  130381 string characters out of 5416925
- 562524 words of memory out of 5000000
+ 561524 words of memory out of 5000000
  36607 multiletter control sequences out of 15000+600000
  672128 words of font info for 74 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 89i,11n,117p,1918b,382s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,11n,117p,2099b,382s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/
 cm/cmbx10.pfb><C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/type1/publ
 ic/amsfonts/cm/cmmi10.pfb><C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/font
@@ -560,7 +555,7 @@ c/tex-gyre/qtmr.pfb><C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/fonts/type
 /type1/public/newtx/ztmb.pfb><C:/Users/Epochoid/AppData/Local/Programs/MiKTeX/f
 onts/type1/public/newtx/ztmr.pfb><C:/Users/Epochoid/AppData/Local/Programs/MiKT
 eX/fonts/type1/public/newtx/ztmri.pfb>
-Output written on draft.pdf (13 pages, 480807 bytes).
+Output written on draft.pdf (13 pages, 481564 bytes).
 PDF statistics:
  514 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
