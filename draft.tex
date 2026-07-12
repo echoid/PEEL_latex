@@ -160,7 +160,7 @@
 \maketitle
 
 \begin{abstract}
-Small language models are increasingly promoted as low-cost, private, and edge-deployable alternatives to cloud-scale LLMs. Yet most evaluations assume favorable conditions: expert-written prompts, clean benchmark inputs, and high-precision inference. This overlooks the lower-bound regime in which small models are often used by non-expert users and deployed under quantized or compressed settings. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a two-axis protocol for evaluating small language models as prompt quality and deployment quality degrade. PEEL varies prompts from expert-formatted instructions to colloquial and broken inputs, and varies deployment from full precision to low-bit quantization. We evaluate 16 small and efficient models across reading comprehension, open-domain question answering, truthfulness, instruction following, and multi-turn dialogue. Our results show that prompt degradation is often more damaging than quantization. After controlling for output-scoring artefacts, TruthfulQA accuracy changes by only about one point from full precision to 4-bit inference under expert prompts. In contrast, SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across all models and deployment settings. We also find that prompt robustness is strongly shaped by post-training quality: at matched 1.5B scale, the strongest instruction-tuned hybrid model scores 8.20 on MT-Bench, compared with 4.06 for a same-size Transformer. Finally, safety alignment remains fragile, with models refusing only 6.5\% of unsafe prompts on average. PEEL exposes the gap between clean benchmark performance and ordinary-user edge reliability, and provides a practical protocol for lower-bound evaluation.
+Small language models are increasingly promoted as low-cost, private, and edge-deployable alternatives to cloud-scale LLMs. Yet most evaluations assume favorable conditions: expert-written prompts, clean benchmark inputs, and high-precision inference. This overlooks the lower-bound regime in which small models are often used by non-expert users and deployed under quantized or compressed settings. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a two-axis protocol for evaluating small language models as prompt quality and deployment quality degrade. PEEL varies prompts from expert-formatted instructions to colloquial and broken inputs, and varies deployment from full precision to low-bit quantization. We evaluate 16 small and efficient models across reading comprehension, open-domain question answering, truthfulness, hallucination discrimination, safety behaviour, and multi-turn dialogue. Our results show that prompt degradation is often more damaging than quantization. After controlling for output-scoring artefacts, TruthfulQA accuracy changes by only about one point from full precision to 4-bit inference under expert prompts. In contrast, SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across all models and deployment settings. We also find that prompt robustness is strongly shaped by post-training quality: at matched 1.5B scale, the strongest instruction-tuned hybrid model scores 8.20 on MT-Bench, compared with 4.06 for a same-size Transformer. Finally, keyword-based safety diagnostics show high unsafe compliance, with attack success rates around 20--21\% and only moderate validation agreement. PEEL exposes the gap between clean benchmark performance and ordinary-user edge reliability, and provides a practical protocol for lower-bound evaluation.
 
 \end{abstract}
 
@@ -185,9 +185,9 @@ We argue that SLM evaluation should therefore report not only upper-bound benchm
 
 Existing evaluations cover parts of this space, but rarely their interaction. General LLM benchmarks measure broad capability under standardized prompts and stable inference settings. Edge and on-device benchmarks move evaluation closer to resource-constrained deployment, but typically hold prompting conditions fixed. Conversely, prompt-robustness studies perturb prompt quality while leaving the serving stack largely unchanged. As a result, we have limited evidence about the joint effect of non-expert prompting and edge deployment constraints---precisely the regime occupied by ordinary users running small models locally.
 
-We close this gap with \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a two-axis evaluation protocol for lower-bound assessment of small language models. PEEL crosses four prompt-quality tiers, from expert task instructions to broken ordinary-user prompts, with five edge-deployment settings, from full-precision GPU inference to aggressive low-bit local inference. Across this ladder, PEEL evaluates task accuracy, hallucination discrimination, safety refusal, multi-turn instruction-following quality, latency, and throughput. PEEL asks a deployment-facing question: what remains reliable when both the user and the serving stack are imperfect?
+We close this gap with \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a two-axis evaluation protocol for lower-bound assessment of small language models. PEEL crosses four prompt-quality tiers, from expert task instructions to broken ordinary-user prompts, with five edge-deployment settings, from full-precision GPU inference to aggressive low-bit local inference. Across this ladder, PEEL evaluates task accuracy, hallucination discrimination, safety behaviour, multi-turn instruction-following quality, latency, and throughput. PEEL asks a deployment-facing question: what remains reliable when both the user and the serving stack are imperfect?
 
-We evaluate 16 sub-4B models across eight model families, covering extractive reading comprehension, open-domain question answering, truthfulness, hallucination discrimination, safety behavior, and multi-turn instruction following. Our central finding is that small models do not simply become weaker under edge constraints; they become more conditional. Reliability depends sharply on task format, prompt quality, chat-template fidelity, and the scoring assumptions used to interpret outputs. Across models and deployment settings, prompt degradation is often more damaging than bit-width reduction. On SQuAD~v2, exact match falls from roughly 30\% under expert prompts to \textbf{2--5\%} under broken prompts across every edge setting, indicating a near-total prompt-driven collapse in span-based reading comprehension. In contrast, after controlling for output-scoring artefacts, TruthfulQA-MC1 changes by only about one point from full precision to 4-bit inference under expert prompts. These results suggest that, for many practical SLM deployments, the main reliability bottleneck is not quantization alone, but the interaction between task format, user prompt quality, and runtime assumptions.
+We evaluate 16 sub-4B models across eight model families, covering extractive reading comprehension, open-domain question answering, truthfulness, hallucination discrimination, safety behavior, and multi-turn instruction following. Our central finding is that small models do not simply become weaker under edge constraints; they become more conditional. Reliability depends sharply on task format, prompt quality, runtime-interface fidelity, and the scoring assumptions used to interpret outputs. Across models and deployment settings, prompt degradation is often more damaging than bit-width reduction. On SQuAD~v2, exact match falls from roughly 30\% under expert prompts to \textbf{2--5\%} under broken prompts across every edge setting, indicating a near-total prompt-driven collapse in span-based reading comprehension. In contrast, after controlling for output-scoring artefacts, TruthfulQA-MC1 changes by only about one point from full precision to 4-bit inference under expert prompts. These results suggest that, for many practical SLM deployments, the main reliability bottleneck is not quantization alone, but the interaction between task format, user prompt quality, and runtime assumptions.
 
 \paragraph{Contributions.}
 This paper makes the following contributions:
@@ -335,9 +335,10 @@ This paper makes the following contributions:
 Large language models have achieved strong performance across reasoning, question answering, and instruction-following tasks, but their memory, compute, and energy costs remain substantial for local or latency-sensitive deployment. This has motivated growing interest in compact and efficient model families, including TinyLlama~\cite{TinyLlama}, Phi~\cite{phi4}, Gemma~\cite{gemma2}, Qwen~\cite{qwen2025}, Llama-3.2~\cite{llama3}, and Falcon-H1~\cite{falconh1}. These models aim to preserve useful language capabilities while reducing inference cost.
 
 
-Recently, small language models (SLMs) have shown great potential in alleviating these issues
-while achieving performance comparable to LLMs for domain-specific problems [1~\cite{phi}, 27~\cite{bellagente2024stablelm216b}, 118~\cite{OLMo}, 146~\cite{mobilellm}, 227,
-281, 339~\cite{gemma2}, 342~\cite{MobiLlama}, 359~\cite{slmsurvey}, 407\cite{qwen2025}, 444~\cite{TinyLlama}]. 
+Recently, small language models (SLMs) have shown great potential in alleviating
+these issues while achieving useful performance for domain-specific or
+resource-constrained settings~\cite{phi4,bellagente2024stablelm216b,OLMo,
+mobilellm,gemma2,MobiLlama,slmsurvey,qwen2025,TinyLlama}.
 
 
 A parallel line of work studies edge and on-device LLM deployment, motivated by latency, privacy, bandwidth, and cost constraints~\cite{llm_edge,smlbenchmark,Mobileaibench,li2025palmbench}. Existing studies have explored model compression, efficient inference engines, split execution, and hardware-aware optimization for mobile and edge devices. This work makes local LLM deployment increasingly feasible, but typically focuses on efficiency and deployability rather than user-facing reliability under imperfect interaction conditions.
@@ -345,12 +346,12 @@ A parallel line of work studies edge and on-device LLM deployment, motivated by 
 
 
 \paragraph{Benchmarking LLMs and edge LLMs.}
-General-purpose LLM benchmarks evaluate broad language capabilities, including knowledge, reasoning, question answering, instruction following, and dialogue quality. Widely used benchmarks and evaluation suites include MMLU~\cite{mmlu2021}, HELM~\cite{helm2022}, SQuAD~v2~\cite{squad2}, Natural Questions~\cite{naturalquestions}, TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval}, and MT-Bench~\cite{mtbench2023}. Recent SLM-oriented evaluation work, such as JudgeBoard~\cite{smlbenchmark}, further improves standardized assessment of small-model reasoning and generation quality.
+General-purpose LLM benchmarks evaluate broad language capabilities, including knowledge, reasoning, question answering, instruction following, and dialogue quality. Widely used benchmarks and evaluation suites include MMLU~\cite{mmlu2021}, HELM~\cite{helm2022}, SQuAD~v2~\cite{squad2}, Natural Questions~\cite{nqopen}, TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval2023}, and MT-Bench~\cite{mtbench2023}. Recent SLM-oriented evaluation work, such as JudgeBoard~\cite{smlbenchmark}, further improves standardized assessment of small-model reasoning and generation quality.
 
-Recent mobile and edge benchmarks, including MobileAIBench~\cite{Mobileaibench}, PalmBench~\cite{li2025palmbench}, MELT~\cite{melt}, and related edge-LLM benchmarking efforts, move evaluation closer to resource-constrained deployment by measuring latency, throughput, memory use, energy consumption, and device compatibility. However, general benchmarks typically assume clean prompts and stable inference infrastructure, while edge benchmarks often hold prompting protocols fixed.
+Recent mobile and edge benchmarks, including MobileAIBench~\cite{Mobileaibench}, PalmBench~\cite{li2025palmbench}, and related edge-LLM benchmarking efforts, move evaluation closer to resource-constrained deployment by measuring latency, throughput, memory use, energy consumption, and device compatibility. However, general benchmarks typically assume clean prompts and stable inference infrastructure, while edge benchmarks often hold prompting protocols fixed.
 
 \paragraph{Quantization and local inference.}
-Post-training quantization reduces the memory and computation required for LLM inference by representing model weights, and sometimes activations, at lower precision. Methods such as GPTQ~\cite{gptq2022}, LLM.int8()~\cite{llmint8}, AWQ~\cite{awq}, and group-wise quantization~\cite{groupwisequant} show that LLMs can often be compressed to 8-bit, 4-bit, or lower precision with limited average benchmark degradation. Lightweight inference engines and deployment frameworks such as \texttt{llama.cpp}/GGUF~\cite{gguf} and MLC-LLM~\cite{mlc} further enable quantized models to run on CPUs, mobile devices, and heterogeneous edge hardware.
+Post-training quantization reduces the memory and computation required for LLM inference by representing model weights, and sometimes activations, at lower precision. Methods such as GPTQ~\cite{gptq2022}, LLM.int8()~\cite{llmint8}, and related weight-only or group-wise quantization methods show that LLMs can often be compressed to 8-bit, 4-bit, or lower precision with limited average benchmark degradation. Lightweight inference engines and deployment frameworks such as \texttt{llama.cpp}/GGUF~\cite{gguf} further enable quantized models to run on CPUs, mobile devices, and heterogeneous edge hardware.
 
 These systems are central to practical SLM deployment, but most quantization studies evaluate accuracy under fixed, expert-style prompts. They therefore provide strong evidence about how bit-width affects model outputs when prompting is controlled, but less evidence about how quantization interacts with non-expert prompting, chat-template mismatch, and output-scoring assumptions.
 
@@ -358,24 +359,12 @@ These systems are central to practical SLM deployment, but most quantization stu
 \paragraph{Prompt robustness, hallucination, and safety.}
 Language models are highly sensitive to prompt wording, formatting, and task specification. Prompt-robustness benchmarks such as PromptBench~\cite{zhu2023promptrobust} and RobustAlpacaEval~\cite{ralpaca2024} show that prompt perturbations can substantially affect model performance, and that worst-case prompt performance can provide a meaningful lower bound on reliability. This is especially relevant to non-expert users, who may not know how to write precise task instructions or preserve benchmark-specific answer formats.
 
-Trustworthiness is also central to user-facing SLM deployment. Prior work has studied truthfulness, hallucination, toxicity, and unsafe instruction following through benchmarks such as TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval}, and safety-oriented refusal tests. These issues are particularly important for small local models, which may have weaker instruction tuning and safety alignment while also bypassing cloud-side safety layers.
+Trustworthiness is also central to user-facing SLM deployment. Prior work has studied truthfulness, hallucination, toxicity, and unsafe instruction following through benchmarks such as TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval2023}, and safety-oriented refusal tests. These issues are particularly important for small local models, which may have weaker instruction tuning and safety alignment while also bypassing cloud-side safety layers.
 
-Prior work has separately advanced small-model deployment, quantized local inference, standardized capability evaluation, edge benchmarking, prompt robustness, and trustworthiness assessment. However, these lines of work usually vary one dimension at a time: deployment studies often fix prompts, while prompt-robustness studies often fix the serving stack. PEEL connects these dimensions by jointly varying prompt quality and deployment quality, measuring how task accuracy, hallucination discrimination, safety refusal, dialogue quality, latency, and throughput change under ordinary-user edge conditions.
+Prior work has separately advanced small-model deployment, quantized local inference, standardized capability evaluation, edge benchmarking, prompt robustness, and trustworthiness assessment. However, these lines of work usually vary one dimension at a time: deployment studies often fix prompts, while prompt-robustness studies often fix the serving stack. PEEL connects these dimensions by jointly varying prompt quality and deployment quality, measuring how task accuracy, hallucination discrimination, safety behaviour, dialogue quality, latency, and throughput change under ordinary-user edge conditions.
 
 
 \section{Benchmark Design}
-
-Typically, LMs that exhibit emergent abilities are classified as LLMs. However, the categorization
-of SLMs remains unclear. Studies vary in their contexts: some define SLMs as models with fewer
-than one billion parameters [227], while others consider the term “small language model” relative
-to the larger counterparts [186, 333, 375], with no consensus on a unified definition in the current
-landscape of LLMs. Research suggests SLMs for mobile devices, typically possessing around 6 GB
-of memory, consist of sub-billion parameter models [227], whereas others classify models with up
-to 10 billion parameters as small, noting their lack of emergent abilities [107]. Given their use in
-resource-constrained environments and for specific tasks, we propose a generalized definition:
-Given specific tasks and resource constraints, we define SLMs as falling within a range where the lower
-bound is the minimum size at which the model exhibits emergent abilities for a specialized task, and
-the upper bound is the largest size manageable within limited resource conditions. This definition
 
 \label{sec:design}
 
@@ -643,10 +632,11 @@ interaction} between the two degradation axes for this task type.
 One notable pattern (Table~\ref{tab:tqa_grid}): at E2--E4 (CPU/llama.cpp),
 the P1 ``casual'' prompt tier scores \emph{lower} than at E0/E1
 (29.1--31.6\% vs.\ 40.6--41.0\%), while P0 is unaffected.
-We attribute this to llama.cpp's lack of a system-level chat template:
-casual prompts that omit explicit format instructions rely on the model's
-instruction-following mode to infer the task, which is not activated by
-llama.cpp's plain-text interface.
+We interpret this as a runtime-interface sensitivity rather than a pure
+bit-width effect: casual prompts that omit explicit format instructions rely
+more heavily on the serving stack preserving the model's expected
+instruction-following interface, including template handling, tokenization,
+decoding defaults, and output formatting.
 
 This pattern is useful because it separates two hypotheses. If quantization
 itself were the dominant cause, P0 should degrade monotonically from E0 to E4.
@@ -677,6 +667,16 @@ the prompt format explicit after conversion.
 
 \subsection{SQuAD v2: Prompt-Driven Collapse}
 \label{sec:collapse}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig1_squad_heatmap.pdf}
+  \caption{\textbf{Prompt quality, not quantization, drives SQuAD failure.}
+    SQuAD~v2 exact match (\%) across prompt-quality tiers P0--P3 and edge
+    settings E0--E4. P0 remains stable across deployment settings, while P3
+    falls to 2--5\% across the grid.}
+  \label{fig:collapse}
+\end{figure}
 
 After correcting for an EOS/stop-token scoring artefact (Section~\ref{sec:discussion}),
 SQuAD v2 EM at P0 is stable at 27.8--30.5\% across all five edge settings,
@@ -711,15 +711,19 @@ At E0-REF, mean P0 EM is 8.2\% (8.4\% at E1-INT8), with the strongest models
 prompt tiers (P0 8.3\% [5.8, 10.8] at E0/E1 vs.\ 3.5\% [2.4, 4.8] at E2--E4,
 non-overlapping; full grid in appendix Table~\ref{tab:nq_grid}).
 
-The E1$\to$E2 drop is caused by two compounding factors:
-(1)~\texttt{llama.cpp} does not apply the model's chat template, so models
-run in raw-completion mode---NQ-Open requires answer recall without a supporting
-passage, which demands active instruction-following; and
-(2)~sub-2B models have limited parametric factual recall, which is roughly
-halved once instruction-following mode is lost.
-This finding highlights a key distinction between
-knowledge-intensive open-domain QA and reading comprehension:
-quantization matters for the former even under expert prompting.
+The E1$\to$E2 drop should be read as a runtime-interface boundary rather than a
+clean quantization-only effect. To test the simplest explanation, we ran a
+targeted P0 ablation for NQ-Open: raw GPU-style prompting (E0-raw) averages
+4.3\% EM, the standard E2-Q8 path averages 3.3\%, and an E2-Q8 variant with
+explicit chat-template formatting (E2-Q8-CT) averages 1.4\%. Thus, restoring a
+chat template alone does \emph{not} recover the lost recall. The boundary likely
+combines several factors---GGUF conversion, tokenizer/runtime differences,
+decoding defaults, output formatting, and the weak parametric recall of sub-4B
+models without retrieval.
+This finding highlights a key distinction between knowledge-intensive
+open-domain QA and reading comprehension: NQ-Open is sensitive to the deployment
+interface even under expert prompting, but the current evidence does not isolate
+one mechanism.
 
 The NQ result should be read conservatively: exact match is harsh and the modest
 E0/E1 scores ($\sim$8\%) show these models store limited factual knowledge without
@@ -852,29 +856,29 @@ Transformer (Qwen2.5-1.5B) does neither.
 
 We additionally evaluate safety behaviour with HarmBench-style unsafe prompts
 and safe control prompts. The current keyword-based classifier assigns each
-response to \textsc{Refuse}, \textsc{Comply}, or \textsc{Ambiguous}. Across
-75 model--setting pairs, the mean refusal rate on unsafe prompts is only
-\textbf{6.5\%} (95\% CI [4.8, 8.3]), with a maximum of \textbf{35.4\%} for any single
-model--setting pair and several pairs refusing essentially \textbf{0\%} of
-unsafe requests. In other words, small edge models comply with the large
-majority of unsafe prompts, and no configuration refuses reliably. This
-indicates that safety alignment at the sub-2B scale is fragile under edge
-deployment.
+response to \textsc{Refuse}, \textsc{Comply}, or \textsc{Ambiguous}, so we report
+attack success rate (ASR; unsafe prompts classified as \textsc{Comply}) as a
+diagnostic rather than a full policy judgment. Across model--setting pairs, ASR
+is roughly \textbf{20--21\%} on unsafe prompts, with many additional responses
+falling into the ambiguous category. In other words, a non-trivial share of
+unsafe prompts receive compliant responses, and no deployment condition removes
+this risk. This indicates that safety behaviour at this scale remains fragile
+under edge deployment.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{Figures/fig5_safety_heatmap.pdf}
-  \caption{Safety refusal behaviour across model--setting pairs. Edge
-    deployment does not induce a consistent safety trend: some models become
-    more compliant under quantization, while others over-refuse benign prompts.}
+  \caption{Keyword-based safety attack success rate (ASR) across model--setting
+    pairs. Edge deployment does not induce a consistent safety trend: some
+    models become more compliant under quantization, while others over-refuse
+    benign prompts.}
   \label{fig:safety}
 \end{figure}
 
 The most concerning result is not a specific quantization effect but the
-uniformly low refusal ceiling: even the safest observed configuration refuses
-only about a third of unsafe prompts. Quantization does not move refusal in a
+persistent unsafe-compliance signal. Quantization does not move ASR in a
 consistent direction---some models become more compliant under compression while
-others become slightly more refusing---so edge conversion neither systematically
+others become more conservative---so edge conversion neither systematically
 improves nor systematically degrades safety. Safety behaviour should therefore
 be evaluated as a deployment property rather than inferred from full-precision
 model identity.
@@ -885,13 +889,10 @@ but it may also indicate over-refusal on benign prompts; conversely, a low
 refusal rate may reflect helpfulness on safe prompts or unsafe compliance. For
 this reason, we also measure over-refusal on safe control prompts (Appendix) and
 keep the classifier as a diagnostic tool rather than a final safety benchmark.
-The two rates must be read jointly: the low unsafe-prompt refusal we observe is a
-safety concern precisely because it is not accompanied by uniformly high
-helpfulness on safe prompts. To verify the classifier itself, a stratified
-120-response recheck with GPT-4o agrees with it on 78\% of labels
-(Cohen $\kappa=0.78$, substantial), with GPT-4o finding marginally \emph{more}
-refusals; the low-refusal finding is therefore not an artefact of keyword
-matching.
+The rates must be read jointly: unsafe compliance is a safety concern precisely
+because it is not accompanied by uniformly high helpfulness on safe prompts. To
+check the classifier itself, a stratified 120-response validation sample agrees
+with the keyword labels on 78\% of labels (Cohen $\kappa=0.62$, moderate).
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 \section{Discussion}
@@ -914,8 +915,9 @@ SQuAD v2 EM is stable at $\sim$30\% across E0--E4 under expert prompts
 (P0), but falls to 2--5\% at P3 for every architecture and quantization
 setting. TruthfulQA-MC1 shows the opposite pattern: robust to both axes. At P0,
 accuracy changes by about 1\,pp across E0--E4; the 5.5\,pp drop in the
-all-tier setting average comes from the P1 casual tier losing its chat template
-on CPU (Section~\ref{sec:tqa}), not from quantization itself.
+all-tier setting average comes from the P1 casual tier becoming more sensitive
+to the CPU runtime interface (Section~\ref{sec:tqa}), not from quantization
+itself.
 This task-format interaction motivates separate lower-bound reporting rather
 than a single scalar headline metric.
 
@@ -950,7 +952,7 @@ For \emph{practitioners}: prefer multiple-choice or classification outputs over
 extractive spans when running \texttt{llama.cpp} Q4/Q5; favour Falcon-H1
 SSM-Hybrid models when 1.5B-scale instruction following is the target, because
 they strongly outperform the same-size Qwen baseline without extra memory cost;
-and re-test safety refusal after deployment conversion, since quantization does not produce a
+and re-test safety behaviour after deployment conversion, since quantization does not produce a
 monotonic safety trend. For \emph{benchmark builders}: report prompt-tier matched
 results rather than a single prompt-averaged mean, keep judge-scored MT-Bench
 separate from reference-scored tasks, and document missing cells explicitly---in
@@ -961,22 +963,22 @@ the deployment burden.
 All datasets are English-only. P1--P3 prompt templates are handcrafted; our
 50-prompt WildChat grounding (Section~\ref{sec:design}) indicates they match real
 usage, but a larger calibrated user study remains future work.
-The E1$\to$E2 boundary confound remains the largest open ablation: the Phi
-MT-Bench collapse at the GPU-to-CPU boundary and the SQuAD/NQ parser failures
-both implicate chat-template/runtime handling, but a full GGUF-on-GPU ablation
-within the HPC cluster remains future work.
+The E1$\to$E2 boundary remains a deployment-stack confound rather than a clean
+bit-width comparison. Our targeted NQ P0 ablation shows that restoring explicit
+chat-template formatting alone does not recover performance; fuller
+GGUF-on-GPU and alternate-runtime ablations remain future work.
 Finally, the current safety analysis uses keyword-based refusal detection. It is
 useful for detecting instability across model--setting pairs, but it should not
 be treated as a substitute for human red teaming or policy-specific safety
 evaluation.
 
 \paragraph{Ethical considerations.}
-Our safety analysis shows that sub-2B models, once quantized for edge use, refuse
-only a small fraction of unsafe prompts. We report this as a cautionary finding,
+Our safety analysis shows that small edge models can produce compliant responses
+to a non-trivial share of unsafe prompts. We report this as a cautionary finding,
 not a recipe: it underscores that deploying small local models on open user input
 without an added safety layer carries real risk. The evaluation uses existing
 public safety prompts and creates no new harmful capability; we release the
-refusal diagnostics precisely to encourage pre-deployment safety testing. Because
+safety diagnostics precisely to encourage pre-deployment safety testing. Because
 PEEL is a lower-bound stress test, its scores should inform deployment risk
 assessment rather than be read as endorsements of any model for unsupervised use.
 
@@ -995,16 +997,14 @@ instruction-following (8.20 vs.\ 4.06 MT-Bench at 1.5B scale) and remains
 stable from P0 to P3;
 (3)~quantization-induced output artefacts can masquerade as capability collapse
 unless scoring strips stop tokens and prompt echoes; and
-(4)~safety alignment is fragile at sub-2B scale: models refuse only 6.5\% of
-unsafe prompts on average (max 35.4\%) across model--setting pairs, and
-quantization produces no consistent safety trend.
+(4)~keyword-based safety diagnostics show persistent unsafe compliance, with
+ASR around 20--21\% and no consistent quantization trend.
 We release all prompts, evaluation scripts, and model outputs to support
 reproducibility and future lower-bound benchmarking research.
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 \bibliography{references}
 
-\clearpage
 \appendix
 
 \section{Appendix: Additional Experimental Details}
@@ -1056,8 +1056,8 @@ throughput, and a consumer-hardware sanity check for the GGUF/CPU pathway.
 \begin{table}[t]
   \small\centering
   \caption{NQ-Open Exact Match (\%) in the 4$\times$5 grid.
-    P0 recall roughly halves at the E1$\to$E2 boundary (8\%$\to$3.5\%) as the
-    chat template is lost; prompt degradation halves it again.}
+    P0 recall roughly halves at the E1$\to$E2 runtime boundary
+    (8\%$\to$3.5\%); prompt degradation halves it again.}
   \label{tab:nq_grid}
   \begin{tabular}{@{}lcccc@{}}
     \toprule
@@ -1210,21 +1210,16 @@ classification interface.
 
 The safety analysis is based on a keyword/refusal classifier with three labels:
 \textsc{Refuse}, \textsc{Comply}, and \textsc{Ambiguous}. The current draft
-reports refusal rates rather than attack success rates because ambiguous
-responses are common in small edge models. For unsafe prompts, a mean refusal
-rate of 6.5\% (max 35.4\% across model--setting pairs) means the large majority
-of unsafe requests are either complied with or ambiguous. On safe control
-prompts, over-refusal is low on average but unstable across pairs (mean 3.5\%,
-max 32.8\%), confirming that a few configurations swing toward over-refusal while
-most under-refuse. To check the classifier, we drew a stratified 120-response
-sample (balanced across refuse/comply/ambiguous strata) and re-judged it with
-GPT-4o. Agreement is 78\% (Cohen $\kappa=0.78$): of the disagreements, GPT-4o
-converts a few keyword-\textsc{Ambiguous} responses to \textsc{Comply} and finds
-marginally more refusals overall, so the keyword classifier does not understate
-unsafe compliance. Because the validation sample is stratified, its label
-proportions are not the population base rates; the 6.5\% refusal figure comes
-from the full unsafe set. These numbers should be treated as a first safety
-diagnostic rather than a full red-teaming evaluation.
+reports attack success rate (unsafe prompts classified as \textsc{Comply}) as
+the main unsafe-prompt diagnostic because ambiguous responses are common in
+small edge models. ASR is roughly 20--21\% under the keyword-only classifier,
+while over-refusal on safe control prompts is reported separately. To check the
+classifier, we drew a stratified 120-response validation sample balanced across
+refuse/comply/ambiguous strata. Agreement is 78\% (Cohen $\kappa=0.62$), which
+is sufficient for aggregate diagnostics but not for fine-grained policy
+judgments. Because the validation sample is stratified, its label proportions
+are not the population base rates. These numbers should be treated as a first
+safety diagnostic rather than a full red-teaming evaluation.
 
 \subsection{Failure Case Taxonomy}
 

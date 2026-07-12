@@ -1,55 +1,91 @@
-\begin{thebibliography}{30}
+\begin{thebibliography}{31}
 \providecommand{\natexlab}[1]{#1}
 
-\bibitem[{Anthony et~al.(2024)}]{mamba_empirical2024}
-Anthony, R.; et~al. 2024.
-\newblock An Empirical Study of Mamba-based Language Models.
+\bibitem[{Abdin et~al.(2024)Abdin, Aneja, Behl, Bubeck, Eldan, Gunasekar,
+  Harrison, Hewett, Javaheripi, Kauffmann et~al.}]{phi4}
+Abdin, M.; Aneja, J.; Behl, H.; Bubeck, S.; Eldan, R.; Gunasekar, S.; Harrison,
+  M.; Hewett, R.~J.; Javaheripi, M.; Kauffmann, P.; et~al. 2024.
+\newblock Phi-4 technical report.
+\newblock \emph{arXiv preprint arXiv:2412.08905}.
 
-\bibitem[{Badawy et~al.(2025)}]{edgellm2025}
-Badawy, M.; et~al. 2025.
-\newblock Sustainable LLM Inference for Edge AI: Evaluating Quantized LLMs on
-  ARM-based Edge Platforms.
+\bibitem[{Bellagente et~al.(2024)Bellagente, Tow, Mahan, Phung, Zhuravinskyi,
+  Adithyan, Baicoianu, Brooks, Cooper, Datta, Lee, Mostaque, Pieler,
+  Pinnaparju, Rocha, Saini, Teufel, Zanichelli, and
+  Riquelme}]{bellagente2024stablelm216b}
+Bellagente, M.; Tow, J.; Mahan, D.; Phung, D.; Zhuravinskyi, M.; Adithyan, R.;
+  Baicoianu, J.; Brooks, B.; Cooper, N.; Datta, A.; Lee, M.; Mostaque, E.;
+  Pieler, M.; Pinnaparju, N.; Rocha, P.; Saini, H.; Teufel, H.; Zanichelli, N.;
+  and Riquelme, C. 2024.
+\newblock Stable LM 2 1.6B Technical Report.
+\newblock arXiv:2402.17834.
 
-\bibitem[{Cao et~al.(2024)Cao, Cai, Zhang et~al.}]{ralpaca2024}
-Cao, B.; Cai, D.; Zhang, Z.; et~al. 2024.
+\bibitem[{Bi et~al.(2026)Bi, Srivastava, Li, Roy, Lu, Ziyadi, and
+  Wang}]{smlbenchmark}
+Bi, Z.; Srivastava, G.; Li, Y.; Roy, S.; Lu, M.; Ziyadi, M.; and Wang, X. 2026.
+\newblock JudgeBoard: benchmarking and enhancing small language models for
+  reasoning evaluation.
+\newblock In \emph{Proceedings of the Fortieth AAAI Conference on Artificial
+  Intelligence and Thirty-Eighth Conference on Innovative Applications of
+  Artificial Intelligence and Sixteenth Symposium on Educational Advances in
+  Artificial Intelligence}, AAAI'26/IAAI'26/EAAI'26. AAAI Press.
+\newblock ISBN 978-1-57735-906-7.
+
+\bibitem[{Cao et~al.(2024)Cao, Cai, Zhang, Zou, and Lam}]{ralpaca2024}
+Cao, B.; Cai, D.; Zhang, Z.; Zou, Y.; and Lam, W. 2024.
 \newblock On the Worst Prompt Performance of Large Language Models.
+\newblock In Globerson, A.; Mackey, L.; Belgrave, D.; Fan, A.; Paquet, U.;
+  Tomczak, J.; and Zhang, C., eds., \emph{Advances in Neural Information
+  Processing Systems}, volume~37, 69022--69042. Curran Associates, Inc.
 
 \bibitem[{Dettmers et~al.(2022)Dettmers, Lewis, Belkada, and
   Zettlemoyer}]{llmint8}
 Dettmers, T.; Lewis, M.; Belkada, Y.; and Zettlemoyer, L. 2022.
-\newblock LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale.
+\newblock LLM.int8(): 8-bit matrix multiplication for transformers at scale.
+\newblock In \emph{Proceedings of the 36th International Conference on Neural
+  Information Processing Systems}, NIPS '22. Red Hook, NY, USA: Curran
+  Associates Inc.
+\newblock ISBN 9781713871088.
 
-\bibitem[{Dong et~al.(2024)}]{hymba2024}
-Dong, X.; et~al. 2024.
-\newblock Hymba: A Hybrid-head Architecture for Small Language Models.
-
-\bibitem[{Frantar et~al.(2022)Frantar, Ashkboos, Hoefler, and
-  Alistarh}]{gptq2022}
-Frantar, E.; Ashkboos, S.; Hoefler, T.; and Alistarh, D. 2022.
-\newblock GPTQ: Accurate Post-Training Quantization for Generative Pre-trained
-  Transformers.
+\bibitem[{Frantar et~al.()Frantar, Ashkboos, Hoefler, and Alistarh}]{gptq2022}
+Frantar, E.; Ashkboos, S.; Hoefler, T.; and Alistarh, D. ????
+\newblock OPTQ: Accurate Quantization for Generative Pre-trained Transformers.
+\newblock In \emph{The Eleventh International Conference on Learning
+  Representations}.
 
 \bibitem[{Gerganov et~al.(2023)}]{gguf}
 Gerganov, G.; et~al. 2023.
 \newblock GGUF: llama.cpp quantization format.
 
-\bibitem[{Gu and Dao(2023)}]{mamba2023}
-Gu, A.; and Dao, T. 2023.
-\newblock Mamba: Linear-Time Sequence Modeling with Selective State Spaces.
+\bibitem[{Grattafiori et~al.(2024)Grattafiori, Dubey, Jauhri, Pandey, Kadian,
+  Al-Dahle, Letman, Mathur, Schelten, Vaughan et~al.}]{llama3}
+Grattafiori, A.; Dubey, A.; Jauhri, A.; Pandey, A.; Kadian, A.; Al-Dahle, A.;
+  Letman, A.; Mathur, A.; Schelten, A.; Vaughan, A.; et~al. 2024.
+\newblock The llama 3 herd of models.
+\newblock \emph{arXiv preprint arXiv:2407.21783}.
 
-\bibitem[{Haggenmiller et~al.(2024)}]{mobilequant2024}
-Haggenmiller, F.; et~al. 2024.
-\newblock MobileQuant: Mobile-friendly Quantization for On-device Language
-  Models.
+\bibitem[{Groeneveld et~al.(2024)Groeneveld, Beltagy, Walsh, Bhagia, Kinney,
+  Tafjord, Jha, Ivison, Magnusson, Wang, Arora, Atkinson, Authur, Chandu,
+  Cohan, Dumas, Elazar, Gu, Hessel, Khot, Merrill, Morrison, Muennighoff, Naik,
+  Nam, Peters, Pyatkin, Ravichander, Schwenk, Shah, Smith, Strubell, Subramani,
+  Wortsman, Dasigi, Lambert, Richardson, Zettlemoyer, Dodge, Lo, Soldaini,
+  Smith, and Hajishirzi}]{OLMo}
+Groeneveld, D.; Beltagy, I.; Walsh, P.; Bhagia, A.; Kinney, R.; Tafjord, O.;
+  Jha, A.~H.; Ivison, H.; Magnusson, I.; Wang, Y.; Arora, S.; Atkinson, D.;
+  Authur, R.; Chandu, K.~R.; Cohan, A.; Dumas, J.; Elazar, Y.; Gu, Y.; Hessel,
+  J.; Khot, T.; Merrill, W.; Morrison, J.; Muennighoff, N.; Naik, A.; Nam, C.;
+  Peters, M.~E.; Pyatkin, V.; Ravichander, A.; Schwenk, D.; Shah, S.; Smith,
+  W.; Strubell, E.; Subramani, N.; Wortsman, M.; Dasigi, P.; Lambert, N.;
+  Richardson, K.; Zettlemoyer, L.; Dodge, J.; Lo, K.; Soldaini, L.; Smith,
+  N.~A.; and Hajishirzi, H. 2024.
+\newblock OLMo: Accelerating the Science of Language Models.
+\newblock arXiv:2402.00838.
 
-\bibitem[{Hendrycks et~al.(2021)}]{mmlu2021}
-Hendrycks, D.; et~al. 2021.
+\bibitem[{Hendrycks et~al.(2021)Hendrycks, Burns, Basart, Zou, Mazeika, Song,
+  and Steinhardt}]{mmlu2021}
+Hendrycks, D.; Burns, C.; Basart, S.; Zou, A.; Mazeika, M.; Song, D.; and
+  Steinhardt, J. 2021.
 \newblock Measuring Massive Multitask Language Understanding.
-\newblock \emph{ICLR}.
-
-\bibitem[{Kim et~al.(2023)Kim, Hooper, Gholami et~al.}]{squeezellm2023}
-Kim, S.; Hooper, C.; Gholami, A.; et~al. 2023.
-\newblock SqueezeLLM: Dense-and-Sparse Quantization.
+\newblock In \emph{International Conference on Learning Representations}.
 
 \bibitem[{Kwiatkowski et~al.(2019)Kwiatkowski, Palomaki, Redfield
   et~al.}]{nqopen}
@@ -62,33 +98,58 @@ Li, J.; Cheng, X.; Zhao, W.~X.; et~al. 2023.
 \newblock HaluEval: A Large-Scale Hallucination Evaluation Benchmark for Large
   Language Models.
 
-\bibitem[{Li et~al.(2024)Li, Liu, Zhang et~al.}]{palmbench2024}
-Li, Y.; Liu, J.; Zhang, H.; et~al. 2024.
-\newblock PalmBench: A Comprehensive Benchmark of Compressed Large Language
-  Models on Mobile Platforms.
+\bibitem[{Li et~al.(2025)Li, Liu, Zhang, Murali~Krishnan, Sharma, Zhang, Zeng,
+  Raghuram, and Banerjee}]{li2025palmbench}
+Li, Y.; Liu, J.; Zhang, H.; Murali~Krishnan, B.~N.; Sharma, U.; Zhang, S.;
+  Zeng, Y.; Raghuram, J.; and Banerjee, S. 2025.
+\newblock Palmbench: A comprehensive benchmark of compressed large language
+  models on mobile platforms.
+\newblock In \emph{International Conference on Learning Representations},
+  volume 2025, 66434--66452.
 
-\bibitem[{Liang et~al.(2023{\natexlab{a}})Liang, He, Luo et~al.}]{edgefm2023}
-Liang, B.; He, L.; Luo, Z.; et~al. 2023{\natexlab{a}}.
-\newblock EdgeFM: Leveraging Foundation Model for Open-set Learning on the
-  Edge.
-
-\bibitem[{Liang et~al.(2023{\natexlab{b}})}]{helm2022}
-Liang, P.; et~al. 2023{\natexlab{b}}.
+\bibitem[{Liang et~al.(2023)Liang, Bommasani, Lee, Tsipras, Soylu, Yasunaga,
+  Zhang, Narayanan, Wu, Kumar et~al.}]{helm2022}
+Liang, P.; Bommasani, R.; Lee, T.; Tsipras, D.; Soylu, D.; Yasunaga, M.; Zhang,
+  Y.; Narayanan, D.; Wu, Y.; Kumar, A.; et~al. 2023.
 \newblock Holistic Evaluation of Language Models.
-\newblock In \emph{TMLR}.
+\newblock \emph{Transactions on Machine Learning Research}, 2023.
 
 \bibitem[{Lin, Hilton, and Evans(2022)}]{truthfulqa}
 Lin, S.; Hilton, J.; and Evans, O. 2022.
 \newblock TruthfulQA: Measuring How Models Mimic Human Falsehoods.
 \newblock In \emph{ACL}.
 
-\bibitem[{Ma et~al.(2024)Ma, Wang, Ma et~al.}]{bitnet2024}
-Ma, S.; Wang, H.; Ma, L.; et~al. 2024.
-\newblock The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits.
+\bibitem[{Liu et~al.(2024)Liu, Zhao, Iandola, Lai, Tian, Fedorov, Xiong, Chang,
+  Shi, Krishnamoorthi, Lai, and Chandra}]{mobilellm}
+Liu, Z.; Zhao, C.; Iandola, F.; Lai, C.; Tian, Y.; Fedorov, I.; Xiong, Y.;
+  Chang, E.; Shi, Y.; Krishnamoorthi, R.; Lai, L.; and Chandra, V. 2024.
+\newblock MobileLLM: Optimizing Sub-billion Parameter Language Models for
+  On-Device Use Cases.
+\newblock arXiv:2402.14905.
 
 \bibitem[{Mizrahi et~al.(2024)Mizrahi, Kaplan, Malkin et~al.}]{multiprompt2024}
 Mizrahi, M.; Kaplan, G.; Malkin, D.; et~al. 2024.
 \newblock State of What Art? A Call for Multi-Prompt LLM Evaluation.
+
+\bibitem[{Murthy et~al.(2024)Murthy, Yang, Tan, Awalgaonkar, Zhou, Heinecke,
+  Desai, Wu, Xu, Tan et~al.}]{Mobileaibench}
+Murthy, R.; Yang, L.; Tan, J.; Awalgaonkar, T.~M.; Zhou, Y.; Heinecke, S.;
+  Desai, S.; Wu, J.; Xu, R.; Tan, S.; et~al. 2024.
+\newblock Mobileaibench: Benchmarking llms and lmms for on-device use cases.
+\newblock \emph{arXiv preprint arXiv:2406.10290}.
+
+\bibitem[{Qwen et~al.(2025)Qwen, :, Yang, Yang, Zhang, Hui, Zheng, Yu, Li, Liu,
+  Huang, Wei, Lin, Yang, Tu, Zhang, Yang, Yang, Zhou, Lin, Dang, Lu, Bao, Yang,
+  Yu, Li, Xue, Zhang, Zhu, Men, Lin, Li, Tang, Xia, Ren, Ren, Fan, Su, Zhang,
+  Wan, Liu, Cui, Zhang, and Qiu}]{qwen2025}
+Qwen; :; Yang, A.; Yang, B.; Zhang, B.; Hui, B.; Zheng, B.; Yu, B.; Li, C.;
+  Liu, D.; Huang, F.; Wei, H.; Lin, H.; Yang, J.; Tu, J.; Zhang, J.; Yang, J.;
+  Yang, J.; Zhou, J.; Lin, J.; Dang, K.; Lu, K.; Bao, K.; Yang, K.; Yu, L.; Li,
+  M.; Xue, M.; Zhang, P.; Zhu, Q.; Men, R.; Lin, R.; Li, T.; Tang, T.; Xia, T.;
+  Ren, X.; Ren, X.; Fan, Y.; Su, Y.; Zhang, Y.; Wan, Y.; Liu, Y.; Cui, Z.;
+  Zhang, Z.; and Qiu, Z. 2025.
+\newblock Qwen2.5 Technical Report.
+\newblock arXiv:2412.15115.
 
 \bibitem[{Rajpurkar, Jia, and Liang(2018)}]{squad2}
 Rajpurkar, P.; Jia, R.; and Liang, P. 2018.
@@ -100,32 +161,88 @@ Sclar, M.; Choi, Y.; Tsvetkov, Y.; and Suhr, A. 2023.
 \newblock Quantifying Language Models' Sensitivity to Spurious Features in
   Prompt Design.
 
-\bibitem[{Srivastava et~al.(2023)}]{bigbench2022}
-Srivastava, A.; et~al. 2023.
-\newblock Beyond the Imitation Game: Quantifying and Extrapolating the
-  Capabilities of Language Models.
-\newblock \emph{TMLR}.
+\bibitem[{Team et~al.(2024)Team, Riviere, Pathak, Sessa, Hardin, Bhupatiraju,
+  Hussenot, Mesnard, Shahriari, Ramé, Ferret, Liu, Tafti, Friesen, Casbon,
+  Ramos, Kumar, Lan, Jerome, Tsitsulin, Vieillard, Stanczyk, Girgin, Momchev,
+  Hoffman, Thakoor, Grill, Neyshabur, Bachem, Walton, Severyn, Parrish, Ahmad,
+  Hutchison, Abdagic, Carl, Shen, Brock, Coenen, Laforge, Paterson, Bastian,
+  Piot, Wu, Royal, Chen, Kumar, Perry, Welty, Choquette-Choo, Sinopalnikov,
+  Weinberger, Vijaykumar, Rogozińska, Herbison, Bandy, Wang, Noland, Moreira,
+  Senter, Eltyshev, Visin, Rasskin, Wei, Cameron, Martins, Hashemi,
+  Klimczak-Plucińska, Batra, Dhand, Nardini, Mein, Zhou, Svensson, Stanway,
+  Chan, Zhou, Carrasqueira, Iljazi, Becker, Fernandez, van Amersfoort, Gordon,
+  Lipschultz, Newlan, yeong Ji, Mohamed, Badola, Black, Millican, McDonell,
+  Nguyen, Sodhia, Greene, Sjoesund, Usui, Sifre, Heuermann, Lago, McNealus,
+  Soares, Kilpatrick, Dixon, Martins, Reid, Singh, Iverson, Görner, Velloso,
+  Wirth, Davidow, Miller, Rahtz, Watson, Risdal, Kazemi, Moynihan, Zhang,
+  Kahng, Park, Rahman, Khatwani, Dao, Bardoliwalla, Devanathan, Dumai, Chauhan,
+  Wahltinez, Botarda, Barnes, Barham, Michel, Jin, Georgiev, Culliton, Kuppala,
+  Comanescu, Merhej, Jana, Rokni, Agarwal, Mullins, Saadat, Carthy, Cogan,
+  Perrin, Arnold, Krause, Dai, Garg, Sheth, Ronstrom, Chan, Jordan, Yu, Eccles,
+  Hennigan, Kocisky, Doshi, Jain, Yadav, Meshram, Dharmadhikari, Barkley, Wei,
+  Ye, Han, Kwon, Xu, Shen, Gong, Wei, Cotruta, Kirk, Rao, Giang, Peran,
+  Warkentin, Collins, Barral, Ghahramani, Hadsell, Sculley, Banks, Dragan,
+  Petrov, Vinyals, Dean, Hassabis, Kavukcuoglu, Farabet, Buchatskaya, Borgeaud,
+  Fiedel, Joulin, Kenealy, Dadashi, and Andreev}]{gemma2}
+Team, G.; Riviere, M.; Pathak, S.; Sessa, P.~G.; Hardin, C.; Bhupatiraju, S.;
+  Hussenot, L.; Mesnard, T.; Shahriari, B.; Ramé, A.; Ferret, J.; Liu, P.;
+  Tafti, P.; Friesen, A.; Casbon, M.; Ramos, S.; Kumar, R.; Lan, C.~L.; Jerome,
+  S.; Tsitsulin, A.; Vieillard, N.; Stanczyk, P.; Girgin, S.; Momchev, N.;
+  Hoffman, M.; Thakoor, S.; Grill, J.-B.; Neyshabur, B.; Bachem, O.; Walton,
+  A.; Severyn, A.; Parrish, A.; Ahmad, A.; Hutchison, A.; Abdagic, A.; Carl,
+  A.; Shen, A.; Brock, A.; Coenen, A.; Laforge, A.; Paterson, A.; Bastian, B.;
+  Piot, B.; Wu, B.; Royal, B.; Chen, C.; Kumar, C.; Perry, C.; Welty, C.;
+  Choquette-Choo, C.~A.; Sinopalnikov, D.; Weinberger, D.; Vijaykumar, D.;
+  Rogozińska, D.; Herbison, D.; Bandy, E.; Wang, E.; Noland, E.; Moreira, E.;
+  Senter, E.; Eltyshev, E.; Visin, F.; Rasskin, G.; Wei, G.; Cameron, G.;
+  Martins, G.; Hashemi, H.; Klimczak-Plucińska, H.; Batra, H.; Dhand, H.;
+  Nardini, I.; Mein, J.; Zhou, J.; Svensson, J.; Stanway, J.; Chan, J.; Zhou,
+  J.~P.; Carrasqueira, J.; Iljazi, J.; Becker, J.; Fernandez, J.; van
+  Amersfoort, J.; Gordon, J.; Lipschultz, J.; Newlan, J.; yeong Ji, J.;
+  Mohamed, K.; Badola, K.; Black, K.; Millican, K.; McDonell, K.; Nguyen, K.;
+  Sodhia, K.; Greene, K.; Sjoesund, L.~L.; Usui, L.; Sifre, L.; Heuermann, L.;
+  Lago, L.; McNealus, L.; Soares, L.~B.; Kilpatrick, L.; Dixon, L.; Martins,
+  L.; Reid, M.; Singh, M.; Iverson, M.; Görner, M.; Velloso, M.; Wirth, M.;
+  Davidow, M.; Miller, M.; Rahtz, M.; Watson, M.; Risdal, M.; Kazemi, M.;
+  Moynihan, M.; Zhang, M.; Kahng, M.; Park, M.; Rahman, M.; Khatwani, M.; Dao,
+  N.; Bardoliwalla, N.; Devanathan, N.; Dumai, N.; Chauhan, N.; Wahltinez, O.;
+  Botarda, P.; Barnes, P.; Barham, P.; Michel, P.; Jin, P.; Georgiev, P.;
+  Culliton, P.; Kuppala, P.; Comanescu, R.; Merhej, R.; Jana, R.; Rokni, R.~A.;
+  Agarwal, R.; Mullins, R.; Saadat, S.; Carthy, S.~M.; Cogan, S.; Perrin, S.;
+  Arnold, S. M.~R.; Krause, S.; Dai, S.; Garg, S.; Sheth, S.; Ronstrom, S.;
+  Chan, S.; Jordan, T.; Yu, T.; Eccles, T.; Hennigan, T.; Kocisky, T.; Doshi,
+  T.; Jain, V.; Yadav, V.; Meshram, V.; Dharmadhikari, V.; Barkley, W.; Wei,
+  W.; Ye, W.; Han, W.; Kwon, W.; Xu, X.; Shen, Z.; Gong, Z.; Wei, Z.; Cotruta,
+  V.; Kirk, P.; Rao, A.; Giang, M.; Peran, L.; Warkentin, T.; Collins, E.;
+  Barral, J.; Ghahramani, Z.; Hadsell, R.; Sculley, D.; Banks, J.; Dragan, A.;
+  Petrov, S.; Vinyals, O.; Dean, J.; Hassabis, D.; Kavukcuoglu, K.; Farabet,
+  C.; Buchatskaya, E.; Borgeaud, S.; Fiedel, N.; Joulin, A.; Kenealy, K.;
+  Dadashi, R.; and Andreev, A. 2024.
+\newblock Gemma 2: Improving Open Language Models at a Practical Size.
+\newblock arXiv:2408.00118.
 
-\bibitem[{Tiiuae et~al.(2025)}]{falconh12025}
-Tiiuae; et~al. 2025.
-\newblock Falcon-H1: A Family of Hybrid-Head Language Models Redefining
-  Efficiency and Performance.
+\bibitem[{Thawakar et~al.(2024)Thawakar, Vayani, Khan, Cholakal, Anwer,
+  Felsberg, Baldwin, Xing, and Khan}]{MobiLlama}
+Thawakar, O.; Vayani, A.; Khan, S.; Cholakal, H.; Anwer, R.~M.; Felsberg, M.;
+  Baldwin, T.; Xing, E.~P.; and Khan, F.~S. 2024.
+\newblock MobiLlama: Towards Accurate and Lightweight Fully Transparent GPT.
+\newblock arXiv:2402.16840.
 
-\bibitem[{Tseng et~al.(2024)Tseng, Chee, Sun et~al.}]{quip2024}
-Tseng, A.; Chee, J.; Sun, Q.; et~al. 2024.
-\newblock QuIP\#: Even Better LLM Quantization with Hadamard Incoherence and
-  Lattice Codebooks.
+\bibitem[{Wang et~al.(2025)Wang, Lin, Ma, Liu, He, Tang, Tang, Pei, and
+  Wang}]{slmsurvey}
+Wang, F.; Lin, M.; Ma, Y.; Liu, H.; He, Q.; Tang, X.; Tang, J.; Pei, J.; and
+  Wang, S. 2025.
+\newblock A Survey on Small Language Models in the Era of Large Language
+  Models: Architecture, Capabilities, and Trustworthiness.
+\newblock In \emph{Proceedings of the 31st ACM SIGKDD Conference on Knowledge
+  Discovery and Data Mining V.2}, KDD '25, 6173–6183. New York, NY, USA:
+  Association for Computing Machinery.
+\newblock ISBN 9798400714542.
 
-\bibitem[{Wang et~al.(2019)}]{superglue2019}
-Wang, A.; et~al. 2019.
-\newblock SuperGLUE: A Stickier Benchmark for General-Purpose Language
-  Understanding Systems.
-\newblock In \emph{NeurIPS}.
-
-\bibitem[{Xiao et~al.(2025)}]{quantsys2025}
-Xiao, G.; et~al. 2025.
-\newblock A Systematic Characterization of LLM Quantization for Efficient
-  Inference.
+\bibitem[{Zhang et~al.(2024)Zhang, Zeng, Wang, and Lu}]{TinyLlama}
+Zhang, P.; Zeng, G.; Wang, T.; and Lu, W. 2024.
+\newblock TinyLlama: An Open-Source Small Language Model.
+\newblock arXiv:2401.02385.
 
 \bibitem[{Zhao et~al.(2024)Zhao, Ren, Hessel, Cardie, Choi, and
   Deng}]{wildchat2024}
@@ -138,13 +255,36 @@ Zheng, L.; Chiang, W.-L.; Sheng, Y.; et~al. 2023.
 \newblock Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena.
 \newblock In \emph{NeurIPS}.
 
+\bibitem[{Zheng et~al.(2025)Zheng, Chen, Qian, Shi, Shu, and Chen}]{llm_edge}
+Zheng, Y.; Chen, Y.; Qian, B.; Shi, X.; Shu, Y.; and Chen, J. 2025.
+\newblock A review on edge large language models: Design, execution, and
+  applications.
+\newblock \emph{ACM Computing Surveys}, 57(8): 1--35.
+
 \bibitem[{Zhou et~al.(2023)Zhou, Lu, Mishra et~al.}]{ifeval2023}
 Zhou, J.; Lu, T.; Mishra, S.; et~al. 2023.
 \newblock Instruction-Following Evaluation for Large Language Models.
 
-\bibitem[{Zhu et~al.(2023)Zhu, Wang, Zhou et~al.}]{promptbench2023}
-Zhu, K.; Wang, J.; Zhou, J.; et~al. 2023.
-\newblock PromptBench: Towards Evaluating the Robustness of Large Language
-  Models on Adversarial Prompts.
+\bibitem[{Zhu et~al.(2023)Zhu, Wang, Zhou, Wang, Chen, Wang, Yang, Ye, Zhang,
+  Gong et~al.}]{zhu2023promptrobust}
+Zhu, K.; Wang, J.; Zhou, J.; Wang, Z.; Chen, H.; Wang, Y.; Yang, L.; Ye, W.;
+  Zhang, Y.; Gong, N.; et~al. 2023.
+\newblock Promptrobust: Towards evaluating the robustness of large language
+  models on adversarial prompts.
+\newblock In \emph{Proceedings of the 1st ACM workshop on large AI systems and
+  models with privacy and safety analysis}, 57--68.
+
+\bibitem[{Zuo et~al.(2025)Zuo, Velikanov, Chahed, Belkada, Rhayem, Kunsch,
+  Hacid, Yous, Farhat, Khadraoui, Farooq, Campesan, Cojocaru, Djilali, Hu,
+  Chaabane, Khanna, Seddik, Huynh, Khac, AlQadi, Mokeddem, Chami, Abubaker,
+  Lubinets, Piskorski, and Frikha}]{falconh1}
+Zuo, J.; Velikanov, M.; Chahed, I.; Belkada, Y.; Rhayem, D.~E.; Kunsch, G.;
+  Hacid, H.; Yous, H.; Farhat, B.; Khadraoui, I.; Farooq, M.; Campesan, G.;
+  Cojocaru, R.; Djilali, Y.; Hu, S.; Chaabane, I.; Khanna, P.; Seddik, M.
+  E.~A.; Huynh, N.~D.; Khac, P.~L.; AlQadi, L.; Mokeddem, B.; Chami, M.;
+  Abubaker, A.; Lubinets, M.; Piskorski, K.; and Frikha, S. 2025.
+\newblock Falcon-H1: A Family of Hybrid-Head Language Models Redefining
+  Efficiency and Performance.
+\newblock arXiv:2507.22448.
 
 \end{thebibliography}
