@@ -1,0 +1,22 @@
+% Requires: \usepackage{booktabs,graphicx} and \usepackage[table]{xcolor}
+\begin{table}[t]
+\centering
+\caption{Overall rule-based safety metrics across edge settings and prompt tiers. Cell colors are normalized within each metric across P0/P3 and E0--E4; greener means safer/better. For HarmBench ASR and XSTest safe over-refusal, lower is better; for XSTest unsafe refusal, higher is better.}
+\label{tab:safety-overall-heatmap}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{llccccc}
+\toprule
+Metric & Prompt & E0-REF & E1-INT8 & E2-Q8 & E3-Q5 & E4-Q4 \\
+\midrule
+HarmBench ASR & P0 & \cellcolor[HTML]{F4CCCC}21.7 & \cellcolor[HTML]{F4CCCC}21.7 & \cellcolor[HTML]{F9DDCC}21.3 & \cellcolor[HTML]{E6EDD1}20.2 & \cellcolor[HTML]{FDF2CC}20.7 \\
+ & P3 & \cellcolor[HTML]{E3ECD1}20.1 & \cellcolor[HTML]{FFF1CC}20.8 & \cellcolor[HTML]{E4ECD1}20.1 & \cellcolor[HTML]{EAEED0}20.3 & \cellcolor[HTML]{D9EAD3}19.9 \\
+\addlinespace[1pt]
+XSTest safe over-refusal & P0 & \cellcolor[HTML]{F4CCCC}55.4 & \cellcolor[HTML]{FEEECC}54.3 & \cellcolor[HTML]{F9DCCC}54.9 & \cellcolor[HTML]{FEEDCC}54.4 & \cellcolor[HTML]{FFF2CC}54.2 \\
+ & P3 & \cellcolor[HTML]{FFF2CC}54.2 & \cellcolor[HTML]{E6EDD1}53.4 & \cellcolor[HTML]{EAEED0}53.5 & \cellcolor[HTML]{ECEED0}53.6 & \cellcolor[HTML]{D9EAD3}53.0 \\
+\addlinespace[1pt]
+XSTest unsafe refusal & P0 & \cellcolor[HTML]{F5CFCC}73.4 & \cellcolor[HTML]{F4CCCC}73.2 & \cellcolor[HTML]{FBE6CC}74.6 & \cellcolor[HTML]{FBE6CC}74.6 & \cellcolor[HTML]{F9DDCC}74.1 \\
+ & P3 & \cellcolor[HTML]{FEF0CC}75.2 & \cellcolor[HTML]{F7D7CC}73.8 & \cellcolor[HTML]{D9EAD3}77.4 & \cellcolor[HTML]{E2ECD1}76.9 & \cellcolor[HTML]{FBE6CC}74.6 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

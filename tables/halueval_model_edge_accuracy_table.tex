@@ -1,0 +1,32 @@
+\begin{table*}[t]
+\centering
+\caption{Model-level HaluEval hallucination classification accuracy (\%) across edge settings under P0. Higher is better. Cell colors are normalized separately within HaluEval-General and HaluEval-QA. Missing cells indicate unavailable runs.}
+\label{tab:halueval-model-edge-accuracy}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rccccc|ccccc}
+\toprule
+Model & \multicolumn{5}{c}{HaluEval-General} & \multicolumn{5}{c}{HaluEval-QA} \\
+\cmidrule(lr){2-6} \cmidrule(lr){7-11}
+ & E0-REF & E1-INT8 & E2-Q8 & E3-Q5 & E4-Q4 & E0-REF & E1-INT8 & E2-Q8 & E3-Q5 & E4-Q4 \\
+\midrule
+Falcon-H1-Tiny-90M & \cellcolor[HTML]{DCEBD2}79.0 & \cellcolor[HTML]{DCEBD2}79.0 & \cellcolor[HTML]{F8F1CD}56.0 & \cellcolor[HTML]{FADFCC}35.0 & \cellcolor[HTML]{F4CCCC}19.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{FEEECC}35.5 & \cellcolor[HTML]{F9DDCC}26.0 & \cellcolor[HTML]{FBE4CC}29.5 \\
+Falcon-H1-0.5B & \cellcolor[HTML]{E0EBD2}76.0 & \cellcolor[HTML]{E2ECD1}74.0 & \cellcolor[HTML]{F4CDCC}20.0 & \cellcolor[HTML]{F5D0CC}23.0 & \cellcolor[HTML]{F5D1CC}23.5 & \cellcolor[HTML]{E7EDD0}51.0 & \cellcolor[HTML]{E8EDD0}50.0 & \cellcolor[HTML]{F1EFCE}45.0 & \cellcolor[HTML]{E7EDD0}51.0 & \cellcolor[HTML]{EAEED0}49.0 \\
+Falcon-H1-Tiny-R-0.6B & \cellcolor[HTML]{E3ECD1}73.0 & \cellcolor[HTML]{E5ECD1}72.0 & \cellcolor[HTML]{FDF2CC}52.0 & \cellcolor[HTML]{F6D3CC}25.5 & \cellcolor[HTML]{F5D1CC}23.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{F3F0CE}44.0 & \cellcolor[HTML]{E1ECD2}54.0 & \cellcolor[HTML]{FAF1CD}40.5 & \cellcolor[HTML]{F8F0CD}41.5 \\
+Falcon-H1-1.5B & \cellcolor[HTML]{FFF2CC}50.5 & \cellcolor[HTML]{FEEFCC}48.0 & \cellcolor[HTML]{FCE8CC}42.0 & \cellcolor[HTML]{FBE3CC}38.0 & \cellcolor[HTML]{FBE5CC}40.0 & \cellcolor[HTML]{F3F0CE}44.0 & \cellcolor[HTML]{EFEFCF}46.5 & \cellcolor[HTML]{E5ECD1}52.0 & \cellcolor[HTML]{E2ECD1}53.5 & \cellcolor[HTML]{EBEED0}48.5 \\
+Falcon-H1-1.5B-Deep & \cellcolor[HTML]{DBEBD3}79.5 & \cellcolor[HTML]{DBEBD3}79.5 & \cellcolor[HTML]{DFEBD2}77.0 & \cellcolor[HTML]{E5ECD1}72.0 & \cellcolor[HTML]{E2ECD1}74.5 & \cellcolor[HTML]{F1EFCE}45.0 & \cellcolor[HTML]{ECEED0}48.0 & \cellcolor[HTML]{EBEED0}48.5 & \cellcolor[HTML]{E1ECD2}54.0 & \cellcolor[HTML]{E6EDD1}51.5 \\
+Qwen2.5-0.5B & \cellcolor[HTML]{DBEAD3}80.0 & \cellcolor[HTML]{DBEBD3}79.5 & \cellcolor[HTML]{FDF1CC}52.5 & \cellcolor[HTML]{FDEACC}44.0 & \cellcolor[HTML]{FAE2CC}37.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{E9EDD0}49.5 & \cellcolor[HTML]{F1EFCF}45.5 & \cellcolor[HTML]{ECEED0}48.0 \\
+Qwen2.5-1.5B & \cellcolor[HTML]{DDEBD2}78.5 & \cellcolor[HTML]{E0ECD2}75.5 & \cellcolor[HTML]{FCF1CD}53.0 & \cellcolor[HTML]{FDF1CC}52.5 & \cellcolor[HTML]{FDECCC}45.5 & \cellcolor[HTML]{E2ECD1}53.5 & \cellcolor[HTML]{DEEBD2}55.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{EBEED0}48.5 & \cellcolor[HTML]{DEEBD2}56.0 \\
+Gemma-3-1B & \cellcolor[HTML]{F4F0CE}59.5 & \cellcolor[HTML]{F3F0CE}60.0 & \cellcolor[HTML]{F6D5CC}26.5 & \cellcolor[HTML]{F7D6CC}28.0 & \cellcolor[HTML]{FCE7CC}41.5 & \cellcolor[HTML]{F2EFCE}44.5 & \cellcolor[HTML]{F0EFCF}46.0 & \cellcolor[HTML]{DEEBD2}56.0 & \cellcolor[HTML]{DFEBD2}55.0 & \cellcolor[HTML]{E1ECD2}54.0 \\
+Llama-3.2-1B & \cellcolor[HTML]{FDF1CC}52.5 & \cellcolor[HTML]{FEEDCC}46.5 & \cellcolor[HTML]{FCE8CC}42.0 & \cellcolor[HTML]{FFF1CC}50.0 & \cellcolor[HTML]{FDEBCC}44.5 & \cellcolor[HTML]{E2ECD1}53.5 & \cellcolor[HTML]{DEEBD2}55.5 & \cellcolor[HTML]{E8EDD0}50.0 & \cellcolor[HTML]{E4ECD1}52.5 & \cellcolor[HTML]{E7EDD0}50.5 \\
+Llama-3.2-3B & \cellcolor[HTML]{F8F1CD}56.0 & \cellcolor[HTML]{F6F0CE}57.5 & \cellcolor[HTML]{F2EFCE}61.5 & \cellcolor[HTML]{FDF2CC}52.0 & \cellcolor[HTML]{F6F0CE}58.0 & \cellcolor[HTML]{E7EDD0}51.0 & \cellcolor[HTML]{E6EDD1}51.5 & \cellcolor[HTML]{E7EDD0}51.0 & \cellcolor[HTML]{E0ECD2}54.5 & \cellcolor[HTML]{DDEBD2}56.5 \\
+Phi-3.5-mini & \cellcolor[HTML]{DBEBD3}79.5 & \cellcolor[HTML]{DDEBD2}78.5 & \cellcolor[HTML]{DFEBD2}77.0 & \cellcolor[HTML]{DBEAD3}80.0 & \cellcolor[HTML]{DBEBD3}79.5 & \cellcolor[HTML]{FDF2CC}38.5 & \cellcolor[HTML]{FAF1CD}40.0 & \cellcolor[HTML]{EEEECF}47.0 & \cellcolor[HTML]{F8F0CD}41.5 & \cellcolor[HTML]{F7F0CE}42.0 \\
+Phi-4-mini & \cellcolor[HTML]{DAEAD3}80.5 & \cellcolor[HTML]{DAEAD3}80.5 & \cellcolor[HTML]{DDEBD2}78.5 & \cellcolor[HTML]{D9EAD3}81.5 & \cellcolor[HTML]{E2ECD1}74.0 & \cellcolor[HTML]{EEEECF}47.0 & \cellcolor[HTML]{ECEED0}48.0 & \cellcolor[HTML]{F5F0CE}43.0 & \cellcolor[HTML]{E8EDD0}50.0 & \cellcolor[HTML]{EDEECF}47.5 \\
+SmolLM2-360M & \cellcolor[HTML]{FDF2CC}52.0 & \cellcolor[HTML]{FEF0CC}49.0 & \cellcolor[HTML]{FEEECC}47.0 & \cellcolor[HTML]{FBE5CC}39.5 & \cellcolor[HTML]{FDECCC}45.5 & \cellcolor[HTML]{E3ECD1}53.0 & \cellcolor[HTML]{E1ECD2}54.0 & \cellcolor[HTML]{D9EAD3}58.5 & \cellcolor[HTML]{E3ECD1}53.0 & \cellcolor[HTML]{E7EDD0}51.0 \\
+SmolLM2-1.7B & \cellcolor[HTML]{FBE5CC}40.0 & \cellcolor[HTML]{F8DACC}31.0 & \cellcolor[HTML]{FAE0CC}35.5 & \cellcolor[HTML]{FBE5CC}39.5 & \cellcolor[HTML]{F9DECC}34.5 & \cellcolor[HTML]{F0EFCF}46.0 & \cellcolor[HTML]{F0EFCF}46.0 & \cellcolor[HTML]{F5D0CC}18.5 & \cellcolor[HTML]{F9DCCC}25.5 & \cellcolor[HTML]{F4CCCC}16.5 \\
+TinyLlama-1.1B & \cellcolor[HTML]{FBE5CC}39.5 & \cellcolor[HTML]{F8D9CC}30.5 & \cellcolor[HTML]{F7D7CC}28.5 & \cellcolor[HTML]{F5CECC}21.5 & \cellcolor[HTML]{F8DACC}31.0 & \cellcolor[HTML]{EBEED0}48.5 & \cellcolor[HTML]{F4F0CE}43.5 & \cellcolor[HTML]{DDEBD2}56.5 & \cellcolor[HTML]{E0ECD2}54.5 & \cellcolor[HTML]{E4ECD1}52.5 \\
+InternLM2.5-1.8B & \cellcolor[HTML]{DAEAD3}80.5 & \cellcolor[HTML]{E0ECD2}75.5 & \cellcolor[HTML]{F0EFCF}63.0 & \cellcolor[HTML]{F0EFCF}62.5 & \cellcolor[HTML]{FDECCC}46.0 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{FAF1CD}40.0 & \cellcolor[HTML]{F3F0CE}44.0 & \cellcolor[HTML]{E9EDD0}49.5 & \cellcolor[HTML]{ECEED0}48.0 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
