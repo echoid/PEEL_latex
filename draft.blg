@@ -5,50 +5,49 @@ Reallocating 'name_of_file' (item size: 1) to 9 items.
 The style file: aaai2027.bst
 Reallocating 'name_of_file' (item size: 1) to 11 items.
 Database file #1: references.bib
+Warning--empty journal in llama3
 Warning--empty year in gptq2022; set to ????
 Warning--empty journal in halueval2023
-Warning--empty journal in multiprompt2024
-Warning--empty journal in sclar2023
 Warning--empty journal in ifeval2023
-You've used 31 entries,
+You've used 34 entries,
             2840 wiz_defined-function locations,
-            738 strings with 16794 characters,
-and the built_in function-call counts, 40694 in all, are:
-= -- 2324
-> -- 4300
+            752 strings with 20761 characters,
+and the built_in function-call counts, 52366 in all, are:
+= -- 2813
+> -- 5892
 < -- 2
-+ -- 1608
-- -- 1572
-* -- 3712
-:= -- 6905
-add.period$ -- 126
-call.type$ -- 31
-change.case$ -- 650
-chr.to.int$ -- 32
-cite$ -- 36
-duplicate$ -- 2118
-empty$ -- 1597
-format.name$ -- 1665
-if$ -- 7259
-int.to.chr$ -- 1
++ -- 2202
+- -- 2162
+* -- 4956
+:= -- 8885
+add.period$ -- 138
+call.type$ -- 34
+change.case$ -- 858
+chr.to.int$ -- 35
+cite$ -- 38
+duplicate$ -- 2592
+empty$ -- 1890
+format.name$ -- 2262
+if$ -- 9227
+int.to.chr$ -- 6
 int.to.str$ -- 1
-missing$ -- 676
-newline$ -- 157
-num.names$ -- 126
-pop$ -- 1458
+missing$ -- 887
+newline$ -- 172
+num.names$ -- 140
+pop$ -- 1883
 preamble$ -- 1
-purify$ -- 624
+purify$ -- 830
 quote$ -- 0
-skip$ -- 995
+skip$ -- 1202
 stack$ -- 0
-substring$ -- 505
-swap$ -- 1404
+substring$ -- 552
+swap$ -- 1821
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 279
-warning$ -- 5
-while$ -- 137
+type$ -- 306
+warning$ -- 4
+while$ -- 152
 width$ -- 0
-write$ -- 386
-(There were 5 warnings)
+write$ -- 421
+(There were 4 warnings)

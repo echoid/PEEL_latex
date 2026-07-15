@@ -710,6 +710,7 @@ quantization, but broad enough to compare architecture families, parameter scale
   \caption{Models evaluated in PEEL.
   $^\ddagger$ denotes SSM-hybrid Falcon-H1 models.}
   \label{tab:models}
+  \resizebox{\columnwidth}{!}{%
   \begin{tabular}{@{}llc@{}}
     \toprule
     Model & Family & Params \\
@@ -732,6 +733,7 @@ quantization, but broad enough to compare architecture families, parameter scale
     TinyLlama-1.1B                       & TinyLlama~\citep{tinyllama_2024} & 1.1B \\
     \bottomrule
   \end{tabular}
+  }
 \end{table}
 
 The model set has three roles. Falcon-H1~\citep{falconh1} is the primary family of interest
@@ -866,48 +868,84 @@ the paper's quantitative claims are derived from the scripted benchmark runs.
 \section{Results}
 \label{sec:results}
 
-\begin{figure}
+We organize the results by the kind of failure signal each task exposes.
+Runtime measurements isolate deployment cost; short-answer and multiple-choice
+tasks test deterministic correctness; IFEval and HaluEval test rule-based
+compliance and binary hallucination judgments; MT-Bench and safety are then
+reported separately because their scoring contracts differ from the
+reference-scored QA tasks. This organization follows the PEEL goal: separating
+edge-deployment effects from prompt and task-format sensitivity.
+
+\subsection{Runtime Efficiency across Edge Settings}
+\label{sec:runtime-results}
+
+Edge settings change the cost profile much more directly than prompt tiers.
+Figure~\ref{fig:runtime-family} summarizes family-level decode throughput and
+latency. GPU-backed HuggingFace settings and CPU-backed \texttt{llama.cpp}
+settings occupy visibly different regimes: E0/E1 provide the reference
+accelerated path, while E2--E4 represent CPU-only local execution. The purpose
+of these measurements is not to rank hardware platforms, but to verify that the
+PEEL edge ladder captures a meaningful deployment pressure in addition to
+accuracy pressure.
+
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=1\linewidth]{Figures/fig4_4_true2d_edge_sequence_overall_correctness.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
-\end{figure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig4_2_throughput_B_family_average_ver2.pdf}
+        \caption{Decode throughput by family and edge setting.}
+        \label{fig:runtime-throughput-family}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig4_2_latency_B_family_average.pdf}
+        \caption{Latency by family and edge setting.}
+        \label{fig:runtime-latency-family}
+    \end{subfigure}
+    \caption{Runtime efficiency under the PEEL edge ladder. Family-level
+    aggregation shows that deployment settings produce distinct
+    throughput/latency profiles, motivating the edge axis as a systems stressor
+    rather than only a numerical precision label.}
+    \label{fig:runtime-family}
+\end{figure*}
 
+\subsection{Deterministic Correctness under Prompt and Edge Perturbations}
+\label{sec:correctness-results}
 
-\begin{figure}
+The clearest separation between prompt effects and deployment effects appears
+in deterministic correctness. Figure~\ref{fig:correctness-sequences} aggregates
+SQuAD v2, NQ-Open, and TruthfulQA-MC1 to show the two PEEL axes from complementary
+directions. Moving along the prompt ladder produces a sharper decline than
+moving along the edge ladder, especially for short-answer tasks that require
+the model to infer a strict output contract.
+
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=1\linewidth]{Figures/fig4_4_true2d_prompt_sequence_overall_correctness.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
-\end{figure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Figures/fig4_4_true2d_edge_sequence_overall_correctness.pdf}
+        \caption{Correctness as deployment quality degrades.}
+        \label{fig:correctness-edge-sequence}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Figures/fig4_4_true2d_prompt_sequence_overall_correctness.pdf}
+        \caption{Correctness as prompt quality degrades.}
+        \label{fig:correctness-prompt-sequence}
+    \end{subfigure}
+    \caption{Overall deterministic correctness along the two PEEL axes.
+    Prompt degradation produces the dominant decline, while deployment effects
+    are more task-dependent.}
+    \label{fig:correctness-sequences}
+\end{figure*}
 
-
-
-\subsection{throughput}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=1\linewidth]{fig4_2_throughput_B_family_average_ver2.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
-\end{figure}
-
-
-\begin{figure}
-    \centering
-    \includegraphics[width=1\linewidth]{fig4_2_latency_B_family_average.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
-\end{figure}
-
-
-\subsection{Output Matching and Correctness}
-
-% Requires: \usepackage{booktabs,graphicx} and \usepackage[table]{xcolor}
-% Requires: \usepackage{booktabs,graphicx} and \usepackage[table]{xcolor}
 \begin{table}[t]
 \centering
-\caption{Exact-match accuracy (\%) for short-answer QA averaged across models. Columns are grouped by dataset, with cell colors normalized separately within SQuAD v2 and NQ-Open; greener is higher EM.}
+\caption{Exact-match accuracy (\%) for short-answer QA averaged across models.
+Columns are grouped by dataset, with cell colors normalized separately within
+SQuAD v2 and NQ-Open; greener is higher EM.}
 \label{tab:short-answer-edge-prompt-em}
 \setlength{\tabcolsep}{2.4pt}
 \renewcommand{\arraystretch}{0.92}
@@ -926,58 +964,98 @@ E4-Q4 & \cellcolor[HTML]{E0ECD2}27.8 & \cellcolor[HTML]{F8F1CD}18.8 & \cellcolor
 \end{tabular}%
 \end{table}
 
+Table~\ref{tab:short-answer-edge-prompt-em} makes the task-format effect
+concrete. SQuAD v2 remains near 28--31\% EM under P0 across all edge settings,
+but falls to 2--5\% under P3. NQ-Open is lower overall and shows an additional
+deployment boundary: P0 EM is 8.2--8.4\% under E0/E1 but only 3.3--3.6\% under
+CPU-backed GGUF settings. Thus, SQuAD primarily exposes prompt-contract
+failure, whereas NQ-Open exposes both weak parametric recall and sensitivity to
+the runtime-interface boundary.
 
 \input{tables/correctness_truthfulqa_mc1_heatmap_table}
 
+TruthfulQA-MC1 behaves differently from short-answer QA. Because the model
+selects from explicit options, the output contract is less dependent on span
+formatting or exact surface form. Table~\ref{tab:truthfulqa-mc1-correctness-grid}
+therefore acts as a multiple-choice counterpoint: correctness varies strongly
+by family, but does not show the same universal P3 collapse seen in SQuAD.
 
-\subsection{Task}
-To evaluate the performance of quantized models across various tasks, we utilize MT-bench (Zheng
-et al., 2023), which employs a predefined multi-turn question set to evaluate models across eight
-categories. Figure 9 shows that models with higher bit quantization generally achieve better scores
-across all categories. In contrast, lower-bit quantization still performs well in humanities, writing,
-and extraction tasks. For users with devices that have limited resources, particularly those with less
-than 4GB of memory, 2-bit or 3-bit quantization can still provide an adequate user experience in these
-tasks or for simple Q\&A application
-\begin{figure}
-    \centering
-    \includegraphics[width=1\linewidth]{Figures/fig5_mtbench_category_radar_2x2_family.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
-\end{figure}
+\subsection{Rule-Based Compliance and Hallucination Detection}
+\label{sec:rule-results}
 
-
-
-
-\subsection{halucinatiom}
-
-\input{tables/halueval_model_edge_accuracy_table.tex}
-
-
-
-\subsection{safty}
+IFEval and HaluEval test rule-following and binary judgment behavior rather
+than reference-string matching. We report them at P0 only; their metrics should
+not be interpreted as a P0--P3 prompt sweep. IFEval separates prompt-level and
+instruction-level compliance, while HaluEval asks the model to classify whether
+a response is hallucinated.
 
 \begin{figure*}[t]
     \centering
-
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
         \includegraphics[width=\linewidth]{Figures/fig4_5_ifeval_instr_acc_model_bars.pdf}
-        \caption{Instruction-level accuracy}
+        \caption{Instruction-level accuracy.}
         \label{fig:ifeval-instr-acc}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
         \includegraphics[width=\linewidth]{Figures/fig4_5_ifeval_prompt_acc_model_bars.pdf}
-        \caption{Prompt-level accuracy}
+        \caption{Prompt-level accuracy.}
         \label{fig:ifeval-prompt-acc}
     \end{subfigure}
-
-    \caption{IFEval rule-based instruction-following compliance across edge settings under P0. Bars show model-level accuracy across GPU-backed HF and CPU-backed llama.cpp deployments.}
+    \caption{IFEval rule-based instruction-following compliance across edge
+    settings under P0. The two official IFEval metrics measure different
+    granularities of compliance; \emph{prompt\_acc} is not a PEEL prompt tier.}
     \label{fig:ifeval-compliance-bars}
 \end{figure*}
 
+\input{tables/halueval_model_edge_accuracy_table.tex}
+
+HaluEval does not exhibit the same prompt-tier story as SQuAD or NQ because we
+run it under its judge-style P0 formulation. The model-level table instead
+shows family-specific variation and parser-sensitive binary classification
+behavior. This supports a narrower conclusion: hallucination detection under
+local runtimes should be evaluated with output-aware parsing, but the current
+HaluEval runs do not justify claims about prompt degradation.
+
+\section{Open-Ended Capability}
+\label{sec:open-ended-results}
+
+MT-Bench evaluates open-ended multi-turn instruction following with an LLM
+judge, so we report it separately from reference-scored correctness. The radar
+view in Figure~\ref{fig:mtbench-category-radar} summarizes category-level
+behavior across model families. The main pattern is that open-ended capability
+is more family- and tuning-dependent than purely bit-width-dependent: strong
+instruction-tuned families retain usable scores across several categories,
+whereas weaker families remain low regardless of edge setting.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/fig5_mtbench_category_radar_2x2_family.pdf}
+    \caption{MT-Bench category scores by model family. The radar view shows
+    performance across writing, roleplay, reasoning, math, coding, extraction,
+    STEM, and humanities categories, highlighting family-level differences in
+    open-ended capability.}
+    \label{fig:mtbench-category-radar}
+\end{figure*}
+
+\section{Safety}
+\label{sec:safety-results}
+
+Safety evaluation uses rule-based refusal/compliance diagnostics rather than a
+single accuracy score. HarmBench attack success rate (ASR) is better when
+lower, XSTest safe over-refusal is better when lower, and XSTest unsafe refusal
+is better when higher. Table~\ref{tab:safety-overall-heatmap} reports these
+metrics across E0--E4 and P0/P3.
+
 \input{tables/safety_overall_setting_prompt_heatmap_table.tex}
+
+The overall safety metrics are relatively stable across edge settings compared
+with the dramatic prompt-driven correctness failures in SQuAD. However, the
+metrics should not be collapsed into one scalar: a model can reduce harmful
+compliance while also over-refusing benign prompts. PEEL therefore reports
+HarmBench and XSTest metrics separately to expose this safety--utility tradeoff.
 % \subsection{TruthfulQA-MC1: Quantization-Resilient}
 % \label{sec:tqa}
 
@@ -1378,55 +1456,47 @@ reproducibility and future lower-bound benchmarking research.
 
 \bibliography{references}
 
-
-
-\clearpage
-
-
-
-\begin{figure*}
-    \centering
-    \includegraphics[width=1\linewidth]{fig4_2_throughput_A_per_model.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
-\end{figure*}
-
-\begin{figure*}
-    \centering
-    \includegraphics[width=1\linewidth]{fig4_2_latency_A_per_model.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
-\end{figure*}
-
 \appendix
 
 \section{Appendix: Additional Experimental Details}
 \label{app:details}
 
+\begin{figure*}[t]
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig4_2_throughput_A_per_model.pdf}
+        \caption{Model-wise decode throughput.}
+        \label{fig:app-throughput-model}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig4_2_latency_A_per_model.pdf}
+        \caption{Model-wise latency.}
+        \label{fig:app-latency-model}
+    \end{subfigure}
+    \caption{Model-level runtime efficiency across edge settings. These plots
+    complement the family-level runtime summary in Figure~\ref{fig:runtime-family}.}
+    \label{fig:app-runtime-modelwise}
+\end{figure*}
 
 \begin{figure*}
     \centering
     \includegraphics[width=1\linewidth]{fig5_mtbench_prompt_vs_edge_degradation_family_radar_3x2_no_smollm.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
+    \caption{Family-level MT-Bench degradation from prompt and edge settings.
+    The radar view compares prompt-induced and deployment-induced changes,
+    excluding SmolLM for readability.}
+    \label{fig:app-mtbench-degradation-radar}
 \end{figure*}
 
-\input{tables/correctness_nq_open_heatmap_table}
 \subsection{Full Result Grids and Throughput}
 
-The main text presents SQuAD~v2 as a heatmap (Figure~\ref{fig:collapse}) and
-summarises the other reference-scored grids in prose. For completeness we give
+The main text presents the short-answer QA grid in
+Table~\ref{tab:short-answer-edge-prompt-em} and summarises the other
+reference-scored grids in prose. For completeness we give
 the full $4\times5$ grids here, together with the TruthfulQA heatmap, decode
 throughput, and a consumer-hardware sanity check for the GGUF/CPU pathway.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig1_benchmark_space.pdf}
-  \caption{Schematic of the PEEL 2D evaluation space. Each cell is one
-    experimental condition; colour encodes schematic relative performance drop
-    from the top-left (expert prompt, full-precision) baseline.}
-  \label{fig:space}
-\end{figure}
 
 \begin{figure}[t]
   \centering
@@ -1776,23 +1846,24 @@ paper results come from the scripted benchmark pipeline.
 \begin{figure}
     \centering
     \includegraphics[width=1\linewidth]{Figures/fig4_4_true2d_edge_sequence_nq_open.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
+    \caption{NQ-Open exact-match accuracy along the edge-deployment sequence,
+    shown separately from the overall correctness summary.}
+    \label{fig:app-nq-edge-sequence}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=1\linewidth]{Figures/fig4_4_true2d_edge_sequence_squad_v2.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
+    \caption{SQuAD v2 exact-match accuracy along the edge-deployment sequence.}
+    \label{fig:app-squad-edge-sequence}
 \end{figure}
 
 
 \begin{figure}
     \centering
     \includegraphics[width=1\linewidth]{Figures/fig4_4_true2d_edge_sequence_truthfulqa_mc1.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
+    \caption{TruthfulQA-MC1 accuracy along the edge-deployment sequence.}
+    \label{fig:app-truthfulqa-edge-sequence}
 \end{figure}
 
 
@@ -1800,36 +1871,37 @@ paper results come from the scripted benchmark pipeline.
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{Figures/fig4_4_true2d_prompt_sequence_nq_open}
-    \caption{Caption}
-    \label{fig:placeholder}
+    \caption{NQ-Open exact-match accuracy along the prompt-quality sequence.}
+    \label{fig:app-nq-prompt-sequence}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{Figures/fig4_4_true2d_prompt_sequence_squad_v2.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
+    \caption{SQuAD v2 exact-match accuracy along the prompt-quality sequence.}
+    \label{fig:app-squad-prompt-sequence}
 \end{figure}
 
 
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{Figures/fig4_4_true2d_prompt_sequence_truthfulqa_mc1.pdf}
-    \caption{Caption}
-    \label{fig:placeholder}
+    \caption{TruthfulQA-MC1 accuracy along the prompt-quality sequence.}
+    \label{fig:app-truthfulqa-prompt-sequence}
 \end{figure}
 \input{tables/correctness_nq_open_heatmap_table}
 
 \input{tables/correctness_squad_v2_heatmap_table}
 
 % Requires: \usepackage{booktabs,graphicx} and \usepackage[table]{xcolor}
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{2.5pt}
 \renewcommand{\arraystretch}{0.92}
 \caption{IFEval rule-based instruction-following accuracy (\%) across edge settings under P0. Cell colors are normalized within each metric--edge column across models; greener cells indicate higher compliance.}
 \label{tab:ifeval-model-edge-heatmap}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lccccc|ccccc}
 \toprule
 Model & \multicolumn{5}{c}{Instruction-level accuracy} & \multicolumn{5}{c}{Prompt-level accuracy} \\
@@ -1854,6 +1926,7 @@ TinyLlama-1.1B & \cellcolor[HTML]{F4CCCC}30.4 & \cellcolor[HTML]{F4CCCC}29.9 & \
 InternLM-1.8B & -- & -- & \cellcolor[HTML]{FDEACC}46.2 & \cellcolor[HTML]{FDECCC}46.2 & \cellcolor[HTML]{FCE9CC}44.7 & -- & -- & \cellcolor[HTML]{FCE8CC}35.9 & \cellcolor[HTML]{FDEACC}35.5 & \cellcolor[HTML]{FCE8CC}34.2 \\
 \bottomrule
 \end{tabular}%
-\end{table}
+}
+\end{table*}
 
 \end{document}
