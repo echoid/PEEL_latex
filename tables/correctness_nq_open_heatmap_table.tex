@@ -1,10 +1,10 @@
 % Requires: \usepackage{booktabs}, \usepackage[table]{xcolor}, \usepackage{graphicx}, \usepackage{multirow}
-\begin{table*}[H]
+\begin{table*}[t]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{2.2pt}
 \renewcommand{\arraystretch}{0.92}
-\caption{NQ-Open exact-match accuracy (\%) across edge settings and prompt tiers. Cell color is normalized within each edge-setting block; greener cells indicate higher EM.}
+\caption{NQ-Open token-overlap F1 (\%) across edge settings and prompt tiers. Cell color is normalized within each edge-setting block; greener cells indicate higher F1. Strict exact match is near zero (see Table~\ref{tab:short-answer-true-em}).}
 \label{tab:nq-open-correctness-grid}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{rrrrr|rrrr|rrrr|rrrr|rrrr}

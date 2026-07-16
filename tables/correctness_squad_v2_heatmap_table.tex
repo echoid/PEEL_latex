@@ -1,10 +1,10 @@
 % Requires: \usepackage{booktabs}, \usepackage[table]{xcolor}, \usepackage{graphicx}, \usepackage{multirow}
-\begin{table*}[!]
+\begin{table*}[t]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{2.2pt}
 \renewcommand{\arraystretch}{0.92}
-\caption{SQuAD v2 exact-match accuracy (\%) across edge settings and prompt tiers. Cell color is normalized within each edge-setting block; greener cells indicate higher EM.}
+\caption{SQuAD v2 token-overlap F1 (\%) across edge settings and prompt tiers. Cell color is normalized within each edge-setting block; greener cells indicate higher F1. Strict exact match is substantially lower (see Table~\ref{tab:short-answer-true-em}).}
 \label{tab:squad-v2-correctness-grid}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{rrrrr|rrrr|rrrr|rrrr|rrrr}
