@@ -37,7 +37,7 @@
 %
 % Recommended for better-looking tables
 \usepackage{booktabs}
-
+\usepackage{float}
 %
 % Keep the \pdfinfo as shown here. There's no need
 % for you to add the /Title and /Author tags.
@@ -165,7 +165,7 @@
 \maketitle
 
 \begin{abstract}
-Small language models are increasingly promoted as low-cost, private, and edge-deployable alternatives to cloud-scale LLMs. Yet most evaluations assume favorable conditions: expert-written prompts, clean benchmark inputs, and high-precision inference. This overlooks the lower-bound regime in which small models are used by non-expert users under quantized or compressed deployment. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a lightweight all-in-one automated benchmarking framework for evaluating small language models under joint prompt-quality and edge-deployment constraints. PEEL automates model/config selection, prompt-tier construction, inference, offline scoring, and aggregation across a two-dimensional ladder: prompts range from expert to broken, while deployment ranges from reference GPU inference to low-bit CPU GGUF inference. We evaluate 16 small and efficient models across QA, truthfulness, hallucination discrimination, safety behavior, and multi-turn dialogue. Our results show that prompt degradation is often more damaging than quantization. After controlling for output-scoring artifacts, TruthfulQA accuracy changes by only about one point from full precision to 4-bit inference under expert prompts. In contrast, SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across all models and deployment settings. We also find that prompt robustness is strongly shaped by post-training quality: at matched 1.5B scale, the strongest instruction-tuned hybrid model scores 8.20 on MT-Bench, compared with 4.06 for a same-size Transformer. Finally, keyword-based safety diagnostics show high unsafe compliance, with attack success rates around 20--21\% and only moderate validation agreement. PEEL exposes the gap between clean benchmark performance and ordinary-user edge reliability.
+Small language models are increasingly promoted as low-cost, private, and edge-deployable alternatives to cloud-scale LLMs. Yet most evaluations assume favorable conditions: expert-written prompts, clean benchmark inputs, and high-precision inference. This overlooks the lower-bound regime in which small models are used by non-expert users under quantized or compressed deployment. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a lightweight all-in-one automated benchmarking framework for evaluating small language models under joint prompt-quality and edge-deployment constraints. PEEL automates model/config selection, prompt-tier construction, inference, offline scoring, and aggregation across a two-dimensional ladder: prompts range from expert to broken, while deployment ranges from reference GPU inference to low-bit CPU GGUF inference. We evaluate 16 small and efficient models across QA, truthfulness, hallucination discrimination, safety behavior, and multi-turn dialogue. Our results show that prompt degradation is often more damaging than quantization. After controlling for output-scoring artifacts, TruthfulQA accuracy changes by only about one point from full precision to 4-bit inference under expert prompts. In contrast, SQuAD~v2 exact match falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across all models and deployment settings. We find that prompt robustness is strongly shaped by post-training quality: at matched 1.5B scale, the strongest instruction-tuned hybrid model scores 8.20 on MT-Bench, compared with 4.06 for a same-size Transformer. Finally, keyword-based safety diagnostics show high unsafe compliance, with attack success rates around 20--21\% and only moderate validation agreement. PEEL exposes the gap between clean benchmark performance and ordinary-user edge reliability.
 
 \end{abstract}
 
@@ -662,13 +662,13 @@ metrics after runtime-aware output normalization.}
 \toprule
 \textbf{Task} & \textbf{Dataset} & \textbf{Metric} \\
 \midrule
-Reading comp. & SQuAD v2 & Exact Match (EM), token F1 \\
-Open-domain QA & NQ-Open & Exact Match after answer normalization \\
-Truthfulness & TruthfulQA-MC1 & Multiple-choice letter accuracy \\
-Hallucination & HaluEval-QA/General & Yes/No accuracy \\
-Instruction following & MT-Bench & LLM-judge score, reported separately \\
-Safety behavior & HarmBench / XSTest & Refusal rate and over-refusal rate \\
-Efficiency & All runs & Latency and decode throughput \\
+Reading comp. & SQuAD v2 & Exact Match (EM)\\
+Open QA & NQ-Open & Exact Match (EM)\\
+Truthfulness & TruthfulQA & Letter accuracy \\
+Hallucination & HaluEval & Yes/No accuracy \\
+Instruction following & MT-Bench & LLM-judge score\\
+Safety behavior & HarmBench & Refusal rate rate \\
+Efficiency & All runs & Latency \& decode throughput \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -751,14 +751,10 @@ These settings are deployment conditions rather than pure bit-width labels:
 moving from reference GPU inference to local CPU inference changes not only
 numeric precision, but also runtime implementation, quantization format,
 chat-template handling, stop-token behavior, and resource budget.
-
 \begin{itemize}
-  \item \textbf{E0-REF}: BF16 inference with Hugging Face
-  \texttt{transformers} on GPU. This serves as the reference capability setting,
-  rather than an edge deployment setting.
-  \item \textbf{E1-INT8}: INT8 inference with \texttt{bitsandbytes} on GPU.
-  This isolates GPU-side precision reduction while retaining the Hugging Face
-  inference path.
+  \item \textbf{E0-REF}: BF16 Hugging Face inference on GPU.
+  \item \textbf{E1-INT8}: INT8 Hugging Face inference with
+  \texttt{bitsandbytes} on GPU.
   \item \textbf{E2-Q8}: Q8\_0 GGUF inference with \texttt{llama.cpp} on CPU.
   \item \textbf{E3-Q5}: Q5\_K\_M GGUF inference with \texttt{llama.cpp} on CPU.
   \item \textbf{E4-Q4}: Q4\_K\_M GGUF inference with \texttt{llama.cpp} on CPU.
@@ -805,7 +801,7 @@ change the label space. Thus, when performance drops under weaker prompts, the
 failure indicates difficulty recovering the intended task contract rather than
 absence of evidence.
 
-\begin{table}[t]
+\begin{table}[H]
   \small
   \centering
   \caption{SQuAD v2 prompt templates across PEEL prompt tiers.
@@ -888,60 +884,96 @@ of these measurements is not to rank hardware platforms, but to verify that the
 PEEL edge ladder captures a meaningful deployment pressure in addition to
 accuracy pressure.
 
-\begin{figure*}[t]
+\begin{figure}[H]
     \centering
-    \begin{subfigure}[t]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{fig4_2_throughput_B_family_average_ver2.pdf}
-        \caption{Decode throughput by family and edge setting.}
-        \label{fig:runtime-throughput-family}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{fig4_2_latency_B_family_average.pdf}
-        \caption{Latency by family and edge setting.}
-        \label{fig:runtime-latency-family}
-    \end{subfigure}
-    \caption{Runtime efficiency under the PEEL edge ladder. Family-level
-    aggregation shows that deployment settings produce distinct
-    throughput/latency profiles, motivating the edge axis as a systems stressor
-    rather than only a numerical precision label.}
+    \includegraphics[width=0.9\linewidth]{fig4_2_throughput_B_family_average_ver2.pdf}
+    \caption{Caption}
     \label{fig:runtime-family}
-\end{figure*}
+\end{figure}
 
-\subsection{Deterministic Correctness under Prompt and Edge Perturbations}
+\subsection{Deterministic Correctness across Prompt and Edge Degradation}
 \label{sec:correctness-results}
 
-The clearest separation between prompt effects and deployment effects appears
-in deterministic correctness. Figure~\ref{fig:correctness-sequences} aggregates
-SQuAD v2, NQ-Open, and TruthfulQA-MC1 to show the two PEEL axes from complementary
-directions. Moving along the prompt ladder produces a sharper decline than
-moving along the edge ladder, especially for short-answer tasks that require
-the model to infer a strict output contract.
-
-\begin{figure*}[t]
+\begin{figure}[t]
     \centering
-    \begin{subfigure}[t]{0.49\textwidth}
+
+    \begin{subfigure}[t]{0.9\linewidth}
         \centering
-        \includegraphics[width=\linewidth]{Figures/fig4_4_true2d_edge_sequence_overall_correctness.pdf}
-        \caption{Correctness as deployment quality degrades.}
-        \label{fig:correctness-edge-sequence}
+        \includegraphics[width=\linewidth]
+        {Figures/fig4_4_true2d_prompt_sequence_overall_correctness.pdf}
+        \caption{Prompt sequence.}
+        \label{fig:true2d_prompt_sequence}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[t]{0.49\textwidth}
+    \begin{subfigure}[t]{0.9\linewidth}
         \centering
-        \includegraphics[width=\linewidth]{Figures/fig4_4_true2d_prompt_sequence_overall_correctness.pdf}
-        \caption{Correctness as prompt quality degrades.}
-        \label{fig:correctness-prompt-sequence}
+        \includegraphics[width=\linewidth]
+        {Figures/fig4_4_true2d_edge_sequence_overall_correctness.pdf}
+        \caption{Edge sequence.}
+        \label{fig:true2d_edge_sequence}
     \end{subfigure}
-    \caption{Overall deterministic correctness along the two PEEL axes.
-    Prompt degradation produces the dominant decline, while deployment effects
-    are more task-dependent.}
-    \label{fig:correctness-sequences}
-\end{figure*}
+    \caption{Overall correctness under prompt and edge degradation sequences.}
+    \label{fig:true2d_sequence_overall_correctness}
+\end{figure}
 
-\begin{table}[t]
+The clearest separation between prompt and deployment effects appears in
+deterministic correctness. Figure~\ref{fig:true2d_sequence_overall_correctness}
+aggregates the results on SQuAD v2, NQ-Open, and TruthfulQA-MC1 and presents
+critical-difference plots along the two PEEL axes.
+Figure~\ref{fig:true2d_prompt_sequence} shows the model rankings across the
+prompt sequence, while Figure~\ref{fig:true2d_edge_sequence} shows the
+corresponding rankings across the edge sequence.
+
+Llama-3B and Phi-4M generally occupy the leading positions, although their
+relative rankings vary across perturbation levels. The prompt sequence exhibits
+clearer separation between model groups, with several models changing rank
+substantially from P0 to P3. In contrast, the edge sequence contains broad
+groups of statistically indistinguishable models, despite some systematic rank
+changes across quantisation levels. This pattern suggests that prompt
+perturbations expose stronger differences in model robustness, whereas the
+effects of edge degradation are more homogeneous across models. Nevertheless,
+the critical-difference plots compare models within each perturbation level and do not directly test whether the overall effect of prompt degradation is
+significantly larger than that of edge degradation.
+
+% \input{tables/correctness_truthfulqa_mc1_heatmap_table}
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{0.92}
+\caption{TruthfulQA-MC1 accuracy (\%) across edge settings and prompt tiers. Cell color is normalized within each edge-setting block; greener cells indicate higher accuracy.}
+\label{tab:truthfulqa-mc1-correctness-grid}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rrrrr|rrrr|rrrr|rrrr|rrrr}
+\toprule
+\multirow{2}{*}{Model} & \multicolumn{4}{c}{E0-REF} & \multicolumn{4}{c}{E1-INT8} & \multicolumn{4}{c}{E2-Q8} & \multicolumn{4}{c}{E3-Q5} & \multicolumn{4}{c}{E4-Q4} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13} \cmidrule(lr){14-17} \cmidrule(lr){18-21}
+ & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 \\
+\midrule
+Falcon-H1-Tiny-90M& \cellcolor[HTML]{F9D2CC}21.5 & \cellcolor[HTML]{F8CCCC}17.5 & \cellcolor[HTML]{FAD6CC}24.0 & \cellcolor[HTML]{FBDECC}29.5 & \cellcolor[HTML]{F9CFCC}19.0 & \cellcolor[HTML]{F8CDCC}17.5 & \cellcolor[HTML]{F9D3CC}21.5 & \cellcolor[HTML]{FBDACC}26.5 & \cellcolor[HTML]{FAD5CC}25.0 & \cellcolor[HTML]{F9D2CC}23.0 & \cellcolor[HTML]{F8CECC}20.5 & \cellcolor[HTML]{F9CFCC}21.0 & \cellcolor[HTML]{F9D2CC}23.0 & \cellcolor[HTML]{F9D2CC}23.0 & \cellcolor[HTML]{F8CDCC}20.0 & \cellcolor[HTML]{F9CFCC}21.5 & \cellcolor[HTML]{F8CDCC}19.5 & \cellcolor[HTML]{F8CECC}20.5 & \cellcolor[HTML]{F8CCCC}19.0 & \cellcolor[HTML]{F9D3CC}23.5 \\
+Falcon-H1-0.5B& \cellcolor[HTML]{FEECCC}38.5 & \cellcolor[HTML]{FBDFCC}30.0 & \cellcolor[HTML]{FCE2CC}32.0 & \cellcolor[HTML]{FBDDCC}28.5 & \cellcolor[HTML]{FFF0CC}40.5 & \cellcolor[HTML]{FCE4CC}33.0 & \cellcolor[HTML]{FCE1CC}31.0 & \cellcolor[HTML]{FBDDCC}28.0 & \cellcolor[HTML]{FFF0CC}43.0 & \cellcolor[HTML]{F9D0CC}21.5 & \cellcolor[HTML]{FFF1CC}43.5 & \cellcolor[HTML]{F9D1CC}22.5 & \cellcolor[HTML]{FCF1CC}44.0 & \cellcolor[HTML]{F9D2CC}23.0 & \cellcolor[HTML]{FFF0CC}41.5 & \cellcolor[HTML]{F8CCCC}19.5 & \cellcolor[HTML]{FFF0CC}40.5 & \cellcolor[HTML]{F9D1CC}22.0 & \cellcolor[HTML]{FFF1CC}41.5 & \cellcolor[HTML]{F9D0CC}21.5 \\
+Falcon-H1-Tiny-R-0.6B & \cellcolor[HTML]{F9D3CC}22.0 & \cellcolor[HTML]{F9D2CC}21.5 & \cellcolor[HTML]{F9D4CC}22.5 & \cellcolor[HTML]{F9D1CC}21.0 & \cellcolor[HTML]{F9D4CC}22.0 & \cellcolor[HTML]{FAD5CC}23.0 & \cellcolor[HTML]{F9D2CC}21.0 & \cellcolor[HTML]{F9D2CC}21.0 & \cellcolor[HTML]{FBDCCC}29.5 & \cellcolor[HTML]{FAD4CC}24.5 & \cellcolor[HTML]{F8CECC}20.0 & \cellcolor[HTML]{F9D2CC}23.0 & \cellcolor[HTML]{F8CDCC}20.0 & \cellcolor[HTML]{F9D0CC}22.0 & \cellcolor[HTML]{F8CCCC}19.5 & \cellcolor[HTML]{F8CECC}20.5 & \cellcolor[HTML]{FAD8CC}26.5 & \cellcolor[HTML]{FAD7CC}25.5 & \cellcolor[HTML]{F8CCCC}19.0 & \cellcolor[HTML]{FAD5CC}24.5 \\
+Falcon-H1-1.5B & \cellcolor[HTML]{E2ECCC}57.0 & \cellcolor[HTML]{E1ECCC}57.5 & \cellcolor[HTML]{FFF1CC}42.0 & \cellcolor[HTML]{F7F1CC}46.5 & \cellcolor[HTML]{E1ECCC}56.5 & \cellcolor[HTML]{DAEBCC}60.0 & \cellcolor[HTML]{FEEFCC}40.0 & \cellcolor[HTML]{F7F0CC}46.0 & \cellcolor[HTML]{FAF1CC}46.5 & \cellcolor[HTML]{FAD5CC}25.0 & \cellcolor[HTML]{FCE4CC}35.0 & \cellcolor[HTML]{FAD6CC}25.5 & \cellcolor[HTML]{FBF1CC}44.5 & \cellcolor[HTML]{F9D0CC}22.0 & \cellcolor[HTML]{FCE4CC}34.0 & \cellcolor[HTML]{FAD4CC}24.5 & \cellcolor[HTML]{FDF2CC}43.0 & \cellcolor[HTML]{FAD5CC}24.5 & \cellcolor[HTML]{FCE3CC}33.0 & \cellcolor[HTML]{FAD4CC}24.0 \\
+ Falcon-H1-1.5B-Deep & \cellcolor[HTML]{D5EACC}63.5 & \cellcolor[HTML]{CEE8CC}67.0 & \cellcolor[HTML]{DBEBCC}60.5 & \cellcolor[HTML]{DBEBCC}60.5 & \cellcolor[HTML]{D6EACC}62.0 & \cellcolor[HTML]{CFE9CC}65.5 & \cellcolor[HTML]{DDEBCC}58.5 & \cellcolor[HTML]{D5EACC}62.5 & \cellcolor[HTML]{DCEBCC}61.5 & \cellcolor[HTML]{FEEECC}41.5 & \cellcolor[HTML]{EAEECC}54.5 & \cellcolor[HTML]{F2F0CC}50.5 & \cellcolor[HTML]{D6EACC}61.0 & \cellcolor[HTML]{EFEFCC}49.5 & \cellcolor[HTML]{D8EACC}60.0 & \cellcolor[HTML]{F6F0CC}46.5 & \cellcolor[HTML]{D6EACC}60.5 & \cellcolor[HTML]{E7EDCC}53.0 & \cellcolor[HTML]{DCEBCC}58.0 & \cellcolor[HTML]{EAEECC}51.5 \\
+Qwen-0.5B & \cellcolor[HTML]{FAD6CC}24.0 & \cellcolor[HTML]{F9D3CC}22.0 & \cellcolor[HTML]{F9D2CC}21.5 & \cellcolor[HTML]{F9D3CC}22.0 & \cellcolor[HTML]{F9D4CC}22.0 & \cellcolor[HTML]{FAD6CC}23.5 & \cellcolor[HTML]{F9D4CC}22.0 & \cellcolor[HTML]{FAD7CC}24.5 & \cellcolor[HTML]{FBDDCC}30.0 & \cellcolor[HTML]{F9D1CC}22.0 & \cellcolor[HTML]{F9D0CC}21.5 & \cellcolor[HTML]{F9D4CC}24.0 & \cellcolor[HTML]{FAD8CC}26.5 & \cellcolor[HTML]{FAD8CC}26.5 & \cellcolor[HTML]{FAD4CC}24.5 & \cellcolor[HTML]{FBDACC}28.0 & \cellcolor[HTML]{FBDACC}27.5 & \cellcolor[HTML]{F9CFCC}21.0 & \cellcolor[HTML]{F9D3CC}23.0 & \cellcolor[HTML]{FAD6CC}25.0 \\
+Qwen-1.5B & \cellcolor[HTML]{ECEECC}52.0 & \cellcolor[HTML]{F0EFCC}50.0 & \cellcolor[HTML]{FAF1CC}45.0 & \cellcolor[HTML]{FEEFCC}40.5 & \cellcolor[HTML]{ECEECC}51.5 & \cellcolor[HTML]{F2EFCC}48.5 & \cellcolor[HTML]{FEF2CC}42.5 & \cellcolor[HTML]{FEEDCC}39.0 & \cellcolor[HTML]{ECEECC}53.5 & \cellcolor[HTML]{FDE5CC}35.5 & \cellcolor[HTML]{F9D3CC}23.5 & \cellcolor[HTML]{FBDDCC}30.0 & \cellcolor[HTML]{E9EECC}52.5 & \cellcolor[HTML]{FDE8CC}36.5 & \cellcolor[HTML]{FAD6CC}25.5 & \cellcolor[HTML]{FDE6CC}35.0 & \cellcolor[HTML]{E1ECCC}55.5 & \cellcolor[HTML]{FAD8CC}26.0 & \cellcolor[HTML]{FBDDCC}29.5 & \cellcolor[HTML]{FCE1CC}31.5 \\
+Gemma-1B & \cellcolor[HTML]{FAD8CC}25.5 & \cellcolor[HTML]{FAD8CC}25.5 & \cellcolor[HTML]{FAD9CC}26.0 & \cellcolor[HTML]{FAD8CC}25.5 & \cellcolor[HTML]{FBDECC}29.0 & \cellcolor[HTML]{FBDBCC}27.0 & \cellcolor[HTML]{FBDACC}26.5 & \cellcolor[HTML]{FBDACC}26.0 & \cellcolor[HTML]{F9D1CC}22.5 & \cellcolor[HTML]{F9D0CC}21.5 & \cellcolor[HTML]{F8CECC}20.5 & \cellcolor[HTML]{F9CFCC}21.0 & \cellcolor[HTML]{FAD4CC}24.5 & \cellcolor[HTML]{F8CECC}21.0 & \cellcolor[HTML]{F9CFCC}21.5 & \cellcolor[HTML]{F9CFCC}21.5 & \cellcolor[HTML]{FBDDCC}29.0 & \cellcolor[HTML]{F8CECC}20.5 & \cellcolor[HTML]{F9D2CC}22.5 & \cellcolor[HTML]{FAD4CC}24.0 \\
+Llama-1B & \cellcolor[HTML]{FDE5CC}34.0 & \cellcolor[HTML]{FEEECC}40.0 & \cellcolor[HTML]{FDE6CC}34.5 & \cellcolor[HTML]{FCE3CC}32.5 & \cellcolor[HTML]{FDE8CC}35.5 & \cellcolor[HTML]{FFF2CC}42.0 & \cellcolor[HTML]{FDE8CC}35.5 & \cellcolor[HTML]{FCE0CC}30.0 & \cellcolor[HTML]{FAD7CC}26.0 & \cellcolor[HTML]{F9D1CC}22.0 & \cellcolor[HTML]{FCE1CC}33.0 & \cellcolor[HTML]{FCE0CC}32.5 & \cellcolor[HTML]{FBDCCC}29.0 & \cellcolor[HTML]{F9CFCC}21.5 & \cellcolor[HTML]{FCE1CC}32.0 & \cellcolor[HTML]{FAD8CC}26.5 & \cellcolor[HTML]{FCE0CC}31.0 & \cellcolor[HTML]{F9D1CC}22.0 & \cellcolor[HTML]{FCE3CC}33.0 & \cellcolor[HTML]{F9D1CC}22.0 \\
+Llama-3B & \cellcolor[HTML]{DEECCC}59.0 & \cellcolor[HTML]{CCE8CC}68.0 & \cellcolor[HTML]{DEECCC}59.0 & \cellcolor[HTML]{E5EDCC}55.5 & \cellcolor[HTML]{E0ECCC}57.0 & \cellcolor[HTML]{D1E9CC}64.5 & \cellcolor[HTML]{DEECCC}58.0 & \cellcolor[HTML]{E7EDCC}54.0 & \cellcolor[HTML]{DDEBCC}61.0 & \cellcolor[HTML]{FBF1CC}46.0 & \cellcolor[HTML]{FFF0CC}43.0 & \cellcolor[HTML]{FDE6CC}36.0 & \cellcolor[HTML]{D6EACC}61.0 & \cellcolor[HTML]{F6F0CC}46.5 & \cellcolor[HTML]{F3F0CC}48.0 & \cellcolor[HTML]{FEEBCC}38.5 & \cellcolor[HTML]{DCEBCC}58.0 & \cellcolor[HTML]{F6F0CC}46.0 & \cellcolor[HTML]{FDF2CC}43.0 & \cellcolor[HTML]{FEECCC}38.5 \\
+Phi-3.5Mini & \cellcolor[HTML]{CEE8CC}67.0 & \cellcolor[HTML]{CCE8CC}68.0 & \cellcolor[HTML]{E6EDCC}55.0 & \cellcolor[HTML]{D5EACC}63.5 & \cellcolor[HTML]{CFE9CC}65.5 & \cellcolor[HTML]{CCE8CC}67.0 & \cellcolor[HTML]{EFEFCC}50.0 & \cellcolor[HTML]{D2E9CC}64.0 & \cellcolor[HTML]{D1E9CC}67.0 & \cellcolor[HTML]{FDF2CC}45.0 & \cellcolor[HTML]{FEEFCC}42.0 & \cellcolor[HTML]{FDE7CC}37.0 & \cellcolor[HTML]{D6EACC}61.0 & \cellcolor[HTML]{DCEBCC}58.5 & \cellcolor[HTML]{E1ECCC}56.0 & \cellcolor[HTML]{D9EBCC}59.5 & \cellcolor[HTML]{CCE8CC}65.0 & \cellcolor[HTML]{D5EACC}61.0 & \cellcolor[HTML]{EDEFCC}50.0 & \cellcolor[HTML]{DEEBCC}57.0 \\
+Phi-4Mini & \cellcolor[HTML]{D5EACC}63.5 & \cellcolor[HTML]{CFE9CC}66.5 & \cellcolor[HTML]{D6EACC}63.0 & \cellcolor[HTML]{D3E9CC}64.5 & \cellcolor[HTML]{D3E9CC}63.5 & \cellcolor[HTML]{CEE8CC}66.0 & \cellcolor[HTML]{D2E9CC}64.0 & \cellcolor[HTML]{CFE9CC}65.5 & \cellcolor[HTML]{CCE8CC}69.5 & \cellcolor[HTML]{ECEECC}53.5 & \cellcolor[HTML]{FEEDCC}41.0 & \cellcolor[HTML]{F1EFCC}51.0 & \cellcolor[HTML]{CCE8CC}65.5 & \cellcolor[HTML]{E8EDCC}53.0 & \cellcolor[HTML]{FBF1CC}44.5 & \cellcolor[HTML]{FFF1CC}42.0 & \cellcolor[HTML]{D3E9CC}62.0 & \cellcolor[HTML]{F7F0CC}45.5 & \cellcolor[HTML]{F7F0CC}45.5 & \cellcolor[HTML]{E8EDCC}52.5 \\
+SmolLM-360M & \cellcolor[HTML]{FAD5CC}23.5 & \cellcolor[HTML]{F8CECC}18.5 & \cellcolor[HTML]{F8CECC}19.0 & \cellcolor[HTML]{F8CECC}18.5 & \cellcolor[HTML]{FAD5CC}23.0 & \cellcolor[HTML]{F9D0CC}19.5 & \cellcolor[HTML]{FAD6CC}23.5 & \cellcolor[HTML]{F9D4CC}22.0 & \cellcolor[HTML]{F8CECC}20.5 & \cellcolor[HTML]{F9D1CC}22.5 & \cellcolor[HTML]{F9CFCC}21.0 & \cellcolor[HTML]{F9CFCC}21.0 & \cellcolor[HTML]{F8CDCC}20.0 & \cellcolor[HTML]{F8CECC}21.0 & \cellcolor[HTML]{F9D1CC}22.5 & \cellcolor[HTML]{F9D0CC}22.0 & \cellcolor[HTML]{F8CECC}20.0 & \cellcolor[HTML]{F9D1CC}22.0 & \cellcolor[HTML]{F8CECC}20.0 & \cellcolor[HTML]{F8CECC}20.0 \\
+SmolLM-1.7B & \cellcolor[HTML]{FAD6CC}24.0 & \cellcolor[HTML]{FDE9CC}36.5 & \cellcolor[HTML]{FBDACC}27.0 & \cellcolor[HTML]{FCE3CC}32.5 & \cellcolor[HTML]{FAD7CC}24.0 & \cellcolor[HTML]{FDE6CC}34.0 & \cellcolor[HTML]{FAD7CC}24.5 & \cellcolor[HTML]{FCDFCC}29.5 & \cellcolor[HTML]{F9D1CC}22.0 & \cellcolor[HTML]{F9D1CC}22.0 & \cellcolor[HTML]{F8CCCC}19.0 & \cellcolor[HTML]{F9D1CC}22.0 & \cellcolor[HTML]{F8CDCC}20.0 & \cellcolor[HTML]{F9D0CC}22.0 & \cellcolor[HTML]{F8CDCC}20.0 & \cellcolor[HTML]{F8CECC}21.0 & \cellcolor[HTML]{F9CFCC}21.0 & \cellcolor[HTML]{F9D2CC}22.5 & \cellcolor[HTML]{F9CFCC}21.0 & \cellcolor[HTML]{F8CECC}20.0 \\
+TinyLlama-1.1B & \cellcolor[HTML]{F9D0CC}20.0 & \cellcolor[HTML]{F9D0CC}20.0 & \cellcolor[HTML]{F8CECC}18.5 & \cellcolor[HTML]{FAD4CC}23.0 & \cellcolor[HTML]{F9D1CC}20.0 & \cellcolor[HTML]{FAD7CC}24.0 & \cellcolor[HTML]{F8CCCC}17.0 & \cellcolor[HTML]{F9D2CC}21.0 & \cellcolor[HTML]{FAD4CC}24.5 & \cellcolor[HTML]{F8CECC}20.0 & \cellcolor[HTML]{F8CECC}20.5 & \cellcolor[HTML]{F9D0CC}21.5 & \cellcolor[HTML]{F9CFCC}21.5 & \cellcolor[HTML]{F8CCCC}19.5 & \cellcolor[HTML]{F9D2CC}23.0 & \cellcolor[HTML]{F9D3CC}23.5 & \cellcolor[HTML]{F9D2CC}22.5 & \cellcolor[HTML]{F8CECC}20.0 & \cellcolor[HTML]{FBDACC}27.5 & \cellcolor[HTML]{F9D2CC}22.5 \\
+InternLM-1.8B & \cellcolor[HTML]{FFF1CC}42.0 & \cellcolor[HTML]{FEEECC}40.0 & \cellcolor[HTML]{FEEACC}37.5 & \cellcolor[HTML]{FDE7CC}35.5 & \cellcolor[HTML]{FFF2CC}42.0 & \cellcolor[HTML]{FEEECC}39.5 & \cellcolor[HTML]{FEECCC}38.0 & \cellcolor[HTML]{FDEACC}36.5 & \cellcolor[HTML]{FEEACC}39.0 & \cellcolor[HTML]{FDE6CC}36.0 & \cellcolor[HTML]{FCE3CC}34.5 & \cellcolor[HTML]{FBDDCC}30.5 & \cellcolor[HTML]{FEEFCC}40.5 & \cellcolor[HTML]{FEEECC}40.0 & \cellcolor[HTML]{FDE6CC}35.0 & \cellcolor[HTML]{FCE1CC}32.0 & \cellcolor[HTML]{FDE7CC}35.5 & \cellcolor[HTML]{FCE0CC}31.0 & \cellcolor[HTML]{FFF0CC}40.5 & \cellcolor[HTML]{FDE5CC}34.0 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+
+\begin{table}[H]
 \centering
 \caption{Exact-match accuracy (\%) for short-answer QA averaged across models.
 Columns are grouped by dataset, with cell colors normalized separately within
@@ -964,32 +996,35 @@ E4-Q4 & \cellcolor[HTML]{E0ECD2}27.8 & \cellcolor[HTML]{F8F1CD}18.8 & \cellcolor
 \end{tabular}%
 \end{table}
 
-Table~\ref{tab:short-answer-edge-prompt-em} makes the task-format effect
-concrete. SQuAD v2 remains near 28--31\% EM under P0 across all edge settings,
-but falls to 2--5\% under P3. NQ-Open is lower overall and shows an additional
-deployment boundary: P0 EM is 8.2--8.4\% under E0/E1 but only 3.3--3.6\% under
-CPU-backed GGUF settings. Thus, SQuAD primarily exposes prompt-contract
-failure, whereas NQ-Open exposes both weak parametric recall and sensitivity to
-the runtime-interface boundary.
+More specifically, Table~\ref{tab:short-answer-edge-prompt-em}
+reports task- and dataset-level performance averaged across models.
+For SQuAD v2, exact-match accuracy remains close to 28--31\% under P0
+across all edge settings, but drops sharply to 2--5\% under P3.
+NQ-Open is more difficult overall and exhibits an additional deployment
+boundary: P0 EM is 8.2--8.4\% under E0/E1, but decreases to 3.3--3.6\%
+under the GGUF-based edge settings. Across both datasets, the decline from P0 to P3 is substantially larger than the variation across edge levels within the same prompt tier.
+This suggests that short-answer generation tasks are particularly
+sensitive to prompt degradation, as weaker prompts make the task
+instruction and expected answer format less explicit. Edge degradation
+still affects performance, especially on NQ-Open, but its effect is less
+uniform and generally smaller than the prompt-induced decline.
 
-\input{tables/correctness_truthfulqa_mc1_heatmap_table}
+
 
 TruthfulQA-MC1 behaves differently from short-answer QA. Because the model
-selects from explicit options, the output contract is less dependent on span
-formatting or exact surface form. Table~\ref{tab:truthfulqa-mc1-correctness-grid}
-therefore acts as a multiple-choice counterpoint: correctness varies strongly
-by family, but does not show the same universal P3 collapse seen in SQuAD.
+selects from explicit answer options, the output contract is less dependent on span extraction, answer formatting, or exact surface form. To examine this
+difference in greater detail, Table~\ref{tab:truthfulqa-mc1-correctness-grid}
+reports the performance of each individual model across all prompt and edge
+settings.
+The table provides a multiple-choice counterpoint to the short-answer results.
+Accuracy varies substantially across model families, but there is no universal collapse at P3 comparable to that observed on SQuAD v2 and NQ-Open. Several models nevertheless exhibit stronger prompt sensitivity under the more constrained E2--E4 settings. For example, Falcon-H1-1.5B, Qwen-1.5B, and
+Llama-3B show substantial declines from P0 to the weaker prompt tiers, while
+Falcon-H1-0.5B displays large but non-monotonic fluctuations across prompt
+tiers. Phi-3.5Mini is sensitive under E2, but remains comparatively stable under E3 and E4. These results indicate that prompt and edge degradation interact in a model-dependent manner rather than producing a uniform multiple-choice
+failure pattern.
 
-\subsection{Rule-Based Compliance and Hallucination Detection}
-\label{sec:rule-results}
 
-IFEval and HaluEval test rule-following and binary judgment behavior rather
-than reference-string matching. We report them at P0 only; their metrics should
-not be interpreted as a P0--P3 prompt sweep. IFEval separates prompt-level and
-instruction-level compliance, while HaluEval asks the model to classify whether
-a response is hallucinated.
-
-\begin{figure*}[t]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
@@ -1008,9 +1043,28 @@ a response is hallucinated.
     settings under P0. The two official IFEval metrics measure different
     granularities of compliance; \emph{prompt\_acc} is not a PEEL prompt tier.}
     \label{fig:ifeval-compliance-bars}
-\end{figure*}
+\end{figure}
+\subsection{Rule-Based Compliance and Hallucination Detection}
+\label{sec:rule-results}
 
-\input{tables/halueval_model_edge_accuracy_table.tex}
+IFEval and HaluEval evaluate rule-following and binary hallucination
+classification rather than reference-string matching. Both tasks are evaluated
+under P0 only and therefore do not constitute a P0--P3 prompt sweep. IFEval
+reports instruction-level and prompt-level compliance, while HaluEval measures
+whether a model can identify hallucinated responses.
+
+The IFEval results show that differences between model families are generally
+larger than the changes across edge settings, with most models maintaining
+similar relative performance under quantisation. HaluEval-General exhibits a
+clearer edge effect for several models, whereas HaluEval-QA varies less
+consistently across edge settings. Overall, rule-based performance is primarily
+model-dependent, although edge degradation affects some models more strongly
+than others. Detailed model-level HaluEval results are provided in
+Appendix~\ref{app:halueval-results}.
+
+
+
+
 
 HaluEval does not exhibit the same prompt-tier story as SQuAD or NQ because we
 run it under its judge-style P0 formulation. The model-level table instead
@@ -1018,27 +1072,31 @@ shows family-specific variation and parser-sensitive binary classification
 behavior. This supports a narrower conclusion: hallucination detection under
 local runtimes should be evaluated with output-aware parsing, but the current
 HaluEval runs do not justify claims about prompt degradation.
-
-\section{Open-Ended Capability}
-\label{sec:open-ended-results}
-
-MT-Bench evaluates open-ended multi-turn instruction following with an LLM
-judge, so we report it separately from reference-scored correctness. The radar
-view in Figure~\ref{fig:mtbench-category-radar} summarizes category-level
-behavior across model families. The main pattern is that open-ended capability
-is more family- and tuning-dependent than purely bit-width-dependent: strong
-instruction-tuned families retain usable scores across several categories,
-whereas weaker families remain low regardless of edge setting.
-
-\begin{figure*}[t]
+\begin{figure}[t]
     \centering
-    \includegraphics[width=\textwidth]{Figures/fig5_mtbench_category_radar_2x2_family.pdf}
+    \includegraphics[width=0.49\textwidth]{Figures/fig5_mtbench_category_radar_2x2_family.pdf}
     \caption{MT-Bench category scores by model family. The radar view shows
     performance across writing, roleplay, reasoning, math, coding, extraction,
     STEM, and humanities categories, highlighting family-level differences in
     open-ended capability.}
     \label{fig:mtbench-category-radar}
-\end{figure*}
+\end{figure}
+\section{Open-Ended Capability}
+\label{sec:open-ended-results}
+
+MT-Bench evaluates open-ended multi-turn instruction following with an LLM
+judge and is therefore reported separately from reference-scored correctness.
+Figure~\ref{fig:mtbench-category-radar} summarizes category-level performance
+under the two extreme prompt and edge settings.
+
+InternLM and Gemma show the strongest overall performance across categories.
+The Falcon-H1 models exhibit a clearer contraction under edge degradation,
+whereas the Llama models appear more sensitive to the E0-to-E4 transition than to prompt degradation alone. InternLM is comparatively robust and even improves on reasoning under P3 relative to P0, indicating that prompt degradation does
+not affect every model or category monotonically. Overall, MT-Bench performance
+is strongly model- and category-dependent rather than being determined solely
+by quantisation level.
+
+
 
 \section{Safety}
 \label{sec:safety-results}
@@ -1051,389 +1109,14 @@ metrics across E0--E4 and P0/P3.
 
 \input{tables/safety_overall_setting_prompt_heatmap_table.tex}
 
-The overall safety metrics are relatively stable across edge settings compared
-with the dramatic prompt-driven correctness failures in SQuAD. However, the
-metrics should not be collapsed into one scalar: a model can reduce harmful
-compliance while also over-refusing benign prompts. PEEL therefore reports
-HarmBench and XSTest metrics separately to expose this safety--utility tradeoff.
-% \subsection{TruthfulQA-MC1: Quantization-Resilient}
-% \label{sec:tqa}
-
-% Across all 1,088 qualifying runs (16 models, num\_examples $\geq$ 100),
-% TruthfulQA-MC1 mean accuracy at the expert baseline (P0, E0-REF) is 39.7\%;
-% it is 39.4\% at E1-INT8 and settles at 38.4--40.1\% at E2--E4. All cells remain
-% well above the 25.0\% chance baseline. Crucially, quantization from E0 to E4
-% changes P0 accuracy by only $-$1.1\,pp---E0-REF 39.7\% (95\% CI [30.9, 48.9])
-% and E4-Q4 38.6\% [31.0, 46.8] have heavily overlapping intervals---and the
-% P0$\to$P3 drop within any single setting stays under 12\,pp: a \emph{near-zero
-% interaction} between the two degradation axes for this task type.
-
-% One notable pattern (Table~\ref{tab:tqa_grid}): at E2--E4 (CPU/llama.cpp),
-% the P1 ``casual'' prompt tier scores \emph{lower} than at E0/E1
-% (29.1--31.6\% vs.\ 40.6--41.0\%), while P0 is unaffected.
-% We interpret this as a runtime-interface sensitivity rather than a pure
-% bit-width effect: casual prompts that omit explicit format instructions rely
-% more heavily on the serving stack preserving the model's expected
-% instruction-following interface, including template handling, tokenization,
-% decoding defaults, and output formatting.
-
-% This pattern is useful because it separates two hypotheses. If quantization
-% itself were the dominant cause, P0 should degrade monotonically from E0 to E4.
-% Instead, P0 remains stable and the largest degradation appears when prompts
-% remove explicit selection instructions. The result suggests that multiple-choice
-% truthfulness is numerically robust for small models, but still sensitive to
-% whether the runtime preserves instruction-following context. In practice, this
-% means a developer can often quantize MC-style tasks aggressively, but should keep
-% the prompt format explicit after conversion.
-
-% \begin{table}[t]
-%   \small\centering
-%   \caption{TruthfulQA-MC1 mean accuracy (\%) in the full 4$\times$5 grid.
-%     Random-chance baseline: 25.0\%.}
-%   \label{tab:tqa_grid}
-%   \begin{tabular}{@{}lcccc@{}}
-%     \toprule
-%     Setting & P0 & P1 & P2 & P3 \\
-%     \midrule
-%     E0-REF  & 39.7 & 40.6 & 36.6 & 37.6 \\
-%     E1-INT8 & 39.4 & 41.0 & 35.7 & 37.3 \\
-%     E2-Q8   & 40.1 & 29.1 & 30.1 & 28.8 \\
-%     E3-Q5   & 38.4 & 31.6 & 33.0 & 30.1 \\
-%     E4-Q4   & 38.6 & 30.2 & 32.9 & 30.8 \\
-%     \bottomrule
-%   \end{tabular}
-% \end{table}
-
-% \subsection{SQuAD v2: Prompt-Driven Collapse}
-% \label{sec:collapse}
-
-% \begin{figure}[t]
-%   \centering
-%   \includegraphics[width=\columnwidth]{Figures/fig1_squad_heatmap.pdf}
-%   \caption{\textbf{Prompt quality, not quantization, drives SQuAD failure.}
-%     SQuAD~v2 exact match (\%) across prompt-quality tiers P0--P3 and edge
-%     settings E0--E4. P0 remains stable across deployment settings, while P3
-%     falls to 2--5\% across the grid.}
-%   \label{fig:collapse}
-% \end{figure}
-
-% After correcting for an EOS/stop-token scoring artefact (Section~\ref{sec:discussion}),
-% SQuAD v2 EM at P0 is stable at 27.8--30.5\% across all five edge settings,
-% with no significant capability cliff at the E1$\to$E2 (\texttt{llama.cpp})
-% boundary (full grid in appendix Table~\ref{tab:squad_grid};
-% the heatmap in Figure~\ref{fig:collapse} visualises the same data).
-% The \emph{dominant failure mode is prompt degradation}, not quantization:
-% EM falls to 2--5\% at P3 for \emph{all} models and settings---a near-total
-% collapse of roughly $10\times$ from P0. Pooled over settings, P0 EM is 29.6\%
-% (95\% CI [22.7, 36.5]) versus 3.2\% [2.8, 3.7] at P3; the non-overlapping
-% intervals make prompt degradation the statistically unambiguous driver. The
-% degradation is monotonic but not uniform: P1 still retains 17--21\%, whereas P2
-% and P3 drop to 3--6\% and 2--5\%, so the cliff lies between P1 and P2.
-
-% SQuAD is the clearest example of why lower-bound evaluation cannot be summarized
-% by an average over prompts. Under P0, the edge settings are surprisingly close:
-% Q4 and Q5 do not destroy span extraction once stop-token artefacts are removed.
-% Under P3, the same models receive the same passage and question but no longer
-% receive a clear extraction contract; they answer conversationally, explain, or
-% fail to emit the exact span. Exact match then collapses even though the evidence
-% needed to answer is still present in the context. This is not a generic
-% ``small models are bad'' result. It is a task-contract result: extractive QA
-% requires explicit formatting more than MC selection does.
-
-% \subsection{NQ-Open: Recall Halves at the GPU$\to$CPU Boundary}
-% \label{sec:nq}
-
-% Natural Questions Open reveals a qualitatively different failure mode from SQuAD.
-% At E0-REF, mean P0 EM is 8.2\% (8.4\% at E1-INT8), with the strongest models
-% (Phi-4-Mini, Llama-3.2-3B, Falcon-H1-1.5B-Deep) reaching 12--18\%. At E2--E4
-% (llama.cpp CPU), P0 EM roughly \emph{halves} to \textbf{3.3--3.6\%} across all
-% prompt tiers (P0 8.3\% [5.8, 10.8] at E0/E1 vs.\ 3.5\% [2.4, 4.8] at E2--E4,
-% non-overlapping; full grid in appendix Table~\ref{tab:nq_grid}).
-
-% The E1$\to$E2 drop should be read as a runtime-interface boundary rather than a
-% clean quantization-only effect. To test the simplest explanation, we ran a
-% targeted P0 ablation for NQ-Open: raw GPU-style prompting (E0-raw) averages
-% 4.3\% EM, the standard E2-Q8 path averages 3.3\%, and an E2-Q8 variant with
-% explicit chat-template formatting (E2-Q8-CT) averages 1.4\%. Thus, restoring a
-% chat template alone does \emph{not} recover the lost recall. The boundary likely
-% combines several factors---GGUF conversion, tokenizer/runtime differences,
-% decoding defaults, output formatting, and the weak parametric recall of sub-4B
-% models without retrieval.
-% This finding highlights a key distinction between knowledge-intensive
-% open-domain QA and reading comprehension: NQ-Open is sensitive to the deployment
-% interface even under expert prompting, but the current evidence does not isolate
-% one mechanism.
-
-% The NQ result should be read conservatively: exact match is harsh and the modest
-% E0/E1 scores ($\sim$8\%) show these models store limited factual knowledge without
-% retrieval. Still, the halving to $\sim$3.5\% at E2--E4 marks a deployment boundary
-% where much of that recall is lost, so small local models are weak standalone
-% factual QA systems without retrieval augmentation.
-
-% \subsection{HaluEval: Binary Classification and Parser Artefacts}
-% \label{sec:halueval}
-
-% HaluEval provides a binary hallucination-detection counterpoint to SQuAD and
-% NQ-Open. Under the corrected first-line parser, HaluEval-General decreases
-% from 52.2\% at E0-REF to 43.5\% at E4-Q4, while HaluEval-QA stays in the
-% 38--47\% range across settings (Table~\ref{tab:halueval_grid}). These results
-% show degradation, but not the near-total P3-style collapse observed for SQuAD.
-
-% \begin{table*}[t]
-% \centering
-% \caption{Family-level HaluEval hallucination classification accuracy (\%) across edge settings under P0. Higher is better.}
-% \label{tab:halueval-family-edge-accuracy}
-% \begin{tabular}{llccccc}
-% \toprule
-% Dataset & Family & E0-REF & E1-INT8 & E2-Q8 & E3-Q5 & E4-Q4 \\
-% \midrule
-% HaluEval-General & Falcon-H1 & 57.0 & 56.1 & 49.4 & 38.7 & 31.7 \\
-% HaluEval-General & Gemma & 59.5 & 60.0 & 26.5 & 28.0 & 41.5 \\
-% HaluEval-General & InternLM & -- & -- & 63.0 & 62.5 & 46.0 \\
-% HaluEval-General & Llama & 29.2 & 32.0 & 51.8 & 51.0 & 51.2 \\
-% HaluEval-General & Phi & 80.0 & 79.5 & 77.8 & 80.8 & 76.8 \\
-% HaluEval-General & Qwen & 79.2 & 77.5 & 52.8 & 48.2 & 41.5 \\
-% HaluEval-General & SmolLM & 26.0 & 25.0 & 41.2 & 39.5 & 40.0 \\
-% HaluEval-General & TinyLlama & 9.5 & 10.5 & 28.5 & 21.5 & 31.0 \\
-% HaluEval-QA & Falcon-H1 & 37.5 & 38.4 & 47.0 & 45.0 & 35.9 \\
-% HaluEval-QA & Gemma & 44.5 & 46.0 & 56.0 & 55.0 & 54.0 \\
-% HaluEval-QA & InternLM & -- & -- & 44.0 & 49.5 & 48.0 \\
-% HaluEval-QA & Llama & 25.5 & 25.8 & 50.5 & 53.5 & 53.5 \\
-% HaluEval-QA & Phi & 42.8 & 44.0 & 45.0 & 45.8 & 44.8 \\
-% HaluEval-QA & Qwen & 50.5 & 51.5 & 48.5 & 47.0 & 52.0 \\
-% HaluEval-QA & SmolLM & 49.5 & 50.0 & 38.5 & 39.2 & 33.8 \\
-% HaluEval-QA & TinyLlama & 5.0 & 13.0 & 56.5 & 54.5 & 52.5 \\
-% \bottomrule
-% \end{tabular}
-% \end{table*}
-
-% The uncorrected parser marked 50--62\% of E2--E4 responses as ambiguous because
-% verbose outputs repeated the task instruction---which contains both ``yes'' and
-% ``no''---after the answer; first-line parsing recovers 44--51\% accuracy, making
-% HaluEval a second \texttt{llama.cpp}-specific artefact rather than a capability
-% loss. The corrected scores remain close to a weak binary classifier, so the key
-% result is methodological: without output-aware parsing, any benchmark whose
-% prompt embeds the label words can turn a usable answer into an ambiguous label.
-% We therefore treat parser specification as part of the benchmark protocol.
-
-% \subsection{MT-Bench: Instruction Following Under Degradation}
-% \label{sec:mtbench}
-
-% We evaluate MT-Bench (80 multi-turn questions, 8 categories) with GPT-4o-mini
-% as judge at all five edge settings and two prompt tiers (P0, P3), totalling
-% 156 scored runs. Coverage is not perfectly rectangular: InternLM and Phi have
-% partial setting coverage due to tokenizer and chat-template failures.
-
-% \begin{figure}[t]
-%   \centering
-%   \includegraphics[width=\columnwidth]{Figures/fig3_mtbench_family_bar.pdf}
-%   \caption{MT-Bench scores at E0-REF/P0 (solid) and P3 (transparent) per model,
-%     colored by family. The strongest models (Phi-3.5, Falcon-H1-1.5B) reach
-%     ${\sim}$8 at E0-REF, with Gemma, InternLM, and Phi-4 close behind; the
-%     weakest baselines (Qwen, SmolLM, TinyLlama) fall below 4.}
-%   \label{fig:mtbench_bar}
-% \end{figure}
-
-% Setting-level means (appendix Table~\ref{tab:app_mtbench_setting})
-% range from 4.63 (E4-Q4, P0) to 5.65 (E0-REF, P0), a ${\sim}$1-point spread. The
-% E2+ decline is concentrated in families whose chat template \texttt{llama.cpp}
-% does not apply (notably Phi, which falls from ${\sim}$8 at E0/E1 to ${\sim}$4 at
-% E2--E4); robustly-served families change little. Informal prompting has little
-% effect: the P0$\to$P3 drop is at most 0.21 points at any single setting.
-% Because Phi is a dense Transformer rather than an SSM-Hybrid model, this
-% GPU-to-CPU collapse points to the runtime-interface boundary itself---especially
-% missing chat-template handling---rather than to Falcon-H1-specific architecture.
-
-% This MT-Bench pattern contrasts with SQuAD. Open-ended instruction following is
-% less dependent on exact output form, so informal prompts usually reduce score
-% gradually rather than catastrophically. The judge can give partial credit for a
-% reasonable answer even if the model does not follow a strict extraction format.
-% Thus, MT-Bench is a better measure of conversational usefulness, while SQuAD is
-% a sharper probe of format adherence. Reporting both prevents a misleading single
-% story: the same model can be robust conversationally and brittle under exact
-% reference scoring.
-
-% \subsection{Architecture Family Comparison on MT-Bench}
-% \label{sec:arch}
-
-% At E0-REF/P0, several families reach the top band: Phi-3.5 and Falcon-H1-1.5B
-% both score ${\sim}$8.2, with Gemma-3-1B (family mean 7.40) and Phi-4 close
-% behind, while Qwen, SmolLM, and TinyLlama sit below 4. We therefore do
-% \emph{not} claim Falcon-H1 is strongest overall. Our sharpest architecture
-% result is a \emph{matched-scale} one: at 1.5B parameters, Falcon-H1-1.5B scores
-% \textbf{8.20} versus Qwen2.5-1.5B at \textbf{4.06} (a 4.14-point gap), isolating
-% architecture from parameter count.
-
-% Prompt degradation barely moves judged quality for the stronger families. From
-% P0 to P3, Falcon-H1 loses only $\mathbf{0.11}$ points as a family average (the
-% flagship Falcon-H1-1.5B is flat, 8.08$\to$8.20 over settings), and Gemma,
-% InternLM, and Phi are similarly stable ($|\Delta|\le0.11$). The clearest
-% degradation is among weaker Transformer baselines: Qwen2.5-1.5B drops from
-% 4.17 to 3.60 ($-$0.57) and Llama by 0.30. Prompt robustness therefore tracks
-% \emph{instruction-following quality} more than a single architecture: Falcon-H1
-% is robust, but so are the strong dense Transformers (Gemma, Phi).
-
-% We avoid a mechanistic claim. The experiment does not ablate Falcon-H1's
-% internal modules, and because non-SSM families (Gemma, Phi) are equally
-% prompt-robust, the data do not support attributing robustness to the SSM
-% component. The defensible benchmark-level statement is narrower: at matched
-% scale and under identical tasks, judge, tiers, and settings, Falcon-H1 reaches
-% the top band and resists prompt degradation, whereas a same-size dense
-% Transformer (Qwen2.5-1.5B) does neither.
-
-% \begin{table}[t]
-%   \small\centering
-%   \caption{MT-Bench mean score by family and P0$\to$P3 delta.
-%     InternLM and Phi have partial setting coverage.}
-%   \label{tab:mtbench_arch}
-%   \begin{tabular}{@{}lccc@{}}
-%     \toprule
-%     Family & P0 & P3 & $\Delta$ (P0$\to$P3) \\
-%     \midrule
-%     Gemma       & 7.40 & 7.28 & $-$0.11 \\
-%     InternLM    & 6.78 & 6.69 & $-$0.09 \\
-%     Falcon-H1   & 6.44 & 6.33 & $-$0.11 \\
-%     Phi         & 5.65 & 5.70 & $+$0.04 \\
-%     Llama       & 4.32 & 4.03 & $-$0.30 \\
-%     Qwen        & 3.61 & 3.34 & $-$0.27 \\
-%     SmolLM      & 3.09 & 2.90 & $-$0.19 \\
-%     TinyLlama   & 2.55 & 2.49 & $-$0.06 \\
-%     \bottomrule
-%   \end{tabular}
-% \end{table}
-
-% \subsection{Safety Alignment Under Edge Deployment}
-% \label{sec:safety}
-
-% We additionally evaluate safety behaviour with HarmBench-style unsafe prompts
-% and safe control prompts. The current keyword-based classifier assigns each
-% response to \textsc{Refuse}, \textsc{Comply}, or \textsc{Ambiguous}, so we report
-% attack success rate (ASR; unsafe prompts classified as \textsc{Comply}) as a
-% diagnostic rather than a full policy judgment. Across model--setting pairs, ASR
-% is roughly \textbf{20--21\%} on unsafe prompts, with many additional responses
-% falling into the ambiguous category. In other words, a non-trivial share of
-% unsafe prompts receive compliant responses, and no deployment condition removes
-% this risk. This indicates that safety behaviour at this scale remains fragile
-% under edge deployment.
-
-% \begin{figure}[t]
-%   \centering
-%   \includegraphics[width=\columnwidth]{Figures/fig5_safety_heatmap.pdf}
-%   \caption{Keyword-based safety attack success rate (ASR) across model--setting
-%     pairs. Edge deployment does not induce a consistent safety trend: some
-%     models become more compliant under quantization, while others over-refuse
-%     benign prompts.}
-%   \label{fig:safety}
-% \end{figure}
-
-% The most concerning result is not a specific quantization effect but the
-% persistent unsafe-compliance signal. Quantization does not move ASR in a
-% consistent direction---some models become more compliant under compression while
-% others become more conservative---so edge conversion neither systematically
-% improves nor systematically degrades safety. Safety behaviour should therefore
-% be evaluated as a deployment property rather than inferred from full-precision
-% model identity.
-
-% This result also cautions against treating refusal rate alone as alignment
-% quality. A higher refusal rate may indicate safer behaviour on unsafe prompts,
-% but it may also indicate over-refusal on benign prompts; conversely, a low
-% refusal rate may reflect helpfulness on safe prompts or unsafe compliance. For
-% this reason, we also measure over-refusal on safe control prompts (Appendix) and
-% keep the classifier as a diagnostic tool rather than a final safety benchmark.
-% The rates must be read jointly: unsafe compliance is a safety concern precisely
-% because it is not accompanied by uniformly high helpfulness on safe prompts. To
-% check the classifier itself, a stratified 120-response validation sample agrees
-% with the keyword labels on 78\% of labels (Cohen $\kappa=0.62$, moderate).
-
-
-\section{Discussion}
-\label{sec:discussion}
-
-% \paragraph{What PEEL's lower bound means.}
-% PEEL should not be read as a replacement for upper-bound benchmarks. A
-% model that performs poorly under P3 may still be useful when embedded in a
-% product with a carefully engineered prompt, retrieval layer, and output parser.
-% Likewise, a model that is robust under PEEL may still fail on tasks outside
-% our English QA and instruction-following suites. The lower-bound interpretation
-% is more specific: if a model, runtime, and prompt tier combination fails here,
-% then a practitioner should not assume that standard benchmark scores will
-% transfer to a lightly engineered local deployment.
-
-% \paragraph{Task type and prompt degradation as primary moderators.}
-% Our corrected results show that \emph{prompt quality}, not
-% quantization level, is the dominant driver of SQuAD performance collapse.
-% SQuAD v2 EM is stable at $\sim$30\% across E0--E4 under expert prompts
-% (P0), but falls to 2--5\% at P3 for every architecture and quantization
-% setting. TruthfulQA-MC1 shows the opposite pattern: robust to both axes. At P0,
-% accuracy changes by about 1\,pp across E0--E4; the 5.5\,pp drop in the
-% all-tier setting average comes from the P1 casual tier becoming more sensitive
-% to the CPU runtime interface (Section~\ref{sec:tqa}), not from quantization
-% itself.
-% This task-format interaction motivates separate lower-bound reporting rather
-% than a single scalar headline metric.
-
-% The implication is that benchmark design should preserve task format as a first
-% class factor. Multiple-choice selection, span extraction, binary judgment, and
-% open-ended conversation do not degrade in the same way. A single average score
-% would hide the most actionable lesson in our data: quantized models can remain
-% usable when the answer space is constrained, while exact-reference tasks become
-% fragile when the prompt no longer specifies the contract.
-
-% \paragraph{Two scoring artefacts and their lesson.}
-% Our audit identified two independent scoring bugs with a shared root cause:
-% \texttt{llama.cpp} models at E2--E4 emit verbose, multi-line outputs that append
-% EOS/stop-token strings and repeated prompt instructions after the actual answer.
-% For \emph{SQuAD~v2}, surviving stop tokens block exact match and produce a
-% spurious 0\% EM at E2$+$; truncating to the first non-empty line and stripping
-% EOS tokens recovers ${\sim}$28--30\% EM, consistent with E0-REF. For \emph{HaluEval}, the
-% echoed instruction contains both ``yes'' and ``no'', so a full-text parser marks
-% 50--62\% of E2--E4 responses \emph{ambiguous}; first-line parsing recovers
-% accuracy from ${\sim}$24\% to ${\sim}$44--51\% (mechanics in
-% Appendix~\ref{app:details}). Both are the same pitfall at different output
-% levels: any \texttt{llama.cpp} evaluation that parses free text without
-% first-line truncation will systematically underreport span-extraction \emph{and}
-% binary-classification accuracy. More broadly, local runtimes expose raw text that
-% hosted chat APIs hide behind message-role formatting and stop-token logic, so
-% benchmarks reusing hosted-model parsers on local outputs may measure interface
-% mismatch rather than capability. Edge-LLM benchmarks should publish parsers with
-% raw outputs and run a parser audit before ranking models.
-
-% \paragraph{Practical recommendations.}
-% For \emph{practitioners}: prefer multiple-choice or classification outputs over
-% extractive spans when running \texttt{llama.cpp} Q4/Q5; favour Falcon-H1
-% SSM-Hybrid models when 1.5B-scale instruction following is the target, because
-% they strongly outperform the same-size Qwen baseline without extra memory cost;
-% and re-test safety behaviour after deployment conversion, since quantization does not produce a
-% monotonic safety trend. For \emph{benchmark builders}: report prompt-tier matched
-% results rather than a single prompt-averaged mean, keep judge-scored MT-Bench
-% separate from reference-scored tasks, and document missing cells explicitly---in
-% an edge benchmark, tokenizer and chat-template failures are themselves part of
-% the deployment burden.
-
-% \paragraph{Limitations.}
-% All datasets are English-only. P1--P3 prompt templates are handcrafted; our
-% 50-prompt WildChat grounding (Section~\ref{sec:design}) indicates they match real
-% usage, but a larger calibrated user study remains future work.
-% The E1$\to$E2 boundary remains a deployment-stack confound rather than a clean
-% bit-width comparison. Our targeted NQ P0 ablation shows that restoring explicit
-% chat-template formatting alone does not recover performance; fuller
-% GGUF-on-GPU and alternate-runtime ablations remain future work.
-% Finally, the current safety analysis uses keyword-based refusal detection. It is
-% useful for detecting instability across model--setting pairs, but it should not
-% be treated as a substitute for human red teaming or policy-specific safety
-% evaluation.
-
-% \paragraph{Ethical considerations.}
-% Our safety analysis shows that small edge models can produce compliant responses
-% to a non-trivial share of unsafe prompts. We report this as a cautionary finding,
-% not a recipe: it underscores that deploying small local models on open user input
-% without an added safety layer carries real risk. The evaluation uses existing
-% public safety prompts and creates no new harmful capability; we release the
-% safety diagnostics precisely to encourage pre-deployment safety testing. Because
-% PEEL is a lower-bound stress test, its scores should inform deployment risk
-% assessment rather than be read as endorsements of any model for unsupervised use.
-
-% â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+The overall safety metrics remain relatively stable across edge settings.
+Compared with P0, P3 yields slightly lower HarmBench ASR and safe
+over-refusal, together with slightly higher unsafe refusal. However, these
+aggregate differences are small and may conceal substantial variation across
+models. We therefore report the complete model-level safety results in
+Appendix~\ref{app:model-level-safety}. HarmBench and XSTest are retained as
+separate metrics because improved harmful-request refusal may coincide with
+greater refusal of benign prompts.
 \section{Conclusion}
 \label{sec:conclusion}
 
@@ -1458,7 +1141,10 @@ reproducibility and future lower-bound benchmarking research.
 
 \appendix
 
-\section{Appendix: Additional Experimental Details}
+\input{tables/halueval_model_edge_accuracy_table.tex}
+
+\section{Appendix: Additional
+Experimental Details}
 \label{app:details}
 
 \begin{figure*}[t]
