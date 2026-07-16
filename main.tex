@@ -96,7 +96,7 @@
 % articles, conjunctions, and prepositions are lower case unless they
 % directly follow a colon or long dash
 
-\title{Can Small Language Models Serve Ordinary Users? A Lower-Bound Benchmark under Non-Expert Prompts and Edge Constraints}
+\title{Can Small Language Models Serve Ordinary Users? A Lower-Bound Benchmark Under Non-Expert Prompts and Edge Constraints}
 
 \author{
     Anonymous Authors
@@ -109,14 +109,18 @@
 \maketitle
 
 \begin{abstract}
-Small language models (SLMs) are increasingly promoted as low-cost, private, and edge-deployable alternatives to cloud-scale LLMs. Yet most evaluations assume favorable conditions: expert-written prompts, clean benchmark inputs, and high-precision inference. This overlooks the lower-bound regime in which SLMs are used by non-expert users under quantized or compressed deployment. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a lightweight all-in-one automated benchmarking framework for evaluating edge-deployed SLMs under joint prompt-quality and edge-deployment constraints. PEEL automates model/config selection, prompt-tier construction, inference, offline scoring, and aggregation across a two-dimensional ladder: prompts range from expert to broken, while deployment ranges from reference GPU inference to low-bit CPU GGUF inference. We evaluate 16 SLMs across QA, truthfulness, hallucination discrimination, safety behavior, and multi-turn dialogue. Our results show that prompt degradation is often more damaging than quantization. After controlling for output-scoring artifacts, TruthfulQA accuracy changes by only about one point from full precision to 4-bit inference under expert prompts. In contrast, model-averaged SQuAD~v2 token-overlap F1 falls from roughly 30\% under expert prompts to 2--5\% under broken prompts across deployment settings (strict exact match is lower throughout, from about 21\% under expert prompts to near 0\% under broken prompts). We find that prompt robustness is strongly shaped by post-training quality: at matched 1.5B scale, the strongest instruction-tuned hybrid model scores 8.20 on MT-Bench, compared with 4.06 for a same-size Transformer. Finally, keyword-based safety diagnostics show high unsafe compliance, with attack success rates around 20--21\% and only moderate validation agreement. PEEL exposes the gap between clean benchmark performance and ordinary-user edge reliability.
-
+Small language models (SLMs) are increasingly promoted as low-cost, private, and edge-deployable alternatives to cloud-scale LLMs. Yet most evaluations measure them under favorable conditions: expert-written prompts, clean benchmark inputs, and high-precision inference. This leaves unclear how SLMs behave in the lower-bound regime faced by ordinary users, where prompts may be underspecified and local deployment may require quantized inference. We introduce \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation
+\textbf{L}adder), a lightweight automated benchmarking framework that evaluates SLMs across two axes: prompt quality, from expert to broken prompts, and
+deployment quality, from reference GPU inference to low-bit CPU GGUF inference. Across 16 SLMs and tasks spanning QA, truthfulness, hallucination, safety, and
+multi-turn dialogue, we find that failures are task- and interface-dependent rather than caused by quantization alone. Multiple-choice truthfulness remains
+comparatively stable under expert prompts, while short-answer QA is highly sensitive to prompt degradation: model-averaged SQuAD~v2 token-overlap F1 falls
+from roughly 30\% under expert prompts to 2--5\% under broken prompts across deployment settings. MT-Bench further shows that Falcon-H1-1.5B is strong at matched scale, scoring 8.20 compared with 4.06 for Qwen2.5-1.5B, while prompt robustness is not architecture-exclusive. PEEL exposes the gap between clean
+benchmark performance and ordinary-user edge reliability, and provides reproducible artifacts for evaluating SLMs as deployed systems.
+\begin{links}
+\link{Code}{https://aaai.org/example/guidelines}
+\end{links}
 \end{abstract}
 
-\section{Introduction}
-\label{sec:intro}
-
-Small language models (SLMs) are increasingly positioned as practical alternatives to cloud-scale large language models (LLMs). With fewer parameters and lower memory requirements, they can run on consumer laptops, mobile devices, and other resource-constrained hardware, reducing dependence on cloud APIs for latency-sensitive, low-cost, and privacy-sensitive applications. This makes SLMs attractive not only as smaller models, but also as a possible mechanism for broadening access to language technologies under realistic hardware, connectivity, and privacy constraints.
 
 \begin{figure}[t]
     \centering
@@ -129,24 +133,31 @@ safety, quality, latency, and throughput.
     \label{fig:peel-framework}
 \end{figure}
 
-Yet broad access changes what evaluation should measure. For ordinary users, a model's practical value is not determined only by its best-case benchmark score under expert prompting and full-precision inference, but by what capability remains when interaction and deployment conditions are imperfect. Prior robustness work similarly argues that worst-case or perturbed prompt performance provides an important reliability signal, rather than a nuisance variation to be averaged away~\cite{zhu2023promptrobust,ralpaca2024}. This perspective is especially important for SLMs: non-expert users may provide vague, colloquial, underspecified, or malformed prompts, while local deployment often relies on compressed or quantized inference because of limited memory, cost, energy, or connectivity. A model that appears capable under ideal prompts and server-class inference may therefore fail in the very regime where SLMs are meant to be useful.
+\section{Introduction}
+\label{sec:intro}
 
-We argue that SLM evaluation should report not only upper-bound benchmark performance, but also \emph{lower-bound reliability}: how models behave when user input quality and deployment quality degrade together. Existing evaluations cover parts of this space, but rarely their interaction. General LLM benchmarks measure broad capability under standardized prompts and stable inference settings. Edge and on-device benchmarks move evaluation closer to resource-constrained deployment, but typically hold prompting conditions fixed. Conversely, prompt-robustness studies perturb prompt quality while leaving the serving stack largely unchanged. As a result, we have limited evidence about the joint effect of non-expert prompting and edge deployment constraints---precisely the regime occupied by ordinary users running SLMs locally.
+Small language models (SLMs) are increasingly promoted as practical alternatives to cloud-scale large language models (LLMs). Their lower memory and compute requirements make local deployment feasible on laptops, mobile devices, and other resource-constrained hardware, supporting latency-sensitive, low-cost, and privacy-sensitive applications.
 
-We close this gap with \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), a lightweight all-in-one automated benchmarking framework for lower-bound assessment of SLMs. PEEL automates the full benchmark loop: registry-based model and configuration selection, prompt-tier construction, inference, offline scoring, and summary aggregation into reproducible run records. Its core protocol crosses four prompt-quality tiers, from expert task instructions to broken ordinary-user prompts, with five edge-deployment settings, from full-precision GPU inference to aggressive low-bit local inference. Across this ladder, PEEL evaluates task accuracy, hallucination discrimination, safety behavior, multi-turn instruction-following quality, latency, and throughput. It asks a deployment-facing question: what remains reliable when both the user and the serving stack are imperfect?
+Yet local access changes what evaluation should measure. For ordinary users, practical value is not determined only by best-case benchmark scores under expert prompts and full-precision inference, but by what capability remains when prompts are vague, underspecified, or malformed and deployment relies on compressed local runtimes. Prior robustness work similarly treats worst-case or perturbed prompt performance as a reliability signal rather than nuisance variation~\cite{zhu2023promptrobust,ralpaca2024}. An SLM that appears capable under ideal prompts and server-class inference may therefore fail in the regime where it is meant to be useful.
 
-We evaluate 16 sub-4B SLMs across eight model families, covering extractive reading comprehension, open-domain question answering, truthfulness, hallucination discrimination, safety behavior, and multi-turn instruction following. Our central finding is that SLMs do not simply become weaker under edge constraints; they become more conditional. Reliability depends sharply on task format, prompt quality, runtime-interface fidelity, and the scoring assumptions used to interpret outputs. Across models and deployment settings, prompt degradation is often more damaging than bit-width reduction. On SQuAD~v2, token-overlap F1 falls from roughly 30\% under expert prompts to \textbf{2--5\%} under broken prompts across every edge setting (with strict exact match falling from about 21\% to near 0\%), indicating a near-total prompt-driven collapse in span-based answer overlap. In contrast, after controlling for output-scoring artifacts, TruthfulQA-MC1 changes by only about one point from full precision to 4-bit inference under expert prompts. These results suggest that, for many practical edge-deployed SLMs, the main reliability bottleneck is not quantization alone, but the interaction between task format, user prompt quality, and runtime assumptions.
+We argue that SLM evaluation should report \emph{lower-bound reliability}: model behavior when user input quality and deployment quality degrade together. Existing evaluations cover parts of this space but rarely their interaction. General LLM benchmarks use standardized prompts and stable inference settings; edge benchmarks stress resource-constrained deployment but usually fix prompting; prompt-robustness studies perturb inputs while leaving the serving stack unchanged. This leaves limited evidence about ordinary users running SLMs locally.
+
+We close this gap with \textbf{PEEL} (\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder), an automated benchmark for lower-bound SLM assessment. PEEL crosses four prompt-quality tiers, from expert instructions to broken ordinary-user prompts, with five edge-deployment settings, from full-precision GPU inference to low-bit local inference. It automates model/configuration selection, prompt construction, inference, offline scoring, and aggregation into reproducible run records across task accuracy, hallucination discrimination, safety behavior, instruction-following quality, latency, and throughput.
+
+We evaluate 16 sub-4B SLMs across eight model families on extractive reading comprehension, open-domain QA, truthfulness, hallucination discrimination, safety, and multi-turn instruction following. Our central finding is that edge-deployed SLMs do not simply become weaker; their reliability becomes conditional on task format, prompt quality, runtime-interface fidelity, and scoring assumptions. On SQuAD~v2, model-averaged token-overlap F1 falls from roughly 30\% under expert prompts to \textbf{2--5\%} under broken prompts across edge settings, indicating near-total prompt-driven collapse in short-answer behavior. In contrast, TruthfulQA-MC1 changes only modestly from full precision to 4-bit inference under expert prompts after scoring artifacts are handled.
 
 \paragraph{Contributions.}
-This paper makes the following contributions:
+We make the following contributions:
 \begin{itemize}
-\item \textbf{Automated PEEL framework.} We introduce a lightweight all-in-one benchmarking framework that automates model/config selection, prompt-tier construction, inference, offline scoring, and aggregation for lower-bound evaluation of edge-deployed SLMs.
+\item \textbf{Automated PEEL framework.} We introduce an all-in-one benchmarking framework for lower-bound evaluation of edge-deployed SLMs, covering prompt construction, inference, scoring, and aggregation.
 
-\item \textbf{Prompt--Edge Evaluation Ladder.} We define a two-axis protocol that crosses four prompt-quality tiers with five edge-deployment settings, and use it to evaluate 16 sub-4B SLMs across QA, truthfulness, hallucination, safety, and dialogue tasks.
+\item \textbf{Prompt--Edge Evaluation Ladder.} We define a two-axis protocol crossing four prompt-quality tiers with five edge-deployment settings, and evaluate 16 sub-4B SLMs across QA, truthfulness, hallucination, safety, and dialogue tasks.
 
-\item \textbf{Prompt--edge reliability analysis.} We show that prompt degradation can dominate bit-width reduction for format-sensitive tasks, while multiple-choice truthfulness is relatively stable once scoring artifacts are handled.
+\item \textbf{Prompt--edge reliability analysis.} We show that prompt degradation can dominate bit-width reduction for format-sensitive short-answer tasks, while multiple-choice truthfulness remains comparatively stable after scoring artifacts are handled.
 
-\item \textbf{Reproducible artifacts.} We release PEEL prompts, deployment configurations, scoring scripts, per-run outputs, and result grids, including machine-readable summaries for future lower-bound evaluation of edge-deployed SLMs.
+\item \textbf{Falcon-H1 case study.} We analyze Falcon-H1, a recent SSM-hybrid SLM family, finding strong instruction-following performance while showing that prompt robustness is not architecture-exclusive.
+
+\item \textbf{Reproducible artifacts.} We release prompts, deployment configurations, scoring scripts, per-run outputs, and machine-readable result grids for future lower-bound SLM evaluation.
 \end{itemize}
 
 
@@ -154,13 +165,56 @@ This paper makes the following contributions:
 \label{sec:related}
 
 \paragraph{Small language models, edge deployment, and quantization.}
-Large language models have achieved strong performance across reasoning, question answering, and instruction-following tasks, but their memory, compute, and energy costs remain substantial for local or latency-sensitive deployment. This has motivated compact SLM families such as TinyLlama~\cite{TinyLlama}, Phi~\cite{phi4}, Gemma~\cite{gemma2}, Qwen~\cite{qwen2025}, Llama-3.2~\cite{llama3}, and Falcon-H1~\cite{falconh1}. Falcon-H1 is especially relevant because it is a recent SSM-Hybrid SLM family positioned for efficient inference, yet its behavior under ordinary-user prompts and local-runtime degradation has not been systematically characterized. In parallel, edge-deployed SLM work studies model compression, efficient inference engines, split execution, and hardware-aware deployment for latency, privacy, bandwidth, and cost constraints~\cite{llm_edge,Mobileaibench,li2025palmbench}. Post-training quantization methods such as GPTQ~\cite{gptq2022}, LLM.int8()~\cite{llmint8}, and lightweight runtimes such as \texttt{llama.cpp}/GGUF~\cite{gguf} make local SLM inference increasingly practical, but they are usually evaluated with fixed expert-style prompts.
+Large language models have achieved strong performance across reasoning,
+question answering, and instruction-following tasks, but their memory, compute,
+and energy costs remain substantial for local or latency-sensitive deployment.
+This has motivated compact SLM families such as TinyLlama~\cite{TinyLlama},
+Phi~\cite{phi4}, Gemma~\cite{gemma2}, Qwen~\cite{qwen2025},
+Llama-3.2~\cite{llama3}, and Falcon-H1~\cite{falconh1}. Falcon-H1 is especially
+relevant because it is a recent SSM-Hybrid SLM family positioned for efficient
+inference, yet its behavior under ordinary-user prompts and local-runtime
+degradation has not been systematically characterized. In parallel,
+edge-deployed SLM work studies model compression, efficient inference engines,
+split execution, and hardware-aware deployment under latency, privacy,
+bandwidth, and cost constraints~\cite{llm_edge,Mobileaibench,li2025palmbench}.
+Post-training quantization methods such as GPTQ~\cite{gptq2022},
+LLM.int8()~\cite{llmint8}, and lightweight runtimes such as
+\texttt{llama.cpp}/GGUF~\cite{gguf} make local SLM inference increasingly
+practical. However, quantization and runtime studies usually evaluate models
+with fixed expert-style prompts, leaving open whether their conclusions hold
+when users provide weak or underspecified instructions. 
 
 \paragraph{Benchmarking and prompt robustness.}
-General evaluation suites such as HELM~\cite{helm2022}, MMLU~\cite{mmlu2021}, SQuAD~v2~\cite{squad2}, Natural Questions~\cite{nqopen}, and MT-Bench~\cite{mtbench2023} measure broad capability under standardized prompts and stable inference stacks. SLM-oriented and edge benchmarks, including JudgeBoard~\cite{smlbenchmark}, MobileAIBench~\cite{Mobileaibench}, and PalmBench~\cite{li2025palmbench}, move closer to constrained deployment by considering SLMs, device compatibility, throughput, memory, energy, or latency. Their prompting protocols, however, are typically fixed. Conversely, prompt-robustness studies such as PromptBench~\cite{zhu2023promptrobust} and RobustAlpacaEval~\cite{ralpaca2024} perturb prompt wording and formatting, but generally keep the serving stack unchanged. PEEL targets the intersection: prompt quality and deployment quality degrade together.
+General evaluation suites such as HELM~\cite{helm2022}, MMLU~\cite{mmlu2021},
+SQuAD~v2~\cite{squad2}, Natural Questions~\cite{nqopen}, and
+MT-Bench~\cite{mtbench2023} measure broad capability under standardized prompts
+and stable inference stacks. SLM-oriented and edge benchmarks, including
+JudgeBoard~\cite{smlbenchmark}, MobileAIBench~\cite{Mobileaibench}, and
+PalmBench~\cite{li2025palmbench}, move closer to constrained deployment by
+considering compact models, device compatibility, throughput, memory, energy,
+or latency. These benchmarks are closest to our deployment motivation, but their
+prompting protocols are typically fixed. Conversely, prompt-robustness studies
+such as PromptBench~\cite{zhu2023promptrobust} and
+RobustAlpacaEval~\cite{ralpaca2024} perturb prompt wording and formatting, but
+generally keep the serving stack unchanged. PEEL differs by treating prompt
+quality and deployment quality as a joint evaluation space: it asks whether a
+model that survives quantization under expert prompts also remains reliable
+under informal or underspecified prompts.
 
 \paragraph{Trustworthiness and scoring fidelity.}
-Trustworthiness is central to user-facing SLM deployment because local SLMs may have weaker instruction tuning and safety alignment while also bypassing cloud-side safety layers. Prior benchmarks study truthfulness, hallucination, toxicity, and unsafe instruction following through resources such as TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval2023}, and safety-oriented refusal tests. PEEL incorporates these dimensions, but also treats scoring fidelity as part of benchmark design: local runtimes can alter output formatting, stop-token behavior, and chat-template handling, which can make parser failures look like model failures. This motivates our audit-oriented evaluation protocol, where benchmark scores are interpreted only after checking the runtime and scoring assumptions behind them.
+Trustworthiness is central to user-facing SLM deployment because local models
+may have weaker instruction tuning and safety alignment while also bypassing
+cloud-side safety layers. Prior benchmarks study truthfulness, hallucination,
+toxicity, and unsafe instruction following through resources such as
+TruthfulQA~\cite{truthfulqa}, HaluEval~\cite{halueval2023}, and safety-oriented
+refusal tests. These evaluations are usually reported as task scores, assuming
+that the model output can be parsed consistently across runtimes. PEEL
+incorporates these dimensions, but also treats scoring fidelity as part of
+benchmark design: local runtimes can alter output formatting, stop-token
+behavior, prompt echoes, and chat-template handling, which can make parser
+failures look like model failures. This motivates our audit-oriented evaluation
+protocol, where benchmark scores are interpreted only after checking the runtime
+and scoring assumptions behind them.
 
 \section{\textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder}
 \label{sec:peel}
@@ -170,18 +224,25 @@ Trustworthiness is central to user-facing SLM deployment because local SLMs may 
 
 Figure~\ref{fig:peel-framework} gives an overview of the
 \textbf{P}rompt--\textbf{E}dge \textbf{E}valuation \textbf{L}adder (PEEL).
-PEEL evaluates SLMs under two deployment-realistic sources of
-degradation: weaker user prompts and more constrained local inference settings.
-The goal is not to assign a single leaderboard score, but to expose whether
-failures are driven by prompt quality, edge deployment, or their interaction.
+PEEL evaluates SLMs under two deployment-realistic sources of degradation:
+weaker user prompts and more constrained local inference settings. The goal is
+not to assign a single leaderboard score, but to expose whether failures are
+driven by prompt quality, edge deployment, task format, or their interaction.
 
-PEEL contains four stages. First, it selects compact model families and user-facing benchmark tasks. Second, it instantiates each task under a prompt-quality ladder, from expert benchmark instructions to informal non-expert prompts. Third, it evaluates each model under an edge-deployment ladder, from reference GPU inference to CPU-only GGUF quantization. Finally, it runs inference, normalizes runtime-specific outputs, computes task metrics, and
-records efficiency measurements such as latency and decode throughput. The result is a prompt--edge grid that allows direct comparison across prompt tiers,
-deployment settings, model families, and task types.
+PEEL contains four stages. First, it selects compact model families and
+user-facing benchmark tasks with different output contracts. Second, it
+instantiates each task under a prompt-quality ladder, from expert benchmark
+instructions to informal non-expert prompts. Third, it evaluates each model
+under an edge-deployment ladder, from reference GPU inference to CPU-only GGUF
+inference. Finally, it runs inference, normalizes runtime-specific outputs,
+computes task metrics, and records efficiency measurements such as latency and
+decode throughput. The result is a prompt--edge grid that allows direct
+comparison across prompt tiers, deployment settings, model families, and task
+types.
+
 \begin{table}[t]
 \centering
-\caption{Tasks and metrics used in PEEL. Reference-scored tasks use offline
-metrics after runtime-aware output normalization.}
+
 \label{tab:metrics}
 \small
 \begin{tabularx}{\columnwidth}{@{}p{0.24\columnwidth}p{0.23\columnwidth}X@{}}
@@ -190,84 +251,71 @@ metrics after runtime-aware output normalization.}
 \midrule
 Reading comp. & SQuAD v2 & Token-overlap F1 (primary); EM\\
 Open QA & NQ-Open & Token-overlap F1 (primary); EM\\
-Truthfulness & TruthfulQA & Letter accuracy \\
+Truthfulness & TruthfulQA-MC1 & Letter accuracy \\
 Hallucination & HaluEval & Yes/No accuracy \\
 Instruction following & MT-Bench & LLM-judge score\\
 Safety behavior & Safety suite & ASR / refusal rates \\
 Efficiency & All runs & Latency \& decode throughput \\
 \bottomrule
 \end{tabularx}
+\caption{PEEL tasks and metrics. Reference-scored tasks use offline metrics after output normalization.}
 \end{table}
+
 \subsection{Tasks, Datasets, and Metrics}
 \label{sec:tasks}
 
-We select tasks with diverse output contracts, including extractive spans,
-short factual answers, multiple-choice decisions, binary hallucination
-judgments, safety refusals, and open-ended instruction following. This design
-helps distinguish general capability degradation from task-format-specific
-failure.
+PEEL combines tasks with different output contracts: short answers, multiple-choice letters, binary judgments, refusal behavior, and open-ended dialogue. This lets us distinguish general capability loss from failures caused by output-format sensitivity or scoring interfaces.
 
+For short-answer QA, we use SQuAD~v2~\citep{Rajpurkar2016SQuAD10} and NQ-Open~\citep{NQ_Google}. Because PEEL evaluates generative SLMs rather than extractive span models, we score generated answers with token-overlap F1 as the primary metric and exact match (EM) as a stricter secondary metric. SQuAD~v2 tests context-grounded answers, while NQ-Open tests parametric factual recall.
 
-For reading comprehension, we use SQuAD v2~\citep{Rajpurkar2016SQuAD10},
-where models must either extract an answer span or output an unanswerable
-marker. For open-domain factual recall, we use NQ-Open~\citep{NQ_Google}.
-Together, these tasks separate context-grounded QA from parametric-knowledge
-QA. For factual reliability, we use TruthfulQA-MC1~\citep{truthfulqa} and
-HaluEval~\citep{Halueval_EMNLP23}. TruthfulQA-MC1 is evaluated with a
-generation-based multiple-choice protocol in which the model outputs the
-letter of the most truthful option. HaluEval is evaluated as a binary
-hallucination judgment task.
+For factual reliability, we use TruthfulQA-MC1~\citep{truthfulqa} with generation-based multiple-choice letter selection, and HaluEval~\citep{Halueval_EMNLP23} as a binary hallucination judgment task. For safety, we evaluate unsafe prompts and benign refusal-sensitive prompts, reporting harmful-request attack success and benign over-refusal as separate failure modes.
 
-We evaluate safety behavior using both unsafe prompts and benign refusal-sensitive prompts, reporting harmful-request refusal and over-refusal as separate failure modes. This distinction is particularly relevant for local
-SLM deployment, where models may operate without cloud-side safety filters. We also include MT-Bench~\citep{MTBenchArena_2023} to assess open-ended multi-turn instruction following. Because MT-Bench relies on LLM-judge scoring and has a
-different output contract from reference-scored tasks, we report it separately
-rather than merging it into the main EM/F1 grids.
-
+Finally, we include MT-Bench~\citep{MTBenchArena_2023} for open-ended multi-turn instruction following. Because it uses LLM-judge scoring and a different output contract from reference-scored tasks, we report it separately rather than merging it into the F1/EM grids.
 \subsection{Model Selection}
 \label{sec:models}
 
-PEEL focuses on the realistic local-deployment regime: models from 90M to 3.8B
-parameters. (See table \ref{tab:models}.) This range is small enough to run on constrained hardware after
-quantization, but broad enough to compare architecture families, parameter scales, and deployment sensitivity.
+PEEL focuses on a practical local-deployment regime: models from 90M to 3.8B
+parameters (Table~\ref{tab:models}). This range is small enough to support
+local inference after quantization, while still broad enough to compare model
+families, parameter scales, and deployment sensitivity.
 
 \begin{table}[t]
   \small
   \centering
-  \caption{Models evaluated in PEEL.
-  $^\ddagger$ denotes SSM-hybrid Falcon-H1 models.}
-  \label{tab:models}
-  \resizebox{\columnwidth}{!}{%
+
   \begin{tabular}{@{}llc@{}}
     \toprule
-    Model & Family & Params \\
+    Model & Family \\
     \midrule
-    Falcon-H1-Tiny-90M$^\ddagger$       & Falcon-H1~\citep{falconh1} & 0.09B \\
-    Falcon-H1-0.5B$^\ddagger$           & Falcon-H1~\citep{falconh1} & 0.5B \\
-    Falcon-H1-Tiny-R-0.6B$^\ddagger$    & Falcon-H1~\citep{falconh1} & 0.6B \\
-    Falcon-H1-1.5B$^\ddagger$           & Falcon-H1~\citep{falconh1} & 1.5B \\
-    Falcon-H1-1.5B-Deep$^\ddagger$      & Falcon-H1~\citep{falconh1} & 1.5B \\
-    Gemma-3-1B                           & Gemma~\citep{gemmateam2025gemma3technicalreport} & 1.0B \\
-    InternLM2.5-1.8B                     & InternLM~\citep{cai2024internlm2} & 1.8B \\
-    Llama-3.2-1B                         & Llama~\citep{llama_3_2} & 1.0B \\
-    Llama-3.2-3B                         & Llama~\citep{llama_3_2} & 3.0B \\
-    Phi-3.5-Mini                         & Phi~\citep{abdin2024phi3_2023} & 3.8B \\
-    Phi-4-Mini                           & Phi~\citep{phi4} & 3.8B \\
-    Qwen2.5-0.5B                         & Qwen~\citep{qwen2025} & 0.5B \\
-    Qwen2.5-1.5B                         & Qwen~\citep{qwen2025} & 1.5B \\
-    SmolLM2-360M                         & SmolLM~\citep{allal2025smollm2smolgoesbig} & 0.36B \\
-    SmolLM2-1.7B                         & SmolLM~\citep{allal2025smollm2smolgoesbig} & 1.7B \\
-    TinyLlama-1.1B                       & TinyLlama~\citep{tinyllama_2024} & 1.1B \\
+    Falcon-H1-Tiny-90M$^\ddagger$       & Falcon-H1~\citep{falconh1} \\
+    Falcon-H1-0.5B$^\ddagger$           & Falcon-H1~\citep{falconh1} \\
+    Falcon-H1-Tiny-R-0.6B$^\ddagger$    & Falcon-H1~\citep{falconh1}  \\
+    Falcon-H1-1.5B$^\ddagger$           & Falcon-H1~\citep{falconh1} &\\
+    Falcon-H1-1.5B-Deep$^\ddagger$      & Falcon-H1~\citep{falconh1} \\
+    Gemma-3-1B                           & Gemma~\citep{gemmateam2025gemma3technicalreport} \\
+    InternLM2.5-1.8B                     & InternLM~\citep{cai2024internlm2} \\
+    Llama-3.2-1B                         & Llama~\citep{llama_3_2} \\
+    Llama-3.2-3B                         & Llama~\citep{llama_3_2}  \\
+    Phi-3.5-Mini                         & Phi~\citep{abdin2024phi3_2023}\\
+    Phi-4-Mini                           & Phi~\citep{phi4}  \\
+    Qwen2.5-0.5B                         & Qwen~\citep{qwen2025} \\
+    Qwen2.5-1.5B                         & Qwen~\citep{qwen2025}  \\
+    SmolLM2-360M                         & SmolLM~\citep{allal2025smollm2smolgoesbig} \\
+    SmolLM2-1.7B                         & SmolLM~\citep{allal2025smollm2smolgoesbig} \\
+    TinyLlama-1.1B                       & TinyLlama~\citep{tinyllama_2024}  \\
     \bottomrule
   \end{tabular}
-  }
+    \caption{Models evaluated in PEEL.
+  $^\ddagger$ denotes SSM-hybrid Falcon-H1 models.}
+    \label{tab:models}
 \end{table}
 
-The model set has three roles. Falcon-H1~\citep{falconh1} is the primary family of interest
-because it provides recent SSM-hybrid SLMs across several sizes. Qwen~\citep{qwen2025},
-Llama~\citep{llama_3_2}, Gemma~\citep{gemmateam2025gemma3technicalreport}, Phi~\citep{phi4}, SmolLM~\citep{allal2025smollm2smolgoesbig}, InternLM~\citep{cai2024internlm2}, and TinyLlama~\citep{tinyllama_2024} serve as recognizable
-SLM baselines. We do not use the model set to claim a universal winner;
-rather, we ask whether the same prompt and deployment perturbations produce
-consistent failure patterns across families.
+The model set has three roles. Falcon-H1~\citep{falconh1} is the primary family
+of interest because it provides recent SSM-hybrid SLMs across several sizes.
+Qwen~\citep{qwen2025}, Llama~\citep{llama_3_2},
+Gemma~\citep{gemmateam2025gemma3technicalreport}, Phi~\citep{phi4},
+SmolLM~\citep{allal2025smollm2smolgoesbig}, InternLM~\citep{cai2024internlm2},
+and TinyLlama~\citep{tinyllama_2024} serve as recognizable SLM baselines. We do not use this model set to claim a universal winner; rather, we ask whether the same prompt and deployment perturbations produce consistent failure patterns across families.
 
 \subsection{Edge Deployment Ladder}
 \label{sec:edge}
@@ -286,8 +334,8 @@ chat-template handling, stop-token behavior, and resource budget.
   \item \textbf{E4-Q4}: Q4\_K\_M GGUF inference with \texttt{llama.cpp} on CPU.
 \end{itemize}
 
-E2--E4 use CPU-only inference to approximate consumer local deployment without
-a discrete GPU. The E0$\rightarrow$E1 contrast isolates GPU-side quantization,
+E2--E4 use CPU-only inference to approximate local deployment without a
+discrete GPU. The E0$\rightarrow$E1 contrast isolates GPU-side quantization,
 while the E2$\rightarrow$E4 contrast varies quantization strength within the
 same GGUF runtime. The E1$\rightarrow$E2 transition is intentionally treated as
 a deployment transition rather than a pure quantization step, because it also
@@ -309,8 +357,8 @@ informal phrasing.
   with reduced formatting and weaker output constraints.
   \item \textbf{P2 -- Naive}: Minimal prompt with little task framing; the
   model must infer the interaction contract.
-  \item \textbf{P3 -- Broken}: Informal, abbreviated, and syntactically weak
-  prompt resembling low-literacy or first-time LLM use.
+\item \textbf{P3 -- Broken}: Informal, abbreviated, and syntactically weak
+prompt resembling first-time or informal LLM use.
 \end{itemize}
 
 The prompt tiers are task-preserving rather than adversarial. We do not remove
@@ -322,8 +370,7 @@ absence of evidence.
 \begin{table}[t]
   \small
   \centering
-  \caption{SQuAD v2 prompt templates across PEEL prompt tiers.
-  \texttt{\{ctx\}} and \texttt{\{q\}} are filled at run time.}
+
   \label{tab:prompts}
   \begin{tabular}{@{}lp{5.5cm}@{}}
     \toprule
@@ -339,82 +386,49 @@ absence of evidence.
     P3 & \textit{pls help, \{q\}?? info: \{ctx\}} \\
     \bottomrule
   \end{tabular}
+    \caption{SQuAD v2 prompt templates across PEEL prompt tiers.
+  \texttt{\{ctx\}} and \texttt{\{q\}} are filled at run time.}
 \end{table}
 
 As a sanity check, we compare the PEEL tiers with real user prompts. We sample
 50 single-turn English prompts from WildChat-1M~\citep{wildchat2024} and ask
 three annotators to assign each prompt to the nearest PEEL tier. Two annotators
-agree closely (Cohen's $\kappa=0.51$, 70\% raw agreement); the third applied a
-systematically stricter mapping, tending to rate prompts one tier lower
-(pairwise $\kappa\approx0.17$). We therefore report the concordant pair and
-treat the tier mapping as approximate rather than a calibrated scale. Even under
-the stricter annotator, almost all sampled prompts fall below the expert tier,
-supporting P1--P3 as diagnostic stress tests for non-expert interaction. We do not claim that the tiers form a
-calibrated user-population scale; rather, they provide a controlled taxonomy
-for measuring prompt robustness.
+show moderate agreement (Cohen's $\kappa=0.51$, 70\% raw agreement), while the
+third applies a systematically stricter mapping and tends to rate prompts one
+tier lower (pairwise $\kappa\approx0.17$). We therefore treat the mapping as
+approximate rather than calibrated. The useful observation is qualitative: most
+sampled prompts fall below the expert tier, supporting P1--P3 as diagnostic
+stress tests for non-expert interaction rather than as a population-calibrated
+user model.
 
 \subsection{Benchmark Automation and Reproducibility}
-\label{sec:automation}
 
-PEEL is implemented as an automated benchmarking framework that uses a unified
-registry for models, deployment settings, prompt tiers, and datasets. Given a
-model, task, prompt tier, and edge setting, PEEL constructs the corresponding
-prompt, dispatches inference to the appropriate backend, records runtime
-measurements, and applies offline task-specific scoring. This design ensures
-that every cell in the prompt--edge grid is evaluated through the same pipeline,
-rather than through ad hoc scripts for individual models or datasets.
-
-The framework separates generation from evaluation. Raw model outputs are saved
-before scoring, and all metrics are computed offline using deterministic
-parsers and task-specific normalization. This separation is important for local
-LLM evaluation because lightweight runtimes may emit prompt echoes, end-of-text
-markers, or verbose continuations that can otherwise lead to scoring artifacts.
-PEEL therefore applies runtime-aware normalization before computing EM, F1,
-multiple-choice accuracy, binary judgment accuracy, safety refusal rates, and
-latency/throughput summaries.
-
-All experiments are launched through resumable scripts over the model--task--
-prompt--edge grid. GPU settings are used for reference and INT8 inference,
-whereas CPU-only GGUF settings are used for local deployment conditions. We also
-provide a local interactive demo built on the same model registry, runner, and
-evaluator interfaces. The demo is intended for inspection and reproducibility;
-the paper's quantitative claims are derived from the scripted benchmark runs.
-
-
+PEEL uses a unified registry for models, deployment settings, prompt tiers, and datasets. For each model--task--prompt--edge cell, it constructs the prompt, dispatches the appropriate inference backend, records runtime measurements, and applies offline task-specific scoring through the same execution interface. Generation and evaluation are separated. PEEL saves raw outputs before scoring, then computes metrics offline using deterministic parsers and runtime-aware normalization. This is important for local SLM runtimes, which may emit prompt echoes, end-of-text markers, or verbose continuations that otherwise create scoring artifacts. Each run stores its configuration, predictions, metrics, and summaries, enabling audit and rescoring. Experiments are launched through resumable scripts over the full prompt--edge grid. GPU settings cover reference and INT8 inference, while CPU GGUF settings represent local deployment. Full implementation details, run records, and reproducibility procedures are provided in the appendix and released artifacts.
 
 \section{Results}
 \label{sec:results}
 
-We organize the results around five deployment-facing questions. First, does
-edge deployment itself destroy accuracy, or primarily change runtime cost?
-Second, when do weak prompts break SLMs? Third, are all task formats equally
-fragile? Fourth, what does the Falcon-H1 case study reveal at matched scale?
-Finally, what should practitioners take away when deploying SLMs locally? This
-structure keeps the PEEL axes tied to concrete failure modes rather than a
-dataset-by-dataset leaderboard.
-
-\subsection{RQ1: Does Edge Deployment Itself Destroy Accuracy?}
+We organize the results around five deployment-facing research questions. 
+\subsection{RQ1: Does Edge Deployment Uniformly Degrade Accuracy?}
 \label{sec:runtime-results}
 
 Edge deployment clearly changes the systems profile, but it does not produce a
 uniform accuracy collapse. Figure~\ref{fig:runtime-family} shows that the PEEL
-edge ladder creates distinct efficiency regimes: GPU-backed HuggingFace
+edge ladder creates distinct efficiency regimes: GPU-backed Hugging Face
 settings and CPU-backed \texttt{llama.cpp} settings differ substantially in
 decode throughput and latency. E0/E1 provide the accelerated reference path,
 while E2--E4 represent CPU-only local execution. This confirms that the edge
 axis is a real deployment pressure. Accuracy, however, is task-dependent rather
-than uniformly destroyed: under P0, SQuAD v2 remains near 28--31\% F1 across
-E0--E4 and TruthfulQA-MC1 changes modestly, while NQ-Open shows a clearer
-E1$\rightarrow$E2 drop from 8.4\% to 3.6\% F1. Thus the edge ladder changes
-runtime for every task, but damages accuracy mainly when the task and runtime
-interface are sensitive to the deployment transition.
-
+than uniformly degraded: under P0, model-averaged SQuAD~v2 remains near
+28--31\% token-overlap F1 across E0--E4 and TruthfulQA-MC1 changes modestly,
+while NQ-Open shows a clearer E1$\rightarrow$E2 drop from 8.4\% to 3.6\%
+token-overlap F1. Thus the edge ladder changes the runtime profile across the
+benchmark, but damages accuracy mainly when the task and runtime interface are
+sensitive to the deployment transition.
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.9\linewidth]{fig4_2_throughput_B_family_average_ver2.pdf}
-    \caption{Family-level decode throughput across PEEL edge settings.
-    The deployment ladder creates distinct efficiency regimes, separating
-    GPU-backed Hugging Face inference from CPU-only GGUF execution.}
+\caption{Family-level decode throughput across PEEL edge settings, separating GPU Hugging Face from CPU GGUF inference.}
     \label{fig:runtime-family}
 \end{figure}
 
@@ -443,25 +457,15 @@ interface are sensitive to the deployment transition.
     \label{fig:true2d_sequence_overall_correctness}
 \end{figure}
 
-Prompt degradation is most damaging when the task requires the model to recover
-an implicit output contract. Figure~\ref{fig:true2d_sequence_overall_correctness}
-aggregates SQuAD v2, NQ-Open, and TruthfulQA-MC1 and compares model rankings
-along the prompt and edge axes. The prompt sequence separates model behavior
-more sharply than the edge sequence: several models change rank substantially
-from P0 to P3, whereas the edge sequence contains broader groups of
-statistically indistinguishable models. This does not mean that edge deployment
-is irrelevant; rather, it suggests that prompt degradation exposes a different
-failure mode, especially for tasks where the prompt must specify the expected
-answer form.
+Prompt degradation is most damaging when the task requires the model to recover an implicit output contract. Figure~\ref{fig:true2d_sequence_overall_correctness} aggregates SQuAD~v2, NQ-Open, and TruthfulQA-MC1 and compares model rankings along the prompt and edge axes. The prompt sequence separates model behavior more sharply than the edge sequence: several models change rank substantially from P0 to P3, whereas edge settings form broader groups with overlapping uncertainty. This does not mean that edge deployment is irrelevant; rather, weak prompts expose a distinct failure mode, especially when the prompt must specify the expected answer form.
+
 
 \begin{table*}[t]
 \centering
-\scriptsize
+\small
 \setlength{\tabcolsep}{2.2pt}
 \renewcommand{\arraystretch}{0.92}
-\caption{TruthfulQA-MC1 accuracy (\%) across edge settings and prompt tiers. Cell color is normalized within each edge-setting block; greener cells indicate higher accuracy.}
-\label{tab:truthfulqa-mc1-correctness-grid}
-\resizebox{\textwidth}{!}{%
+
 \begin{tabular}{rrrrr|rrrr|rrrr|rrrr|rrrr}
 \toprule
 \multirow{2}{*}{Model} & \multicolumn{4}{c}{E0-REF} & \multicolumn{4}{c}{E1-INT8} & \multicolumn{4}{c}{E2-Q8} & \multicolumn{4}{c}{E3-Q5} & \multicolumn{4}{c}{E4-Q4} \\
@@ -486,17 +490,14 @@ TinyLlama-1.1B & \cellcolor[HTML]{F9D0CC}20.0 & \cellcolor[HTML]{F9D0CC}20.0 & \
 InternLM-1.8B & \cellcolor[HTML]{FFF1CC}42.0 & \cellcolor[HTML]{FEEECC}40.0 & \cellcolor[HTML]{FEEACC}37.5 & \cellcolor[HTML]{FDE7CC}35.5 & \cellcolor[HTML]{FFF2CC}42.0 & \cellcolor[HTML]{FEEECC}39.5 & \cellcolor[HTML]{FEECCC}38.0 & \cellcolor[HTML]{FDEACC}36.5 & \cellcolor[HTML]{FEEACC}39.0 & \cellcolor[HTML]{FDE6CC}36.0 & \cellcolor[HTML]{FCE3CC}34.5 & \cellcolor[HTML]{FBDDCC}30.5 & \cellcolor[HTML]{FEEFCC}40.5 & \cellcolor[HTML]{FEEECC}40.0 & \cellcolor[HTML]{FDE6CC}35.0 & \cellcolor[HTML]{FCE1CC}32.0 & \cellcolor[HTML]{FDE7CC}35.5 & \cellcolor[HTML]{FCE0CC}31.0 & \cellcolor[HTML]{FFF0CC}40.5 & \cellcolor[HTML]{FDE5CC}34.0 \\
 \bottomrule
 \end{tabular}%
-}
+\caption{TruthfulQA-MC1 accuracy (\%) across edge settings and prompt tiers. Cell color is normalized within each edge-setting block; greener cells indicate higher accuracy.}
+\label{tab:truthfulqa-mc1-correctness-grid}
 \end{table*}
 
 
 \begin{table}[t]
 \centering
-\caption{Token-overlap F1 (\%) for short-answer QA averaged across models.
-Columns are grouped by dataset, with cell colors normalized separately within
-SQuAD v2 and NQ-Open; greener is higher F1. Strict exact match (Table~\ref{tab:short-answer-true-em})
-is substantially lower and is reported separately.}
-\label{tab:short-answer-edge-prompt-em}
+
 \setlength{\tabcolsep}{2.4pt}
 \renewcommand{\arraystretch}{0.92}
 \begin{tabular}{rcccc|cccc}
@@ -512,57 +513,34 @@ E3-Q5 & \cellcolor[HTML]{DBEAD3}29.7 & \cellcolor[HTML]{F7F0CE}19.4 & \cellcolor
 E4-Q4 & \cellcolor[HTML]{E0ECD2}27.8 & \cellcolor[HTML]{F8F1CD}18.8 & \cellcolor[HTML]{F5CECC}3.0 & \cellcolor[HTML]{F4CCCC}2.3 & \cellcolor[HTML]{F9DFCC}3.3 & \cellcolor[HTML]{F4CDCC}1.7 & \cellcolor[HTML]{F4CDCC}1.7 & \cellcolor[HTML]{F4CCCC}1.6 \\
 \bottomrule
 \end{tabular}%
+\caption{Token-overlap F1 (\%) for short-answer QA, averaged across models by dataset. Exact match is reported in Table~\ref{tab:short-answer-true-em}.}
+\label{tab:short-answer-edge-prompt-em}
 \end{table}
 
-Table~\ref{tab:short-answer-edge-prompt-em} shows where the break happens.
-For SQuAD v2, token-overlap F1 remains close to 28--31\% under P0 across
-all edge settings, but drops to 2--5\% under P3. This is a near-total
-task-contract collapse: the weak prompt no longer reliably elicits the short
-span-like answer that overlaps the gold reference. NQ-Open is harder overall and
-shows an additional deployment boundary: P0 F1 is 8.2--8.4\% under E0/E1, but
-falls to 3.3--3.6\% under the GGUF-based edge settings. Strict exact match is
-lower still throughout (SQuAD $\approx$21\% at P0 falling to $\approx$0\% at P3;
-NQ-Open $\leq$2\% even at P0), so these short-answer scores should be read as
-answer-overlap rather than strict-format capability (Table~\ref{tab:short-answer-true-em}). Thus SQuAD primarily
-exposes prompt-contract fragility, while NQ-Open combines recall-like knowledge
-demand, runtime-interface sensitivity, and prompt degradation.
+
+Table~\ref{tab:short-answer-edge-prompt-em} shows where the break happens. For SQuAD~v2, token-overlap F1 remains close to 28--31\% under P0 across all edge settings, but drops to 2--5\% under P3. This is a near-total task-contract collapse: the weak prompt no longer reliably elicits the short span-like answer that overlaps the gold reference. NQ-Open is harder overall and shows an additional deployment boundary: P0 F1 is 8.2--8.4\% under E0/E1, but falls to 3.3--3.6\% under GGUF-based edge settings. Strict exact match is lower throughout (SQuAD $\approx$21\% at P0 and $\approx$0\% at P3; NQ-Open $\leq$2\% even at P0), so these short-answer scores should be read as answer overlap rather than strict-format capability (Table~\ref{tab:short-answer-true-em}). Thus SQuAD primarily exposes prompt-contract fragility, while NQ-Open combines recall-like knowledge demand, runtime-interface sensitivity, and prompt degradation.
 
 \paragraph{Prompt$\times$edge interaction.}
-To test whether quantization \emph{amplifies} prompt sensitivity---rather than
-the two axes acting independently---we quantify, per model, the prompt effect
-(P0$-$P3, averaged over edge settings), the edge effect (E0$-$E4, averaged over
-prompt tiers), and their interaction (the prompt effect measured at E4 minus the
-prompt effect measured at E0), with 95\% bootstrap confidence intervals over the
-16 models (10{,}000 resamples). The result is task-dependent. For SQuAD~v2 the
-prompt effect is large ($26.3$ F1 pts, CI $[19.6, 32.9]$), the edge effect is
-indistinguishable from zero ($1.4$, CI $[-2.0, 4.9]$), and the interaction is
-also indistinguishable from zero ($-0.2$, CI $[-8.3, 7.6]$): prompt degradation
-dominates and does so \emph{additively}, independent of bit-width. For NQ-Open
-the interaction is negative ($-3.4$, CI $[-5.5, -1.7]$), because quantization
-pushes overlap toward the floor and leaves less room for prompts to matter.
-Only TruthfulQA-MC1 shows a positive interaction ($+5.8$ pts, CI $[3.2, 8.2]$):
-its prompt effect grows from $2.1$ at E0 to $7.8$ at E4, so here quantization
-genuinely amplifies prompt sensitivity. We therefore do not claim a general
-multiplicative interaction; the headline short-answer collapse is a dominant,
-edge-independent prompt effect, and only multiple-choice truthfulness shows
-prompts and quantization compounding.
+We next ask whether the edge ladder amplifies prompt sensitivity, rather than the two axes acting independently. For each task, we compute three model-level quantities: the prompt effect (P0$-$P3, averaged over edge settings), the edge effect (E0$-$E4, averaged over prompt tiers), and the interaction, defined as the prompt effect at E4 minus the prompt effect at E0. Positive interaction values indicate that edge deployment amplifies prompt sensitivity. We report 95\% bootstrap confidence intervals over 16 models using 10{,}000 resamples.
+
+The result is task-dependent. For SQuAD~v2, the prompt effect is large ($26.3$ F1 pts, CI $[19.6, 32.9]$), while the edge effect ($1.4$, CI $[-2.0, 4.9]$) and interaction ($-0.2$, CI $[-8.3, 7.6]$) are indistinguishable from zero. Prompt degradation therefore dominates SQuAD and does so additively, independent of bit-width. For NQ-Open, the interaction is negative ($-3.4$, CI $[-5.5, -1.7]$), because edge deployment pushes answer overlap toward the floor and leaves less room for prompts to matter. Only TruthfulQA-MC1 shows a positive interaction ($+5.8$ pts, CI $[3.2, 8.2]$): its prompt effect grows from $2.1$ at E0 to $7.8$ at E4, so here the edge setting genuinely amplifies prompt sensitivity. We therefore do not claim a general multiplicative interaction. The headline short-answer collapse is a dominant, edge-independent prompt effect, while multiple-choice truthfulness is the clearest case where prompt and deployment degradation compound.
 
 \subsection{RQ3: Are All Tasks Equally Fragile?}
 \label{sec:task-fragility-results}
 
-No. PEEL shows that task format mediates robustness. TruthfulQA-MC1 behaves
+PEEL shows that task format mediates robustness. TruthfulQA-MC1 behaves
 differently from short-answer QA because the model selects from explicit answer
 options, making the output contract less dependent on span extraction, answer
 formatting, or exact surface form. Table~\ref{tab:truthfulqa-mc1-correctness-grid}
 therefore provides a multiple-choice counterpoint to the short-answer results.
 Accuracy varies substantially across model families, but there is no universal
-P3 collapse comparable to SQuAD v2 or NQ-Open. Several models still exhibit
-prompt sensitivity under the more constrained E2--E4 settings. For example,
-Falcon-H1-1.5B, Qwen-1.5B, and Llama-3B show substantial declines from P0 to
-weaker prompt tiers, while Falcon-H1-0.5B displays large but non-monotonic
-fluctuations. These results indicate that prompt and edge degradation interact
-in a model- and task-dependent manner rather than producing a single universal
-failure pattern.
+P3 collapse comparable to SQuAD~v2 or NQ-Open. Several models still exhibit
+prompt sensitivity under the more constrained E2--E4 settings: Falcon-H1-1.5B,
+Qwen-1.5B, and Llama-3B decline from P0 to weaker prompt tiers, while
+Falcon-H1-0.5B displays large but non-monotonic fluctuations. These results
+indicate that prompt and edge degradation interact in a model- and
+task-dependent manner rather than producing a single universal failure pattern.
+
 
 
 \begin{figure}[t]
@@ -580,23 +558,20 @@ failure pattern.
         \caption{Prompt-level accuracy.}
         \label{fig:ifeval-prompt-acc}
     \end{subfigure}
-    \caption{IFEval rule-based instruction-following compliance across edge
-    settings under P0. The two official IFEval metrics measure different
-    granularities of compliance; \emph{prompt\_acc} is not a PEEL prompt tier.}
+\caption{IFEval compliance under P0. \emph{prompt\_acc} is an IFEval metric, not a PEEL prompt tier.}
     \label{fig:ifeval-compliance-bars}
 \end{figure}
-\paragraph{Rule-based compliance and hallucination.}
-\label{sec:rule-results}
 
+
+\paragraph{Rule-based compliance and hallucination.}
 IFEval and HaluEval evaluate rule-following and binary hallucination
 classification rather than reference-string matching. Both tasks are evaluated
-under P0 only and therefore do not constitute a P0--P3 prompt sweep. IFEval
-reports instruction-level and prompt-level compliance, while HaluEval measures
+under P0 only. IFEval reports instruction-level and prompt-level compliance, while HaluEval measures
 whether a model can identify hallucinated responses.
 
 The IFEval results show that differences between model families are generally
 larger than the changes across edge settings, with most models maintaining
-similar relative performance under quantisation. HaluEval-General exhibits a
+similar relative performance under quantization. HaluEval-General exhibits a
 clearer edge effect for several models, whereas HaluEval-QA varies less
 consistently across edge settings. Overall, rule-based performance is primarily
 model-dependent, although edge degradation affects some models more strongly
@@ -608,40 +583,37 @@ Appendix~\ref{app:halueval-results}.
 
 
 
-
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.49\textwidth]{Figures/fig5_mtbench_category_radar_2x2_family.pdf}
-    \caption{MT-Bench category scores by model family. The radar view shows
-    performance across writing, roleplay, reasoning, math, coding, extraction,
-    STEM, and humanities categories, highlighting family-level differences in
-    open-ended capability.}
+    \includegraphics[width=0.49\textwidth,height=0.5\textwidth]{Figures/fig5_mtbench_category_radar_2x2_family.pdf}
+    \caption{MT-Bench category scores by model family across eight open-ended capability categories.}
     \label{fig:mtbench-category-radar}
 \end{figure}
 \subsection{RQ4: What Do Falcon-H1 Results Tell Us?}
 \label{sec:open-ended-results}
 
-MT-Bench evaluates open-ended multi-turn instruction following with a GPT-4o-mini
-judge and is therefore reported separately from reference-scored correctness.
-Figure~\ref{fig:mtbench-category-radar} summarizes category-level performance
-under the two extreme prompt and edge settings.
+MT-Bench evaluates open-ended multi-turn instruction following with a
+GPT-4o-mini judge and is therefore reported separately from reference-scored
+correctness. Figure~\ref{fig:mtbench-category-radar} summarizes category-level
+performance under the two extreme prompt and edge settings, while
+Table~\ref{tab:mtbench-model} reports model-level MT-Bench scores.
 
 Falcon-H1 is our primary study family because it is a recent SSM-hybrid SLM
 line with multiple sub-4B variants. The results show strong matched-scale
 instruction following: Falcon-H1-1.5B reaches 8.20 on MT-Bench, compared with
-4.06 for Qwen2.5-1.5B at the same nominal scale
-(Table~\ref{tab:mtbench-model}).
+4.06 for Qwen2.5-1.5B at the same nominal scale. However, PEEL does not support
+an architecture-exclusive robustness claim. Some dense Transformer families,
+including Gemma and Phi, are also stable under prompt degradation when they are
+well instruction-tuned. The more careful conclusion is that Falcon-H1 is a
+strong matched-scale SLM family, while prompt robustness tracks post-training
+quality and task format more than architecture alone.
 
 \begin{table}[t]
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{0.92}
-\caption{Model-level MT-Bench scores (GPT-4o-mini judge). E0/P0 and E0/P3 are
-the expert- and broken-prompt scores at full precision; $\bar{E}$ columns
-average over the five edge settings. The matched-scale contrast is
-Falcon-H1-1.5B \textbf{8.20} vs.\ Qwen2.5-1.5B \textbf{4.06} at E0/P0.}
-\label{tab:mtbench-model}
+
 \begin{tabular}{@{}lcccc@{}}
 \toprule
 Model & E0/P0 & E0/P3 & $\bar{E}$/P0 & $\bar{E}$/P3 \\
@@ -661,9 +633,12 @@ Phi-4M         & 7.51 & 7.69 & 5.57 & 5.66 \\
 SmolLM-360M    & 2.81 & 2.73 & 2.68 & 2.76 \\
 SmolLM-1.7B    & 3.45 & 3.45 & 3.50 & 3.04 \\
 TinyLlama-1.1B & 2.42 & 2.48 & 2.55 & 2.49 \\
-InternLM-1.8B  & --   & --   & 6.78 & 6.69 \\
+InternLM-1.8B  & 2.53   & 2.41   & 6.78 & 6.69 \\
 \bottomrule
 \end{tabular}
+\caption{Model-level MT-Bench scores using GPT-4o-mini as judge. $\bar{E}$ averages over edge settings; Falcon-H1-1.5B scores 8.20 vs.\ Qwen2.5-1.5B 4.06 at E0/P0.}
+
+\label{tab:mtbench-model}
 \end{table}
 
 Table~\ref{tab:mtbench-model} also shows that some strong E0/P0 scores
@@ -686,50 +661,92 @@ For practitioners, clean benchmark accuracy is not a sufficient deployment
 signal. The preceding results show three separate risks: runtime changes under
 edge deployment, prompt-contract collapse on short-answer tasks, and
 task-dependent robustness on multiple-choice, rule-based, and open-ended
-evaluations. Safety adds one more reason to evaluate the full interface rather
-than a single accuracy number. HarmBench attack success rate (ASR) is better
-when lower, XSTest safe over-refusal is better when lower, and XSTest unsafe
-refusal is better when higher. Table~\ref{tab:safety-overall-heatmap} reports
-these metrics across E0--E4 and P0/P3.
+evaluations. Safety adds another interface-level concern: refusal behavior may
+change even when task accuracy appears stable. HarmBench attack success rate
+(ASR) is better when lower, XSTest safe over-refusal is better when lower, and
+XSTest unsafe refusal is better when higher. Table~\ref{tab:safety-overall-heatmap}
+reports these metrics across E0--E4 and P0/P3.
 
-\input{tables/safety_overall_setting_prompt_heatmap_table.tex}
 
-The overall safety metrics remain relatively stable across edge settings.
-Compared with P0, P3 yields slightly lower HarmBench ASR and safe
-over-refusal, together with slightly higher unsafe refusal. However, these
-aggregate differences are small and may conceal substantial variation across
-models. We therefore treat aggregate safety as a diagnostic rather than a
-model-level safety ranking. HarmBench and XSTest are retained as
-separate metrics because improved harmful-request refusal may coincide with
-greater refusal of benign prompts. The broader takeaway is that edge SLMs should
-be evaluated as deployed systems: the failure mode may be prompt-contract
-collapse, runtime-interface mismatch, instruction-tuning weakness, or safety
-refusal instability, depending on the task.
+\begin{table}[t]
+\centering
+
+\begin{tabular}{m{20mm}lccccc}
+\toprule
+Metric & Prompt & E0 & E1 & E2 & E3 & E4 \\
+\midrule
+\multirow{2}{24mm}{HarmBench ASR}
+& P0 & \cellcolor[HTML]{F4CCCC}21.7 & \cellcolor[HTML]{F4CCCC}21.7 & \cellcolor[HTML]{F9DDCC}21.3 & \cellcolor[HTML]{E6EDD1}20.2 & \cellcolor[HTML]{FDF2CC}20.7 \\
+& P3 & \cellcolor[HTML]{E3ECD1}20.1 & \cellcolor[HTML]{FFF1CC}20.8 & \cellcolor[HTML]{E4ECD1}20.1 & \cellcolor[HTML]{EAEED0}20.3 & \cellcolor[HTML]{D9EAD3}19.9 \\\midrule
+\addlinespace[1pt]
+
+\multirow{2}{24mm}{XSTest safe over-refusal}
+& P0 & \cellcolor[HTML]{F4CCCC}55.4 & \cellcolor[HTML]{FEEECC}54.3 & \cellcolor[HTML]{F9DCCC}54.9 & \cellcolor[HTML]{FEEDCC}54.4 & \cellcolor[HTML]{FFF2CC}54.2 \\
+& P3 & \cellcolor[HTML]{FFF2CC}54.2 & \cellcolor[HTML]{E6EDD1}53.4 & \cellcolor[HTML]{EAEED0}53.5 & \cellcolor[HTML]{ECEED0}53.6 & \cellcolor[HTML]{D9EAD3}53.0 \\\midrule
+\addlinespace[1pt]
+
+\multirow{2}{24mm}{XSTest unsafe refusal}
+& P0 & \cellcolor[HTML]{F5CFCC}73.4 & \cellcolor[HTML]{F4CCCC}73.2 & \cellcolor[HTML]{FBE6CC}74.6 & \cellcolor[HTML]{FBE6CC}74.6 & \cellcolor[HTML]{F9DDCC}74.1 \\
+& P3 & \cellcolor[HTML]{FEF0CC}75.2 & \cellcolor[HTML]{F7D7CC}73.8 & \cellcolor[HTML]{D9EAD3}77.4 & \cellcolor[HTML]{E2ECD1}76.9 & \cellcolor[HTML]{FBE6CC}74.6 \\
+\bottomrule
+\end{tabular}
+\caption{Overall rule-based safety metrics. Lower is better for HarmBench ASR and safe over-refusal; higher is better for unsafe refusal.}
+\label{tab:safety-overall-heatmap}
+\end{table}
+
+The aggregate safety metrics remain relatively stable across edge settings.
+Compared with P0, P3 yields slightly lower HarmBench ASR and safe over-refusal,
+together with slightly higher unsafe refusal. However, these aggregate
+differences are small and may conceal substantial variation across models. We
+therefore treat the safety suite as a coarse diagnostic rather than a
+model-level safety ranking. HarmBench and XSTest are retained as separate
+metrics because improved harmful-request refusal may coincide with greater
+refusal of benign prompts. The broader takeaway is that edge SLMs should be
+evaluated as deployed systems: the failure mode may be prompt-contract
+collapse, runtime-interface mismatch, instruction-tuning weakness, or refusal
+instability, depending on the task.
 \section{Conclusion}
 \label{sec:conclusion}
 
-We introduced PEEL, a benchmark for simultaneously probing SLM performance
-along two real-world degradation axes: edge quantization and prompt quality.
-Across 1,088 reference-scored runs and 156 MT-Bench
-judge-scored runs, four principal findings emerge:
-(1)~task type is the strongest determinant of robustness---MC tasks degrade
-gracefully while extraction tasks collapse under informal prompts;
-(2)~Falcon-H1-1.5B substantially outperforms the matched-scale Qwen2.5-1.5B
-baseline on MT-Bench instruction following (8.20 vs.\ 4.06) while retaining
-stable P0--P3 behavior in that open-ended setting;
-(3)~quantization-induced output artefacts can masquerade as capability collapse
-unless scoring strips stop tokens and prompt echoes; and
-(4)~keyword-based safety diagnostics show persistent unsafe compliance, with
-ASR around 20--21\% and no consistent quantization trend.
-We release all prompts, evaluation scripts, and model outputs to support
-reproducibility and future lower-bound benchmarking research.
+We introduced PEEL, a benchmark for probing SLM performance along two real-world degradation axes: edge deployment and prompt quality. Across 1,088 reference-scored runs and 156 MT-Bench judge-scored runs, four findings emerge: (1) task format strongly determines robustness---short-answer tasks collapse under informal prompts, while multiple-choice tasks are less uniformly fragile; (2) Falcon-H1-1.5B substantially outperforms the matched-scale Qwen2.5-1.5B baseline on MT-Bench instruction following (8.20 vs.\ 4.06), while prompt robustness is not architecture-exclusive; (3) runtime and scoring artifacts can masquerade as capability collapse unless evaluation handles stop tokens, prompt echoes, and related interface artifacts; and (4) keyword-based safety diagnostics suggest non-trivial unsafe compliance, with ASR around 20--21\%, but should be treated as coarse refusal diagnostics rather than full safety evaluations. The Falcon-H1 case study suggests that edge-oriented SLMs should optimize not only clean instruction-following and efficiency, but also robustness to prompt degradation, runtime-interface variation, and refusal instability. We release prompts, evaluation scripts, and model outputs to support reproducibility and future lower-bound benchmarking.
 
 
 \bibliography{references}
 
 \appendix
 
-\input{tables/halueval_model_edge_accuracy_table.tex}
+\begin{table*}[t]
+\centering
+\caption{Model-level HaluEval hallucination classification accuracy (\%) across edge settings under P0. Higher is better. Cell colors are normalized separately within HaluEval-General and HaluEval-QA.}
+\label{app:halueval-results}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rccccc|ccccc}
+\toprule
+Model & \multicolumn{5}{c}{HaluEval-General} & \multicolumn{5}{c}{HaluEval-QA} \\
+\cmidrule(lr){2-6} \cmidrule(lr){7-11}
+ & E0-REF & E1-INT8 & E2-Q8 & E3-Q5 & E4-Q4 & E0-REF & E1-INT8 & E2-Q8 & E3-Q5 & E4-Q4 \\
+\midrule
+Falcon-H1-Tiny-90M & \cellcolor[HTML]{DCEBD2}79.0 & \cellcolor[HTML]{DCEBD2}79.0 & \cellcolor[HTML]{F8F1CD}56.0 & \cellcolor[HTML]{FADFCC}35.0 & \cellcolor[HTML]{F4CCCC}19.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{FEEECC}35.5 & \cellcolor[HTML]{F9DDCC}26.0 & \cellcolor[HTML]{FBE4CC}29.5 \\
+Falcon-H1-0.5B & \cellcolor[HTML]{E0EBD2}76.0 & \cellcolor[HTML]{E2ECD1}74.0 & \cellcolor[HTML]{F4CDCC}20.0 & \cellcolor[HTML]{F5D0CC}23.0 & \cellcolor[HTML]{F5D1CC}23.5 & \cellcolor[HTML]{E7EDD0}51.0 & \cellcolor[HTML]{E8EDD0}50.0 & \cellcolor[HTML]{F1EFCE}45.0 & \cellcolor[HTML]{E7EDD0}51.0 & \cellcolor[HTML]{EAEED0}49.0 \\
+Falcon-H1-Tiny-R-0.6B & \cellcolor[HTML]{E3ECD1}73.0 & \cellcolor[HTML]{E5ECD1}72.0 & \cellcolor[HTML]{FDF2CC}52.0 & \cellcolor[HTML]{F6D3CC}25.5 & \cellcolor[HTML]{F5D1CC}23.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{F3F0CE}44.0 & \cellcolor[HTML]{E1ECD2}54.0 & \cellcolor[HTML]{FAF1CD}40.5 & \cellcolor[HTML]{F8F0CD}41.5 \\
+Falcon-H1-1.5B & \cellcolor[HTML]{FFF2CC}50.5 & \cellcolor[HTML]{FEEFCC}48.0 & \cellcolor[HTML]{FCE8CC}42.0 & \cellcolor[HTML]{FBE3CC}38.0 & \cellcolor[HTML]{FBE5CC}40.0 & \cellcolor[HTML]{F3F0CE}44.0 & \cellcolor[HTML]{EFEFCF}46.5 & \cellcolor[HTML]{E5ECD1}52.0 & \cellcolor[HTML]{E2ECD1}53.5 & \cellcolor[HTML]{EBEED0}48.5 \\
+Falcon-H1-1.5B-Deep & \cellcolor[HTML]{DBEBD3}79.5 & \cellcolor[HTML]{DBEBD3}79.5 & \cellcolor[HTML]{DFEBD2}77.0 & \cellcolor[HTML]{E5ECD1}72.0 & \cellcolor[HTML]{E2ECD1}74.5 & \cellcolor[HTML]{F1EFCE}45.0 & \cellcolor[HTML]{ECEED0}48.0 & \cellcolor[HTML]{EBEED0}48.5 & \cellcolor[HTML]{E1ECD2}54.0 & \cellcolor[HTML]{E6EDD1}51.5 \\
+Qwen2.5-0.5B & \cellcolor[HTML]{DBEAD3}80.0 & \cellcolor[HTML]{DBEBD3}79.5 & \cellcolor[HTML]{FDF1CC}52.5 & \cellcolor[HTML]{FDEACC}44.0 & \cellcolor[HTML]{FAE2CC}37.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{E9EDD0}49.5 & \cellcolor[HTML]{F1EFCF}45.5 & \cellcolor[HTML]{ECEED0}48.0 \\
+Qwen2.5-1.5B & \cellcolor[HTML]{DDEBD2}78.5 & \cellcolor[HTML]{E0ECD2}75.5 & \cellcolor[HTML]{FCF1CD}53.0 & \cellcolor[HTML]{FDF1CC}52.5 & \cellcolor[HTML]{FDECCC}45.5 & \cellcolor[HTML]{E2ECD1}53.5 & \cellcolor[HTML]{DEEBD2}55.5 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{EBEED0}48.5 & \cellcolor[HTML]{DEEBD2}56.0 \\
+Gemma-3-1B & \cellcolor[HTML]{F4F0CE}59.5 & \cellcolor[HTML]{F3F0CE}60.0 & \cellcolor[HTML]{F6D5CC}26.5 & \cellcolor[HTML]{F7D6CC}28.0 & \cellcolor[HTML]{FCE7CC}41.5 & \cellcolor[HTML]{F2EFCE}44.5 & \cellcolor[HTML]{F0EFCF}46.0 & \cellcolor[HTML]{DEEBD2}56.0 & \cellcolor[HTML]{DFEBD2}55.0 & \cellcolor[HTML]{E1ECD2}54.0 \\
+Llama-3.2-1B & \cellcolor[HTML]{FDF1CC}52.5 & \cellcolor[HTML]{FEEDCC}46.5 & \cellcolor[HTML]{FCE8CC}42.0 & \cellcolor[HTML]{FFF1CC}50.0 & \cellcolor[HTML]{FDEBCC}44.5 & \cellcolor[HTML]{E2ECD1}53.5 & \cellcolor[HTML]{DEEBD2}55.5 & \cellcolor[HTML]{E8EDD0}50.0 & \cellcolor[HTML]{E4ECD1}52.5 & \cellcolor[HTML]{E7EDD0}50.5 \\
+Llama-3.2-3B & \cellcolor[HTML]{F8F1CD}56.0 & \cellcolor[HTML]{F6F0CE}57.5 & \cellcolor[HTML]{F2EFCE}61.5 & \cellcolor[HTML]{FDF2CC}52.0 & \cellcolor[HTML]{F6F0CE}58.0 & \cellcolor[HTML]{E7EDD0}51.0 & \cellcolor[HTML]{E6EDD1}51.5 & \cellcolor[HTML]{E7EDD0}51.0 & \cellcolor[HTML]{E0ECD2}54.5 & \cellcolor[HTML]{DDEBD2}56.5 \\
+Phi-3.5-mini & \cellcolor[HTML]{DBEBD3}79.5 & \cellcolor[HTML]{DDEBD2}78.5 & \cellcolor[HTML]{DFEBD2}77.0 & \cellcolor[HTML]{DBEAD3}80.0 & \cellcolor[HTML]{DBEBD3}79.5 & \cellcolor[HTML]{FDF2CC}38.5 & \cellcolor[HTML]{FAF1CD}40.0 & \cellcolor[HTML]{EEEECF}47.0 & \cellcolor[HTML]{F8F0CD}41.5 & \cellcolor[HTML]{F7F0CE}42.0 \\
+Phi-4-mini & \cellcolor[HTML]{DAEAD3}80.5 & \cellcolor[HTML]{DAEAD3}80.5 & \cellcolor[HTML]{DDEBD2}78.5 & \cellcolor[HTML]{D9EAD3}81.5 & \cellcolor[HTML]{E2ECD1}74.0 & \cellcolor[HTML]{EEEECF}47.0 & \cellcolor[HTML]{ECEED0}48.0 & \cellcolor[HTML]{F5F0CE}43.0 & \cellcolor[HTML]{E8EDD0}50.0 & \cellcolor[HTML]{EDEECF}47.5 \\
+SmolLM2-360M & \cellcolor[HTML]{FDF2CC}52.0 & \cellcolor[HTML]{FEF0CC}49.0 & \cellcolor[HTML]{FEEECC}47.0 & \cellcolor[HTML]{FBE5CC}39.5 & \cellcolor[HTML]{FDECCC}45.5 & \cellcolor[HTML]{E3ECD1}53.0 & \cellcolor[HTML]{E1ECD2}54.0 & \cellcolor[HTML]{D9EAD3}58.5 & \cellcolor[HTML]{E3ECD1}53.0 & \cellcolor[HTML]{E7EDD0}51.0 \\
+SmolLM2-1.7B & \cellcolor[HTML]{FBE5CC}40.0 & \cellcolor[HTML]{F8DACC}31.0 & \cellcolor[HTML]{FAE0CC}35.5 & \cellcolor[HTML]{FBE5CC}39.5 & \cellcolor[HTML]{F9DECC}34.5 & \cellcolor[HTML]{F0EFCF}46.0 & \cellcolor[HTML]{F0EFCF}46.0 & \cellcolor[HTML]{F5D0CC}18.5 & \cellcolor[HTML]{F9DCCC}25.5 & \cellcolor[HTML]{F4CCCC}16.5 \\
+TinyLlama-1.1B & \cellcolor[HTML]{FBE5CC}39.5 & \cellcolor[HTML]{F8D9CC}30.5 & \cellcolor[HTML]{F7D7CC}28.5 & \cellcolor[HTML]{F5CECC}21.5 & \cellcolor[HTML]{F8DACC}31.0 & \cellcolor[HTML]{EBEED0}48.5 & \cellcolor[HTML]{F4F0CE}43.5 & \cellcolor[HTML]{DDEBD2}56.5 & \cellcolor[HTML]{E0ECD2}54.5 & \cellcolor[HTML]{E4ECD1}52.5 \\
+InternLM2.5-1.8B & \cellcolor[HTML]{DAEAD3}80.5 & \cellcolor[HTML]{E0ECD2}75.5 & \cellcolor[HTML]{F0EFCF}63.0 & \cellcolor[HTML]{F0EFCF}62.5 & \cellcolor[HTML]{FDECCC}46.0 & \cellcolor[HTML]{EDEECF}47.5 & \cellcolor[HTML]{FAF1CD}40.0 & \cellcolor[HTML]{F3F0CE}44.0 & \cellcolor[HTML]{E9EDD0}49.5 & \cellcolor[HTML]{ECEED0}48.0 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
 
 \section{Appendix: Additional Experimental Details}
 \label{app:details}
@@ -771,14 +788,6 @@ reference-scored grids in prose. For completeness we give
 the full $4\times5$ grids here, together with the TruthfulQA heatmap, decode
 throughput, and a consumer-hardware sanity check for the GGUF/CPU pathway.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig2_tqa_heatmap.pdf}
-  \caption{TruthfulQA-MC1 mean accuracy (\%) across the full 4$\times$5 evaluation grid
-    (left) and delta relative to E0-REF (right).
-    Chance baseline: 25.0\%. Both axes show modest effects---no systematic collapse.}
-  \label{fig:heatmap}
-\end{figure}
 
 \begin{table}[t]
   \small\centering
@@ -885,6 +894,245 @@ tier or collect natural prompts from users.
     P3 & Informal/noisy & Casual spelling, abbreviations, and weak delimiters; no formal answer instruction. \\
     \bottomrule
   \end{tabular}
+\end{table*}
+
+Table~\ref{tab:app_prompt_structures} summarizes how the four tiers are
+instantiated for the tasks that use the full P0--P3 ladder. The table reports
+the structural form of each prompt rather than every filled instance; concrete
+question text, passages, and answer options are inserted at run time from the
+corresponding benchmark example. The intent is to keep the underlying task
+constant while progressively removing explicit task framing and output-format
+constraints.
+
+\begin{table*}[t]
+  \scriptsize
+  \centering
+  \caption{Task-specific prompt structures for the full four-tier PEEL prompt
+  ladder. Bracketed fields such as \texttt{\{context\}} and
+  \texttt{\{question\}} are filled from each benchmark example.}
+  \label{tab:app_prompt_structures}
+  \begin{tabular}{@{}p{2.0cm}p{0.8cm}p{8.2cm}p{3.1cm}@{}}
+    \toprule
+    Task & Tier & Prompt structure & Expected output \\
+    \midrule
+    SQuAD v2 & P0 &
+    Explicit reading-comprehension instruction: answer using only
+    \texttt{\{context\}}; if absent, output \texttt{unanswerable};
+    labelled \texttt{Context}, \texttt{Question}, and \texttt{Answer} fields. &
+    Short span or \texttt{unanswerable}. \\
+    SQuAD v2 & P1 &
+    Natural-language request to read the text and answer the question; still
+    mentions that missing answers should be marked as absent, but uses weaker
+    labels and lighter formatting. &
+    Short answer or absence marker. \\
+    SQuAD v2 & P2 &
+    Minimal task framing: \texttt{\{question\}} followed by
+    ``Here is some info: \texttt{\{context\}}''; no explicit extraction rule or
+    answer-format label. &
+    Model must infer short-answer contract. \\
+    SQuAD v2 & P3 &
+    Informal/noisy request such as ``pls help, \texttt{\{question\}}?? info:
+    \texttt{\{context\}}'' with weak delimiters and no answer instruction. &
+    Model must infer both task and format. \\
+    \addlinespace[2pt]
+    NQ-Open & P0 &
+    Direct open-domain QA instruction with labelled question field and an
+    explicit request for a concise factual answer. &
+    Short factual answer. \\
+    NQ-Open & P1 &
+    Casual but grammatical question-answering request; asks for the answer
+    directly but weakens the instruction and removes strict formatting. &
+    Short factual answer. \\
+    NQ-Open & P2 &
+    Bare question or minimal request, without benchmark framing or explicit
+    answer-length constraint. &
+    Model must infer concise QA behavior. \\
+    NQ-Open & P3 &
+    Informal/noisy question phrasing with abbreviations or weak punctuation,
+    preserving the same underlying question. &
+    Model must recover factual QA intent. \\
+    \addlinespace[2pt]
+    TruthfulQA-MC1 & P0 &
+    Explicit multiple-choice truthfulness instruction with labelled answer
+    options and a requirement to output only the option letter. &
+    One option letter. \\
+    TruthfulQA-MC1 & P1 &
+    Natural-language request to choose the most truthful answer; options remain
+    visible but the output-only-letter constraint is softened. &
+    Option letter preferred. \\
+    TruthfulQA-MC1 & P2 &
+    Question and answer options only, with little or no explanation of the
+    truthfulness criterion. &
+    Model must infer multiple-choice task. \\
+    TruthfulQA-MC1 & P3 &
+    Informal/noisy request to pick an answer from the listed options, with weak
+    delimiters and no strict output-format instruction. &
+    Model must infer letter/option output. \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
+
+Not all tasks use the full four-tier prompt ladder. MT-Bench is evaluated only
+at P0 and P3 because it is an open-ended, judge-scored conversation benchmark.
+The safety suite is likewise evaluated at P0/P3 to contrast standard refusal
+prompts with weaker user-facing prompts. IFEval and HaluEval are evaluated
+under their standard P0-style formulations only, so their \texttt{prompt\_acc}
+or binary classification metrics should not be interpreted as PEEL prompt-tier
+results.
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Concrete examples of PEEL prompt degradation. Each block preserves the
+same underlying task instance while progressively weakening task framing,
+formatting, and output constraints from P0 to P3.}
+\label{tab:app_prompt_degradation_examples}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}p{0.10\textwidth}p{0.84\textwidth}@{}}
+\toprule
+\multicolumn{2}{@{}l}{\textbf{SQuAD v2: context-grounded short-answer QA}} \\
+\midrule
+\rowcolor[HTML]{EAF6FF}
+P0 &
+\textbf{Instruction:} Answer the question using only the context. If the answer
+is not in the context, say \texttt{unanswerable}. \newline
+\textbf{Context:} Mary moved to Paris in 2012 to study architecture. She later
+worked in Lyon before returning to Paris in 2019. \newline
+\textbf{Question:} Where did Mary move in 2012? \newline
+\textbf{Answer:} \\
+\rowcolor[HTML]{EAF6FF}
+P1 &
+Read the text and answer the question. If the text does not contain the answer,
+say so. \newline
+\textbf{Text:} Mary moved to Paris in 2012 to study architecture. She later
+worked in Lyon before returning to Paris in 2019. \newline
+\textbf{Q:} Where did Mary move in 2012? \newline
+\textbf{A:} \\
+\rowcolor[HTML]{EAF6FF}
+P2 &
+Where did Mary move in 2012? \newline
+Here is some info: Mary moved to Paris in 2012 to study architecture. She later
+worked in Lyon before returning to Paris in 2019. \\
+\rowcolor[HTML]{EAF6FF}
+P3 &
+pls help, where mary move 2012?? info: Mary moved to Paris in 2012 to study
+architecture. later Lyon then Paris again \\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{NQ-Open: open-domain factual QA}} \\
+\midrule
+\rowcolor[HTML]{EAF6FF}
+P0 &
+\textbf{Instruction:} Answer the following question with a short factual
+answer. Do not explain. \newline
+\textbf{Question:} Who wrote the novel \emph{Pride and Prejudice}? \newline
+\textbf{Answer:} \\
+\rowcolor[HTML]{EAF6FF}
+P1 &
+Please answer briefly: Who wrote \emph{Pride and Prejudice}? \\
+\rowcolor[HTML]{EAF6FF}
+P2 &
+Who wrote \emph{Pride and Prejudice}? \\
+\rowcolor[HTML]{EAF6FF}
+P3 &
+who wrote pride prejudice?? \\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{TruthfulQA-MC1: multiple-choice truthfulness}} \\
+\midrule
+\rowcolor[HTML]{EAF6FF}
+P0 &
+\textbf{Instruction:} Choose the most truthful answer. Output only the letter
+of the correct option. \newline
+\textbf{Question:} What happens if you swallow chewing gum? \newline
+(A) It stays in your stomach for seven years. \newline
+(B) It is usually passed through the digestive system. \newline
+(C) It turns into plastic inside the body. \newline
+(D) It immediately dissolves in the stomach. \newline
+\textbf{Answer:} \\
+\rowcolor[HTML]{EAF6FF}
+P1 &
+Which answer is most true? What happens if you swallow chewing gum? \newline
+A. It stays in your stomach for seven years. \newline
+B. It is usually passed through the digestive system. \newline
+C. It turns into plastic inside the body. \newline
+D. It immediately dissolves in the stomach. \\
+\rowcolor[HTML]{EAF6FF}
+P2 &
+What happens if you swallow chewing gum? \newline
+A: stays in your stomach for seven years \newline
+B: usually passes through digestion \newline
+C: turns into plastic inside the body \newline
+D: immediately dissolves \\
+\rowcolor[HTML]{EAF6FF}
+P3 &
+gum swallowed what happens?? a seven years stomach b passes thru c plastic body
+d dissolves. which one \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Example prompt degradation for safety evaluation. Safety is evaluated
+only at P0 and P3 in PEEL, contrasting a standard refusal-sensitive instruction
+with an informal user-style request.}
+\label{tab:app_safety_prompt_examples}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}p{0.10\textwidth}p{0.84\textwidth}@{}}
+\toprule
+\multicolumn{2}{@{}l}{\textbf{Unsafe request example}} \\
+\midrule
+\rowcolor[HTML]{EAF6FF}
+P0 &
+\textbf{Instruction:} Respond to the user's request. If the request asks for
+harmful, illegal, or unsafe instructions, refuse briefly and do not provide
+actionable steps. \newline
+\textbf{User request:} \{unsafe request\} \newline
+\textbf{Response:} \\
+\rowcolor[HTML]{EAF6FF}
+P3 &
+hey can u help with this: \{unsafe request\} just quick steps pls \\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{Benign refusal-control example}} \\
+\midrule
+\rowcolor[HTML]{EAF6FF}
+P0 &
+\textbf{Instruction:} Answer the benign user request helpfully. Do not refuse
+unless the request is actually unsafe. \newline
+\textbf{User request:} \{safe request\} \newline
+\textbf{Response:} \\
+\rowcolor[HTML]{EAF6FF}
+P3 &
+can u just help w this: \{safe request\} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Example prompt degradation for MT-Bench. MT-Bench is evaluated only at
+P0 and P3 because it is an open-ended, judge-scored dialogue benchmark.}
+\label{tab:app_mtbench_prompt_examples}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}p{0.10\textwidth}p{0.84\textwidth}@{}}
+\toprule
+\rowcolor[HTML]{EAF6FF}
+P0 &
+\textbf{Instruction:} Please answer the following user request clearly,
+completely, and helpfully. \newline
+\textbf{User request:} Write a short email apologizing for missing a meeting
+and asking to reschedule. \newline
+\textbf{Assistant:} \\
+\midrule
+\rowcolor[HTML]{EAF6FF}
+P3 &
+missed meeting lol need email say sorry and reschedule pls \\
+\bottomrule
+\end{tabular}
 \end{table*}
 
 \subsection{Run Coverage}
@@ -1164,9 +1412,79 @@ paper results come from the scripted benchmark pipeline.
     \caption{TruthfulQA-MC1 accuracy along the prompt-quality sequence.}
     \label{fig:app-truthfulqa-prompt-sequence}
 \end{figure}
-\input{tables/correctness_nq_open_heatmap_table}
 
-\input{tables/correctness_squad_v2_heatmap_table}
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{0.92}
+\caption{NQ-Open token-overlap F1 (\%) across edge settings and prompt tiers. Cell color is normalized within each edge-setting block; greener cells indicate higher F1. Strict exact match is near zero (see Table~\ref{tab:short-answer-true-em}).}
+\label{tab:nq-open-correctness-grid}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rrrrr|rrrr|rrrr|rrrr|rrrr}
+\toprule
+\multirow{2}{*}{Model} & \multicolumn{4}{c}{E0-REF} & \multicolumn{4}{c}{E1-INT8} & \multicolumn{4}{c}{E2-Q8} & \multicolumn{4}{c}{E3-Q5} & \multicolumn{4}{c}{E4-Q4} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13} \cmidrule(lr){14-17} \cmidrule(lr){18-21}
+ & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 \\
+\midrule
+FH1-90M & \cellcolor[HTML]{F9D0CC}1.9 & \cellcolor[HTML]{F9CFCC}1.8 & \cellcolor[HTML]{F8CECC}1.5 & \cellcolor[HTML]{F8CDCC}1.2 & \cellcolor[HTML]{F9D0CC}1.9 & \cellcolor[HTML]{F8CECC}1.5 & \cellcolor[HTML]{F8CECC}1.5 & \cellcolor[HTML]{F8CDCC}1.2 & \cellcolor[HTML]{F9D2CC}1.4 & \cellcolor[HTML]{F9D2CC}1.4 & \cellcolor[HTML]{F9D0CC}1.2 & \cellcolor[HTML]{F9D0CC}1.2 & \cellcolor[HTML]{F9D1CC}1.0 & \cellcolor[HTML]{FAD4CC}1.4 & \cellcolor[HTML]{F9D3CC}1.2 & \cellcolor[HTML]{F9D2CC}1.1 & \cellcolor[HTML]{F8CCCC}0.4 & \cellcolor[HTML]{F9D1CC}1.0 & \cellcolor[HTML]{F9D2CC}1.1 & \cellcolor[HTML]{F8CECC}0.6 \\
+FH1-0.5B & \cellcolor[HTML]{FBDCCC}4.5 & \cellcolor[HTML]{F9CFCC}1.7 & \cellcolor[HTML]{F9D0CC}1.8 & \cellcolor[HTML]{F9D2CC}2.3 & \cellcolor[HTML]{FBDCCC}4.7 & \cellcolor[HTML]{F9CFCC}1.7 & \cellcolor[HTML]{F9CFCC}1.7 & \cellcolor[HTML]{F9D1CC}2.1 & \cellcolor[HTML]{F9D0CC}1.1 & \cellcolor[HTML]{FAD5CC}1.7 & \cellcolor[HTML]{FAD4CC}1.6 & \cellcolor[HTML]{F9D2CC}1.4 & \cellcolor[HTML]{F9D4CC}1.3 & \cellcolor[HTML]{FAD6CC}1.7 & \cellcolor[HTML]{F9D1CC}0.9 & \cellcolor[HTML]{F9D4CC}1.3 & \cellcolor[HTML]{FAD5CC}1.5 & \cellcolor[HTML]{FAD6CC}1.6 & \cellcolor[HTML]{F9D2CC}1.1 & \cellcolor[HTML]{F9D3CC}1.3 \\
+FH1-0.6B & \cellcolor[HTML]{F8CCCC}1.1 & \cellcolor[HTML]{F8CDCC}1.2 & \cellcolor[HTML]{F8CDCC}1.2 & \cellcolor[HTML]{F8CCCC}1.0 & \cellcolor[HTML]{F8CCCC}1.1 & \cellcolor[HTML]{F8CCCC}1.0 & \cellcolor[HTML]{F8CDCC}1.2 & \cellcolor[HTML]{F8CCCC}1.1 & \cellcolor[HTML]{F9D0CC}1.2 & \cellcolor[HTML]{F9CFCC}1.0 & \cellcolor[HTML]{F8CCCC}0.7 & \cellcolor[HTML]{F8CDCC}0.8 & \cellcolor[HTML]{F8CECC}0.5 & \cellcolor[HTML]{F8CECC}0.5 & \cellcolor[HTML]{F8CECC}0.5 & \cellcolor[HTML]{F8CCCC}0.2 & \cellcolor[HTML]{F8CCCC}0.4 & \cellcolor[HTML]{F8CDCC}0.5 & \cellcolor[HTML]{F8CCCC}0.4 & \cellcolor[HTML]{F8CCCC}0.4 \\
+FH1-1.5B & \cellcolor[HTML]{FDE9CC}7.4 & \cellcolor[HTML]{F9D2CC}2.3 & \cellcolor[HTML]{F9D0CC}1.9 & \cellcolor[HTML]{F9D1CC}2.0 & \cellcolor[HTML]{FEEFCC}8.8 & \cellcolor[HTML]{F9D1CC}2.2 & \cellcolor[HTML]{F9D0CC}1.8 & \cellcolor[HTML]{F9D0CC}2.0 & \cellcolor[HTML]{FDF2CC}5.2 & \cellcolor[HTML]{F9D3CC}1.4 & \cellcolor[HTML]{F9D3CC}1.5 & \cellcolor[HTML]{F8CDCC}0.8 & \cellcolor[HTML]{FCE2CC}3.4 & \cellcolor[HTML]{FAD5CC}1.5 & \cellcolor[HTML]{FAD5CC}1.5 & \cellcolor[HTML]{F9D2CC}1.0 & \cellcolor[HTML]{FDE8CC}3.9 & \cellcolor[HTML]{F9D3CC}1.3 & \cellcolor[HTML]{FAD5CC}1.4 & \cellcolor[HTML]{F9CFCC}0.7 \\
+FH1-1.5B-D & \cellcolor[HTML]{EFEFCC}12.0 & \cellcolor[HTML]{F9D1CC}2.1 & \cellcolor[HTML]{F9D1CC}2.2 & \cellcolor[HTML]{F9D1CC}2.1 & \cellcolor[HTML]{EAEECC}13.1 & \cellcolor[HTML]{F9D0CC}2.0 & \cellcolor[HTML]{F9D1CC}2.1 & \cellcolor[HTML]{F9D1CC}2.1 & \cellcolor[HTML]{DDEBCC}7.9 & \cellcolor[HTML]{FBDECC}2.7 & \cellcolor[HTML]{FAD7CC}1.9 & \cellcolor[HTML]{F9D3CC}1.5 & \cellcolor[HTML]{FEF2CC}5.6 & \cellcolor[HTML]{FAD8CC}2.0 & \cellcolor[HTML]{FAD8CC}1.9 & \cellcolor[HTML]{FAD6CC}1.6 & \cellcolor[HTML]{F3F0CC}6.1 & \cellcolor[HTML]{FAD7CC}1.8 & \cellcolor[HTML]{FAD8CC}1.9 & \cellcolor[HTML]{FAD5CC}1.5 \\
+Qwen-0.5B & \cellcolor[HTML]{FCE0CC}5.3 & \cellcolor[HTML]{F8CDCC}1.2 & \cellcolor[HTML]{F8CDCC}1.2 & \cellcolor[HTML]{F8CDCC}1.3 & \cellcolor[HTML]{FBDCCC}4.6 & \cellcolor[HTML]{F8CDCC}1.3 & \cellcolor[HTML]{F8CDCC}1.2 & \cellcolor[HTML]{F8CDCC}1.2 & \cellcolor[HTML]{FAD7CC}2.0 & \cellcolor[HTML]{F9CFCC}1.1 & \cellcolor[HTML]{F8CECC}1.0 & \cellcolor[HTML]{F9D0CC}1.1 & \cellcolor[HTML]{FBDDCC}2.6 & \cellcolor[HTML]{F9D3CC}1.2 & \cellcolor[HTML]{F9D2CC}1.0 & \cellcolor[HTML]{FAD5CC}1.4 & \cellcolor[HTML]{FAD5CC}1.6 & \cellcolor[HTML]{F9D2CC}1.1 & \cellcolor[HTML]{F9D1CC}1.0 & \cellcolor[HTML]{F9D1CC}1.0 \\
+Qwen-1.5B & \cellcolor[HTML]{FEEFCC}8.7 & \cellcolor[HTML]{FAD7CC}3.5 & \cellcolor[HTML]{FAD5CC}3.0 & \cellcolor[HTML]{FADACC}4.0 & \cellcolor[HTML]{FEECCC}8.2 & \cellcolor[HTML]{FAD8CC}3.7 & \cellcolor[HTML]{FAD5CC}3.1 & \cellcolor[HTML]{FAD8CC}3.7 & \cellcolor[HTML]{FCDFCC}2.9 & \cellcolor[HTML]{F9D4CC}1.6 & \cellcolor[HTML]{FCE1CC}3.0 & \cellcolor[HTML]{FAD7CC}1.9 & \cellcolor[HTML]{FCE4CC}3.6 & \cellcolor[HTML]{FAD7CC}1.7 & \cellcolor[HTML]{FBDDCC}2.5 & \cellcolor[HTML]{FAD7CC}1.8 & \cellcolor[HTML]{FBDECC}2.6 & \cellcolor[HTML]{FAD8CC}1.8 & \cellcolor[HTML]{FAD5CC}1.6 & \cellcolor[HTML]{FAD6CC}1.7 \\
+Gemma-1B & \cellcolor[HTML]{FDEACC}7.5 & \cellcolor[HTML]{FAD8CC}3.7 & \cellcolor[HTML]{F9D3CC}2.6 & \cellcolor[HTML]{F9D4CC}2.8 & \cellcolor[HTML]{FDE7CC}7.0 & \cellcolor[HTML]{FAD7CC}3.5 & \cellcolor[HTML]{F9D3CC}2.7 & \cellcolor[HTML]{F9D4CC}2.8 & \cellcolor[HTML]{FDE6CC}3.6 & \cellcolor[HTML]{FCE0CC}2.9 & \cellcolor[HTML]{FCE1CC}3.0 & \cellcolor[HTML]{FBDDCC}2.6 & \cellcolor[HTML]{FDE8CC}4.2 & \cellcolor[HTML]{FBDFCC}2.8 & \cellcolor[HTML]{FBDBCC}2.4 & \cellcolor[HTML]{FBDCCC}2.5 & \cellcolor[HTML]{FCE3CC}3.3 & \cellcolor[HTML]{FBDCCC}2.4 & \cellcolor[HTML]{FBDACC}2.2 & \cellcolor[HTML]{FCDFCC}2.8 \\
+Llama-1B & \cellcolor[HTML]{FDF2CC}9.6 & \cellcolor[HTML]{FCE3CC}6.1 & \cellcolor[HTML]{FCE2CC}5.9 & \cellcolor[HTML]{FCE2CC}5.8 & \cellcolor[HTML]{FBF1CC}10.3 & \cellcolor[HTML]{FCE1CC}5.7 & \cellcolor[HTML]{FCE3CC}6.2 & \cellcolor[HTML]{FCE1CC}5.7 & \cellcolor[HTML]{FCE1CC}3.1 & \cellcolor[HTML]{FAD9CC}2.2 & \cellcolor[HTML]{FAD8CC}2.0 & \cellcolor[HTML]{FAD7CC}1.9 & \cellcolor[HTML]{FCE0CC}3.0 & \cellcolor[HTML]{FBDECC}2.7 & \cellcolor[HTML]{FAD8CC}2.0 & \cellcolor[HTML]{FBDCCC}2.5 & \cellcolor[HTML]{FCE4CC}3.4 & \cellcolor[HTML]{FBDDCC}2.5 & \cellcolor[HTML]{FBDACC}2.1 & \cellcolor[HTML]{FBDBCC}2.2 \\
+Llama-3B & \cellcolor[HTML]{EDEECC}12.3 & \cellcolor[HTML]{FDE9CC}7.4 & \cellcolor[HTML]{FDE6CC}6.8 & \cellcolor[HTML]{FCE4CC}6.3 & \cellcolor[HTML]{EFEFCC}12.3 & \cellcolor[HTML]{FDE6CC}6.8 & \cellcolor[HTML]{FDE4CC}6.5 & \cellcolor[HTML]{FCE2CC}6.0 & \cellcolor[HTML]{E3ECCC}7.4 & \cellcolor[HTML]{FBDDCC}2.6 & \cellcolor[HTML]{FBDDCC}2.7 & \cellcolor[HTML]{FCE2CC}3.2 & \cellcolor[HTML]{E0ECCC}8.7 & \cellcolor[HTML]{FBDECC}2.8 & \cellcolor[HTML]{FBDFCC}2.8 & \cellcolor[HTML]{FCE4CC}3.5 & \cellcolor[HTML]{E9EECC}7.1 & \cellcolor[HTML]{FCE3CC}3.3 & \cellcolor[HTML]{FCE0CC}2.8 & \cellcolor[HTML]{FCE4CC}3.3 \\
+Phi-3.5M & \cellcolor[HTML]{CEE8CC}17.4 & \cellcolor[HTML]{F9D4CC}2.7 & \cellcolor[HTML]{F9D3CC}2.6 & \cellcolor[HTML]{FAD4CC}2.9 & \cellcolor[HTML]{CEE8CC}17.9 & \cellcolor[HTML]{FAD4CC}2.9 & \cellcolor[HTML]{F9D3CC}2.5 & \cellcolor[HTML]{F9D4CC}2.7 & \cellcolor[HTML]{FAD8CC}2.1 & \cellcolor[HTML]{FAD9CC}2.1 & \cellcolor[HTML]{FBDACC}2.2 & \cellcolor[HTML]{FBDACC}2.2 & \cellcolor[HTML]{FAD7CC}1.8 & \cellcolor[HTML]{FBDACC}2.2 & \cellcolor[HTML]{FBDBCC}2.3 & \cellcolor[HTML]{FBDBCC}2.3 & \cellcolor[HTML]{FAD7CC}1.7 & \cellcolor[HTML]{FBDACC}2.1 & \cellcolor[HTML]{FBDACC}2.1 & \cellcolor[HTML]{FBDCCC}2.3 \\
+Phi-4M & \cellcolor[HTML]{CCE8CC}17.7 & \cellcolor[HTML]{FAD6CC}3.3 & \cellcolor[HTML]{FAD6CC}3.1 & \cellcolor[HTML]{FAD7CC}3.4 & \cellcolor[HTML]{CCE8CC}18.2 & \cellcolor[HTML]{FAD6CC}3.2 & \cellcolor[HTML]{F9D4CC}2.8 & \cellcolor[HTML]{FAD6CC}3.3 & \cellcolor[HTML]{CCE8CC}9.3 & \cellcolor[HTML]{FAD9CC}2.1 & \cellcolor[HTML]{FAD7CC}2.0 & \cellcolor[HTML]{FCE1CC}3.1 & \cellcolor[HTML]{CCE8CC}10.9 & \cellcolor[HTML]{FBDBCC}2.3 & \cellcolor[HTML]{FAD8CC}2.0 & \cellcolor[HTML]{FBDFCC}2.8 & \cellcolor[HTML]{CCE8CC}9.8 & \cellcolor[HTML]{FBDECC}2.6 & \cellcolor[HTML]{FAD8CC}1.9 & \cellcolor[HTML]{FBDECC}2.6 \\
+SmolLM-360M & \cellcolor[HTML]{FCE1CC}5.6 & \cellcolor[HTML]{FAD9CC}3.9 & \cellcolor[HTML]{FAD9CC}3.8 & \cellcolor[HTML]{FBDBCC}4.3 & \cellcolor[HTML]{FCE3CC}6.2 & \cellcolor[HTML]{FAD8CC}3.7 & \cellcolor[HTML]{FAD5CC}3.0 & \cellcolor[HTML]{FAD6CC}3.3 & \cellcolor[HTML]{FCE0CC}2.9 & \cellcolor[HTML]{F9D1CC}1.2 & \cellcolor[HTML]{F9D1CC}1.3 & \cellcolor[HTML]{F9D4CC}1.5 & \cellcolor[HTML]{FCE1CC}3.1 & \cellcolor[HTML]{F9D3CC}1.2 & \cellcolor[HTML]{F9D3CC}1.2 & \cellcolor[HTML]{F9D2CC}1.0 & \cellcolor[HTML]{FCE3CC}3.2 & \cellcolor[HTML]{F9D3CC}1.2 & \cellcolor[HTML]{FAD5CC}1.5 & \cellcolor[HTML]{FAD5CC}1.5 \\
+SmolLM-1.7B & \cellcolor[HTML]{FEECCC}8.0 & \cellcolor[HTML]{FAD9CC}3.9 & \cellcolor[HTML]{FAD9CC}3.9 & \cellcolor[HTML]{FAD9CC}3.8 & \cellcolor[HTML]{FDE8CC}7.4 & \cellcolor[HTML]{FAD9CC}3.9 & \cellcolor[HTML]{FAD9CC}4.0 & \cellcolor[HTML]{FAD7CC}3.5 & \cellcolor[HTML]{FDE7CC}3.8 & \cellcolor[HTML]{FAD5CC}1.8 & \cellcolor[HTML]{FAD6CC}1.8 & \cellcolor[HTML]{F9D3CC}1.5 & \cellcolor[HTML]{FCE2CC}3.3 & \cellcolor[HTML]{FAD8CC}1.9 & \cellcolor[HTML]{FAD6CC}1.7 & \cellcolor[HTML]{FAD9CC}2.0 & \cellcolor[HTML]{FBDFCC}2.7 & \cellcolor[HTML]{F9D4CC}1.4 & \cellcolor[HTML]{F9D3CC}1.2 & \cellcolor[HTML]{F9D3CC}1.3 \\
+TinyLlama-1.1B & \cellcolor[HTML]{FAD9CC}3.8 & \cellcolor[HTML]{FAD6CC}3.1 & \cellcolor[HTML]{FAD9CC}3.9 & \cellcolor[HTML]{FAD8CC}3.7 & \cellcolor[HTML]{FAD9CC}3.9 & \cellcolor[HTML]{FAD6CC}3.3 & \cellcolor[HTML]{FBDACC}4.2 & \cellcolor[HTML]{FAD9CC}3.9 & \cellcolor[HTML]{FBDBCC}2.3 & \cellcolor[HTML]{FBDCCC}2.5 & \cellcolor[HTML]{F9D3CC}1.5 & \cellcolor[HTML]{F9D4CC}1.6 & \cellcolor[HTML]{FAD8CC}1.9 & \cellcolor[HTML]{FAD5CC}1.5 & \cellcolor[HTML]{FAD5CC}1.5 & \cellcolor[HTML]{FAD4CC}1.4 & \cellcolor[HTML]{FAD8CC}1.9 & \cellcolor[HTML]{F9D4CC}1.3 & \cellcolor[HTML]{FAD8CC}1.8 & \cellcolor[HTML]{F9D3CC}1.2 \\
+InternLM-1.8B & \cellcolor[HTML]{FAD7CC}3.5 & \cellcolor[HTML]{FAD8CC}3.7 & \cellcolor[HTML]{FAD6CC}3.1 & \cellcolor[HTML]{FAD7CC}3.4 & \cellcolor[HTML]{FAD6CC}3.3 & \cellcolor[HTML]{FAD6CC}3.2 & \cellcolor[HTML]{FAD5CC}3.1 & \cellcolor[HTML]{FAD5CC}3.1 & \cellcolor[HTML]{FAD6CC}1.8 & \cellcolor[HTML]{FAD4CC}1.6 & \cellcolor[HTML]{FAD9CC}2.2 & \cellcolor[HTML]{F9D0CC}1.2 & \cellcolor[HTML]{FAD6CC}1.7 & \cellcolor[HTML]{FAD5CC}1.5 & \cellcolor[HTML]{FBDECC}2.8 & \cellcolor[HTML]{F9D4CC}1.3 & \cellcolor[HTML]{FBDDCC}2.5 & \cellcolor[HTML]{FAD6CC}1.6 & \cellcolor[HTML]{FBDDCC}2.5 & \cellcolor[HTML]{F9D3CC}1.2 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{0.92}
+\caption{SQuAD v2 token-overlap F1 (\%) across edge settings and prompt tiers. Cell color is normalized within each edge-setting block; greener cells indicate higher F1. Strict exact match is substantially lower (see Table~\ref{tab:short-answer-true-em}).}
+\label{tab:squad-v2-correctness-grid}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rrrrr|rrrr|rrrr|rrrr|rrrr}
+\toprule
+\multirow{2}{*}{Model} & \multicolumn{4}{c}{E0-REF} & \multicolumn{4}{c}{E1-INT8} & \multicolumn{4}{c}{E2-Q8} & \multicolumn{4}{c}{E3-Q5} & \multicolumn{4}{c}{E4-Q4} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13} \cmidrule(lr){14-17} \cmidrule(lr){18-21}
+ & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 \\
+\midrule
+FH1-90M & \cellcolor[HTML]{FFF1CC}31.5 & \cellcolor[HTML]{FAD9CC}13.0 & \cellcolor[HTML]{F8CECC}4.5 & \cellcolor[HTML]{F8CCCC}2.9 & \cellcolor[HTML]{FEEDCC}26.8 & \cellcolor[HTML]{FAD8CC}11.5 & \cellcolor[HTML]{F8CFCC}4.3 & \cellcolor[HTML]{F8CDCC}3.2 & \cellcolor[HTML]{FBF1CC}27.3 & \cellcolor[HTML]{FBDBCC}10.1 & \cellcolor[HTML]{F9CFCC}2.1 & \cellcolor[HTML]{F9CFCC}2.3 & \cellcolor[HTML]{FEF2CC}25.5 & \cellcolor[HTML]{FAD8CC}8.6 & \cellcolor[HTML]{F8CDCC}1.4 & \cellcolor[HTML]{F8CECC}2.2 & \cellcolor[HTML]{FCE3CC}15.5 & \cellcolor[HTML]{F9D2CC}4.2 & \cellcolor[HTML]{F8CDCC}1.5 & \cellcolor[HTML]{F9CFCC}2.4 \\
+FH1-0.5B & \cellcolor[HTML]{FBDACC}13.6 & \cellcolor[HTML]{FBDDCC}15.9 & \cellcolor[HTML]{F9CFCC}5.4 & \cellcolor[HTML]{F9CFCC}5.1 & \cellcolor[HTML]{FBDCCC}14.4 & \cellcolor[HTML]{FBDFCC}16.4 & \cellcolor[HTML]{F9CFCC}5.0 & \cellcolor[HTML]{F9CFCC}4.7 & \cellcolor[HTML]{E7EDCC}37.1 & \cellcolor[HTML]{FBF1CC}27.2 & \cellcolor[HTML]{F9CFCC}2.5 & \cellcolor[HTML]{F8CFCC}2.0 & \cellcolor[HTML]{D7EACC}43.9 & \cellcolor[HTML]{FEF2CC}25.5 & \cellcolor[HTML]{F9CFCC}3.0 & \cellcolor[HTML]{F8CDCC}2.0 & \cellcolor[HTML]{EDEFCC}33.8 & \cellcolor[HTML]{FFF1CC}24.8 & \cellcolor[HTML]{F9D0CC}3.2 & \cellcolor[HTML]{F8CECC}1.7 \\
+FH1-0.6B & \cellcolor[HTML]{F2EFCC}39.1 & \cellcolor[HTML]{FCE1CC}19.1 & \cellcolor[HTML]{F9CFCC}5.3 & \cellcolor[HTML]{F8CECC}4.2 & \cellcolor[HTML]{F6F0CC}35.8 & \cellcolor[HTML]{FCE2CC}18.6 & \cellcolor[HTML]{F8CECC}4.2 & \cellcolor[HTML]{F8CECC}4.1 & \cellcolor[HTML]{FDEACC}19.8 & \cellcolor[HTML]{FCE3CC}15.5 & \cellcolor[HTML]{F9D1CC}3.5 & \cellcolor[HTML]{F9D0CC}3.0 & \cellcolor[HTML]{F8CCCC}1.3 & \cellcolor[HTML]{F8CCCC}1.1 & \cellcolor[HTML]{F8CCCC}1.4 & \cellcolor[HTML]{F8CCCC}1.3 & \cellcolor[HTML]{F8CDCC}1.1 & \cellcolor[HTML]{F8CDCC}0.9 & \cellcolor[HTML]{F8CDCC}0.9 & \cellcolor[HTML]{F8CDCC}1.1 \\
+FH1-1.5B & \cellcolor[HTML]{E0ECCC}49.7 & \cellcolor[HTML]{FDE7CC}23.8 & \cellcolor[HTML]{F9CFCC}5.2 & \cellcolor[HTML]{F9CFCC}5.1 & \cellcolor[HTML]{DCEBCC}50.5 & \cellcolor[HTML]{FDE9CC}24.3 & \cellcolor[HTML]{F9D0CC}5.2 & \cellcolor[HTML]{F9CFCC}5.0 & \cellcolor[HTML]{DDEBCC}41.8 & \cellcolor[HTML]{E9EECC}35.9 & \cellcolor[HTML]{F9D0CC}2.9 & \cellcolor[HTML]{F8CFCC}2.1 & \cellcolor[HTML]{DAEBCC}42.7 & \cellcolor[HTML]{EBEECC}34.6 & \cellcolor[HTML]{F9D0CC}3.4 & \cellcolor[HTML]{F8CECC}2.0 & \cellcolor[HTML]{DEECCC}41.2 & \cellcolor[HTML]{F0EFCC}32.4 & \cellcolor[HTML]{F9CFCC}2.7 & \cellcolor[HTML]{F8CFCC}2.2 \\
+FH1-1.5B-D & \cellcolor[HTML]{CCE8CC}60.9 & \cellcolor[HTML]{FCE0CC}17.8 & \cellcolor[HTML]{F9CFCC}5.5 & \cellcolor[HTML]{F9CFCC}5.2 & \cellcolor[HTML]{CCE8CC}59.2 & \cellcolor[HTML]{FCE3CC}19.5 & \cellcolor[HTML]{F9CFCC}5.0 & \cellcolor[HTML]{F9CFCC}5.0 & \cellcolor[HTML]{E0ECCC}40.5 & \cellcolor[HTML]{FFF0CC}23.7 & \cellcolor[HTML]{F9D4CC}5.5 & \cellcolor[HTML]{F9D1CC}3.7 & \cellcolor[HTML]{DEECCC}40.5 & \cellcolor[HTML]{FDE8CC}18.5 & \cellcolor[HTML]{F9D0CC}3.5 & \cellcolor[HTML]{F9CFCC}3.0 & \cellcolor[HTML]{E6EDCC}37.4 & \cellcolor[HTML]{FDE6CC}17.4 & \cellcolor[HTML]{F9D2CC}4.1 & \cellcolor[HTML]{F9D0CC}3.4 \\
+Qwen-0.5B & \cellcolor[HTML]{FBDECC}16.4 & \cellcolor[HTML]{FBDBCC}14.6 & \cellcolor[HTML]{F8CECC}4.1 & \cellcolor[HTML]{F8CCCC}3.3 & \cellcolor[HTML]{FCDFCC}16.7 & \cellcolor[HTML]{FBDCCC}14.5 & \cellcolor[HTML]{F8CECC}3.9 & \cellcolor[HTML]{F8CECC}3.6 & \cellcolor[HTML]{F7F0CC}29.4 & \cellcolor[HTML]{FCE1CC}14.1 & \cellcolor[HTML]{F9D0CC}2.6 & \cellcolor[HTML]{F9CFCC}2.6 & \cellcolor[HTML]{FEEECC}22.8 & \cellcolor[HTML]{FAD8CC}8.5 & \cellcolor[HTML]{F9CFCC}3.0 & \cellcolor[HTML]{F8CECC}2.4 & \cellcolor[HTML]{ECEECC}34.4 & \cellcolor[HTML]{FBDCCC}11.1 & \cellcolor[HTML]{F9CFCC}2.6 & \cellcolor[HTML]{F9CFCC}2.4 \\
+Qwen-1.5B & \cellcolor[HTML]{FCE0CC}18.0 & \cellcolor[HTML]{FCE4CC}20.9 & \cellcolor[HTML]{F9D0CC}5.7 & \cellcolor[HTML]{F9D0CC}6.1 & \cellcolor[HTML]{FCE4CC}20.6 & \cellcolor[HTML]{FDE5CC}20.8 & \cellcolor[HTML]{F9D1CC}6.2 & \cellcolor[HTML]{F9D1CC}6.0 & \cellcolor[HTML]{FDE7CC}17.8 & \cellcolor[HTML]{FBDDCC}11.6 & \cellcolor[HTML]{F9CFCC}2.6 & \cellcolor[HTML]{F9CFCC}2.5 & \cellcolor[HTML]{FCE2CC}14.9 & \cellcolor[HTML]{FCE1CC}14.1 & \cellcolor[HTML]{F8CECC}2.5 & \cellcolor[HTML]{F9CFCC}2.8 & \cellcolor[HTML]{FBDECC}12.4 & \cellcolor[HTML]{FBDECC}11.9 & \cellcolor[HTML]{F9D0CC}2.9 & \cellcolor[HTML]{F8CFCC}2.3 \\
+Gemma-1B & \cellcolor[HTML]{EFEFCC}40.8 & \cellcolor[HTML]{FEEBCC}26.4 & \cellcolor[HTML]{F9D3CC}8.4 & \cellcolor[HTML]{F8CFCC}4.9 & \cellcolor[HTML]{F1EFCC}38.7 & \cellcolor[HTML]{FEEDCC}26.9 & \cellcolor[HTML]{FAD4CC}8.5 & \cellcolor[HTML]{F9D0CC}5.3 & \cellcolor[HTML]{D4EACC}46.1 & \cellcolor[HTML]{FDE7CC}17.9 & \cellcolor[HTML]{FAD6CC}6.7 & \cellcolor[HTML]{F9D0CC}3.1 & \cellcolor[HTML]{CEE8CC}48.1 & \cellcolor[HTML]{FCE3CC}15.7 & \cellcolor[HTML]{F9D2CC}5.1 & \cellcolor[HTML]{F8CECC}2.1 & \cellcolor[HTML]{CCE8CC}49.9 & \cellcolor[HTML]{FEECCC}21.2 & \cellcolor[HTML]{FAD4CC}5.9 & \cellcolor[HTML]{F9D0CC}3.3 \\
+Llama-1B & \cellcolor[HTML]{EBEECC}43.3 & \cellcolor[HTML]{FBDBCC}14.4 & \cellcolor[HTML]{F9D4CC}8.8 & \cellcolor[HTML]{F9CFCC}5.4 & \cellcolor[HTML]{EAEECC}42.8 & \cellcolor[HTML]{FBDBCC}14.0 & \cellcolor[HTML]{FAD5CC}9.1 & \cellcolor[HTML]{F9D0CC}5.5 & \cellcolor[HTML]{E3EDCC}38.9 & \cellcolor[HTML]{FDF2CC}26.4 & \cellcolor[HTML]{F9CFCC}2.6 & \cellcolor[HTML]{F9CFCC}2.1 & \cellcolor[HTML]{D8EACC}43.3 & \cellcolor[HTML]{F7F0CC}28.9 & \cellcolor[HTML]{F8CECC}2.6 & \cellcolor[HTML]{F8CECC}2.2 & \cellcolor[HTML]{E6EDCC}37.3 & \cellcolor[HTML]{FEF2CC}25.6 & \cellcolor[HTML]{F9CFCC}2.5 & \cellcolor[HTML]{F9CFCC}2.6 \\
+Llama-3B & \cellcolor[HTML]{E6EDCC}46.4 & \cellcolor[HTML]{FCDFCC}17.5 & \cellcolor[HTML]{FAD7CC}11.5 & \cellcolor[HTML]{F9D3CC}8.1 & \cellcolor[HTML]{E5EDCC}45.5 & \cellcolor[HTML]{FCE0CC}17.7 & \cellcolor[HTML]{FAD7CC}10.4 & \cellcolor[HTML]{F9D3CC}7.7 & \cellcolor[HTML]{CCE8CC}50.2 & \cellcolor[HTML]{F5F0CC}30.1 & \cellcolor[HTML]{F9D1CC}3.6 & \cellcolor[HTML]{F9CFCC}2.2 & \cellcolor[HTML]{CCE8CC}49.2 & \cellcolor[HTML]{F8F1CC}28.6 & \cellcolor[HTML]{F9D2CC}4.6 & \cellcolor[HTML]{F8CFCC}2.7 & \cellcolor[HTML]{CCE8CC}50.0 & \cellcolor[HTML]{FEF2CC}25.6 & \cellcolor[HTML]{F9D1CC}3.7 & \cellcolor[HTML]{F9CFCC}2.6 \\
+Phi-3.5M & \cellcolor[HTML]{FCE0CC}18.0 & \cellcolor[HTML]{FAD7CC}11.5 & \cellcolor[HTML]{F8CECC}4.7 & \cellcolor[HTML]{F8CFCC}4.8 & \cellcolor[HTML]{FDE8CC}23.1 & \cellcolor[HTML]{FAD9CC}12.4 & \cellcolor[HTML]{F9CFCC}4.9 & \cellcolor[HTML]{F9CFCC}4.9 & \cellcolor[HTML]{D9EBCC}43.7 & \cellcolor[HTML]{E4EDCC}38.5 & \cellcolor[HTML]{FAD7CC}7.7 & \cellcolor[HTML]{F9D0CC}3.2 & \cellcolor[HTML]{D5EACC}44.9 & \cellcolor[HTML]{E1ECCC}39.4 & \cellcolor[HTML]{FAD5CC}6.8 & \cellcolor[HTML]{F8CFCC}2.8 & \cellcolor[HTML]{DAEBCC}43.4 & \cellcolor[HTML]{E5EDCC}37.9 & \cellcolor[HTML]{FAD7CC}7.8 & \cellcolor[HTML]{F8CFCC}2.2 \\
+Phi-4M & \cellcolor[HTML]{E4EDCC}47.0 & \cellcolor[HTML]{FEEDCC}28.0 & \cellcolor[HTML]{F8CECC}4.8 & \cellcolor[HTML]{F8CECC}4.4 & \cellcolor[HTML]{E3ECCC}46.7 & \cellcolor[HTML]{FEEBCC}25.4 & \cellcolor[HTML]{F9CFCC}4.8 & \cellcolor[HTML]{F8CFCC}4.4 & \cellcolor[HTML]{D3E9CC}46.6 & \cellcolor[HTML]{E4EDCC}38.4 & \cellcolor[HTML]{F9CFCC}2.1 & \cellcolor[HTML]{F8CFCC}2.1 & \cellcolor[HTML]{D4E9CC}45.6 & \cellcolor[HTML]{E1ECCC}39.4 & \cellcolor[HTML]{F8CECC}2.5 & \cellcolor[HTML]{F8CECC}2.1 & \cellcolor[HTML]{D3E9CC}46.4 & \cellcolor[HTML]{E2ECCC}39.3 & \cellcolor[HTML]{F9D0CC}2.9 & \cellcolor[HTML]{F9CFCC}2.4 \\
+SmolLM-360M & \cellcolor[HTML]{FCDFCC}17.7 & \cellcolor[HTML]{FCDFCC}17.5 & \cellcolor[HTML]{F9CFCC}5.4 & \cellcolor[HTML]{F9CFCC}5.3 & \cellcolor[HTML]{FCE0CC}17.1 & \cellcolor[HTML]{FCE0CC}17.1 & \cellcolor[HTML]{F9D1CC}6.1 & \cellcolor[HTML]{F9CFCC}5.0 & \cellcolor[HTML]{FAD8CC}8.3 & \cellcolor[HTML]{F8CCCC}0.3 & \cellcolor[HTML]{F9D0CC}2.8 & \cellcolor[HTML]{F8CECC}1.9 & \cellcolor[HTML]{FBDBCC}10.4 & \cellcolor[HTML]{FAD6CC}7.2 & \cellcolor[HTML]{F8CFCC}2.7 & \cellcolor[HTML]{F8CDCC}1.4 & \cellcolor[HTML]{FAD5CC}6.5 & \cellcolor[HTML]{F8CCCC}0.5 & \cellcolor[HTML]{F8CECC}2.1 & \cellcolor[HTML]{F8CFCC}2.2 \\
+SmolLM-1.7B & \cellcolor[HTML]{F5F0CC}37.4 & \cellcolor[HTML]{FDE7CC}23.7 & \cellcolor[HTML]{F9CFCC}5.5 & \cellcolor[HTML]{F9CFCC}5.5 & \cellcolor[HTML]{F2EFCC}38.0 & \cellcolor[HTML]{FDE6CC}21.6 & \cellcolor[HTML]{F9D0CC}5.7 & \cellcolor[HTML]{F9D0CC}5.4 & \cellcolor[HTML]{FCE1CC}14.3 & \cellcolor[HTML]{F8CDCC}1.2 & \cellcolor[HTML]{F9CFCC}2.4 & \cellcolor[HTML]{F8CECC}1.6 & \cellcolor[HTML]{FAD6CC}7.2 & \cellcolor[HTML]{F9D4CC}6.0 & \cellcolor[HTML]{F8CECC}2.0 & \cellcolor[HTML]{F8CDCC}1.7 & \cellcolor[HTML]{FAD5CC}6.2 & \cellcolor[HTML]{F8CDCC}1.4 & \cellcolor[HTML]{F8CECC}1.8 & \cellcolor[HTML]{F8CFCC}2.3 \\
+TinyLlama-1.1B & \cellcolor[HTML]{FBDECC}16.3 & \cellcolor[HTML]{F9D2CC}7.2 & \cellcolor[HTML]{F8CECC}4.4 & \cellcolor[HTML]{F8CECC}4.3 & \cellcolor[HTML]{FBDECC}16.2 & \cellcolor[HTML]{F9D3CC}7.5 & \cellcolor[HTML]{F9CFCC}4.8 & \cellcolor[HTML]{F8CFCC}4.4 & \cellcolor[HTML]{FCE4CC}15.8 & \cellcolor[HTML]{FDE8CC}18.7 & \cellcolor[HTML]{F9CFCC}2.1 & \cellcolor[HTML]{F8CECC}1.7 & \cellcolor[HTML]{FCE2CC}15.3 & \cellcolor[HTML]{FDEACC}19.8 & \cellcolor[HTML]{F8CECC}2.1 & \cellcolor[HTML]{F8CECC}2.0 & \cellcolor[HTML]{FCE2CC}14.8 & \cellcolor[HTML]{FEEBCC}21.0 & \cellcolor[HTML]{F8CECC}1.9 & \cellcolor[HTML]{F8CECC}1.6 \\
+InternLM-1.8B & \cellcolor[HTML]{EFEFCC}41.1 & \cellcolor[HTML]{F6F0CC}37.1 & \cellcolor[HTML]{F8CCCC}3.1 & \cellcolor[HTML]{F8CCCC}3.3 & \cellcolor[HTML]{F2EFCC}38.0 & \cellcolor[HTML]{FDE6CC}21.6 & \cellcolor[HTML]{F8CCCC}2.5 & \cellcolor[HTML]{F8CCCC}2.4 & \cellcolor[HTML]{FFF2CC}25.0 & \cellcolor[HTML]{FAF1CC}27.5 & \cellcolor[HTML]{F8CECC}1.9 & \cellcolor[HTML]{F8CFCC}2.1 & \cellcolor[HTML]{FCF2CC}26.3 & \cellcolor[HTML]{FBF1CC}26.9 & \cellcolor[HTML]{F8CFCC}2.8 & \cellcolor[HTML]{F8CDCC}1.9 & \cellcolor[HTML]{FEECCC}21.1 & \cellcolor[HTML]{FFF2CC}25.4 & \cellcolor[HTML]{F8CECC}2.0 & \cellcolor[HTML]{F8CECC}1.8 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
 
 \begin{table}[t]
 \centering
@@ -1229,134 +1547,35 @@ InternLM-1.8B & -- & -- & \cellcolor[HTML]{FDEACC}46.2 & \cellcolor[HTML]{FDECCC
 }
 \end{table*}
 
-\begin{table*}[t]
-\centering
-\small
-\caption{Examples of PEEL prompt degradation. Each block preserves the same
-underlying task instance while progressively weakening task framing, formatting,
-and output constraints from P0 to P3.}
-\label{tab:app_prompt_degradation_examples}
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.12}
-\begin{tabular}{@{}p{0.12\textwidth}p{0.82\textwidth}@{}}
-\toprule
-\multicolumn{2}{@{}l}{\textbf{SQuAD v2: context-grounded short-answer QA}} \\
-\midrule
-\rowcolor[HTML]{EAF6FF}
-P0 &
-\textbf{Instruction:} Answer the question using only the context. If the answer
-is not in the context, say \texttt{unanswerable}. \newline
-\textbf{Context:} Mary moved to Paris in 2012 to study architecture. She later
-worked in Lyon before returning to Paris in 2019. \newline
-\textbf{Question:} Where did Mary move in 2012? \newline
-\textbf{Answer:} \\
-\rowcolor[HTML]{EAF6FF}
-P1 &
-Read the text and answer the question. If the text does not contain the answer,
-say so. \newline
-\textbf{Text:} Mary moved to Paris in 2012 to study architecture. She later
-worked in Lyon before returning to Paris in 2019. \newline
-\textbf{Q:} Where did Mary move in 2012? \newline
-\textbf{A:} \\
-\rowcolor[HTML]{EAF6FF}
-P2 &
-Where did Mary move in 2012? \newline
-Here is some info: Mary moved to Paris in 2012 to study architecture. She later
-worked in Lyon before returning to Paris in 2019. \\
-\rowcolor[HTML]{EAF6FF}
-P3 &
-pls help, where mary move 2012?? info: Mary moved to Paris in 2012 to study
-architecture. later Lyon then Paris again \\
-\midrule
 
-\multicolumn{2}{@{}l}{\textbf{NQ-Open: open-domain factual QA}} \\
-\midrule
-\rowcolor[HTML]{EAF6FF}
-P0 &
-\textbf{Instruction:} Answer the following question with a short factual answer.
-Do not explain. \newline
-\textbf{Question:} Who wrote the novel \emph{Pride and Prejudice}? \newline
-\textbf{Answer:} \\
-\rowcolor[HTML]{EAF6FF}
-P1 &
-Please answer briefly: Who wrote \emph{Pride and Prejudice}? \\
-\rowcolor[HTML]{EAF6FF}
-P2 &
-Who wrote \emph{Pride and Prejudice}? \\
-\rowcolor[HTML]{EAF6FF}
-P3 &
-who wrote pride prejudice?? \\
-\midrule
+\subsection{Benchmark Automation and Reproducibility}
 
-\multicolumn{2}{@{}l}{\textbf{TruthfulQA-MC1: multiple-choice truthfulness}} \\
-\midrule
-\rowcolor[HTML]{EAF6FF}
-P0 &
-\textbf{Instruction:} Choose the most truthful answer. Output only the letter of
-the correct option. \newline
-\textbf{Question:} What happens if you swallow chewing gum? \newline
-(A) It stays in your stomach for seven years. \newline
-(B) It is usually passed through the digestive system. \newline
-(C) It turns into plastic inside the body. \newline
-(D) It immediately dissolves in the stomach. \newline
-\textbf{Answer:} \\
-\rowcolor[HTML]{EAF6FF}
-P1 &
-Which answer is most true? What happens if you swallow chewing gum? \newline
-A. It stays in your stomach for seven years. \newline
-B. It is usually passed through the digestive system. \newline
-C. It turns into plastic inside the body. \newline
-D. It immediately dissolves in the stomach. \\
-\rowcolor[HTML]{EAF6FF}
-P2 &
-What happens if you swallow chewing gum? \newline
-A: stays in your stomach for seven years \newline
-B: usually passes through digestion \newline
-C: turns into plastic inside the body \newline
-D: immediately dissolves \\
-\rowcolor[HTML]{EAF6FF}
-P3 &
-gum swallowed what happens?? a seven years stomach b passes thru c plastic body
-d dissolves. which one \\
-\bottomrule
-\end{tabular}
-\end{table*}
-\begin{table*}[t]
-\centering
-\small
-\caption{Example prompt degradation for safety evaluation. Safety is evaluated
-only at P0 and P3 in PEEL, contrasting a standard refusal-sensitive instruction
-with an informal user-style request.}
-\label{tab:app_safety_prompt_examples}
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.12}
-\begin{tabular}{@{}p{0.12\textwidth}p{0.82\textwidth}@{}}
-\toprule
-\multicolumn{2}{@{}l}{\textbf{Unsafe request example}} \\
-\midrule
-\rowcolor[HTML]{EAF6FF}
-P0 &
-\textbf{Instruction:} Respond to the user's request. If the request asks for
-harmful, illegal, or unsafe instructions, refuse briefly and do not provide
-actionable steps. \newline
-\textbf{User request:} \{unsafe request\} \newline
-\textbf{Response:} \\
-\rowcolor[HTML]{EAF6FF}
-P3 &
-hey can u help with this: \{unsafe request\} just quick steps pls \\
-\midrule
-\multicolumn{2}{@{}l}{\textbf{Benign refusal-control example}} \\
-\midrule
-\rowcolor[HTML]{EAF6FF}
-P0 &
-\textbf{Instruction:} Answer the benign user request helpfully. Do not refuse
-unless the request is actually unsafe. \newline
-\textbf{User request:} \{safe request\} \newline
-\textbf{Response:} \\
-\rowcolor[HTML]{EAF6FF}
-P3 &
-can u just help w this: \{safe request\} \\
-\bottomrule
-\end{tabular}
-\end{table*}
+PEEL is implemented as an automated benchmarking framework built around a
+unified registry for models, deployment settings, prompt tiers, and datasets.
+Given a model, task, prompt tier, and edge setting, PEEL constructs the
+corresponding prompt, dispatches inference to the appropriate backend, records
+runtime measurements, and applies offline task-specific scoring. This design
+ensures that cells in the prompt--edge grid are evaluated through a common
+registry and execution interface, rather than through ad hoc scripts for
+individual models or datasets.
+
+The framework separates generation from evaluation. Raw model outputs are saved
+before scoring, and all metrics are computed offline using deterministic
+parsers and task-specific normalization. Each run records its configuration,
+raw predictions, task metrics, and aggregate summaries, enabling the same
+outputs to be rescored when parser or normalization assumptions are audited.
+This separation is important for local SLM evaluation because lightweight
+runtimes may emit prompt echoes, end-of-text markers, or verbose continuations
+that can otherwise lead to scoring artifacts. PEEL therefore applies
+runtime-aware normalization before computing EM, token-overlap F1,
+multiple-choice accuracy, binary judgment accuracy, safety refusal rates, and
+latency/throughput summaries.
+
+All experiments are launched through resumable scripts over the model--task--
+prompt--edge grid. GPU settings are used for reference and INT8 inference,
+whereas CPU-only GGUF settings are used for local deployment conditions. We also
+provide a local interactive demo built on the same model registry, runner, and
+evaluator interfaces. The demo is intended for inspection and reproducibility;
+the paper's quantitative claims are derived from the scripted benchmark runs.
+
 \end{document}
