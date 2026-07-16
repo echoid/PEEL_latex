@@ -715,10 +715,28 @@ We introduced PEEL, a benchmark for probing SLM performance along two real-world
 
 \appendix
 
+\section{Additional Results and Reproducibility Details}
+\label{app:details}
+
+This appendix collects the supporting material for PEEL. We organize it by the
+role each item plays in the paper: additional task results, runtime and
+MT-Bench diagnostics, prompt-tier operationalization, run coverage, scoring and
+safety caveats, threats to validity, and implementation details. The appendix
+is intended to make clear which results support the main claims and which
+results are diagnostic checks.
+
+\subsection{Rule-Based Hallucination Results}
+\label{app:halueval-results}
+
+Table~\ref{tab:app-halueval-results} reports the model-level HaluEval results
+summarized in Section~\ref{sec:task-fragility-results}. HaluEval is evaluated
+only under P0-style prompts, so this table supports the task-format comparison
+rather than the P0--P3 prompt-degradation analysis.
+
 \begin{table*}[t]
 \centering
 \caption{Model-level HaluEval hallucination classification accuracy (\%) across edge settings under P0. Higher is better. Cell colors are normalized separately within HaluEval-General and HaluEval-QA.}
-\label{app:halueval-results}
+\label{tab:app-halueval-results}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{rccccc|ccccc}
 \toprule
@@ -748,8 +766,13 @@ InternLM2.5-1.8B & \cellcolor[HTML]{DAEAD3}80.5 & \cellcolor[HTML]{E0ECD2}75.5 &
 \end{table*}
 
 
-\section{Appendix: Additional Experimental Details}
-\label{app:details}
+\subsection{Runtime and Open-Ended Capability Diagnostics}
+
+Figure~\ref{fig:app-runtime-modelwise} expands the family-level runtime plot in
+the main text to the model level. Figure~\ref{fig:app-mtbench-degradation-radar}
+provides an additional view of MT-Bench prompt and edge degradation by family;
+it is diagnostic rather than a replacement for the model-level MT-Bench table in
+the main paper.
 
 \begin{figure*}[t]
     \centering
@@ -783,10 +806,12 @@ InternLM2.5-1.8B & \cellcolor[HTML]{DAEAD3}80.5 & \cellcolor[HTML]{E0ECD2}75.5 &
 \subsection{Full Result Grids and Throughput}
 
 The main text presents the short-answer QA grid in
-Table~\ref{tab:short-answer-edge-prompt-em} and summarises the other
-reference-scored grids in prose. For completeness we give
-the full $4\times5$ grids here, together with the TruthfulQA heatmap, decode
-throughput, and a consumer-hardware sanity check for the GGUF/CPU pathway.
+Table~\ref{tab:short-answer-edge-prompt-em} and summarizes the other
+reference-scored grids in prose. Tables~\ref{tab:squad_grid}
+and~\ref{tab:nq_grid} provide compact model-averaged views of the two
+short-answer tasks, while later appendix tables give model-level grids. This
+subsection also reports decode throughput and a consumer-hardware sanity check
+for the GGUF/CPU pathway.
 
 
 \begin{table}[t]
@@ -1365,6 +1390,16 @@ not assigned automatic EM/F1 scores because they have no gold references. The
 demo is included to make PEEL easier to inspect and reproduce, but all main
 paper results come from the scripted benchmark pipeline.
 
+\subsection{Per-Task Sequence Diagnostics and Model-Level Correctness Grids}
+
+The main text uses the overall prompt and edge sequence plots to compare
+ranking stability across tasks. Figures~\ref{fig:app-nq-edge-sequence}--
+\ref{fig:app-truthfulqa-prompt-sequence} unpack that aggregate view into
+per-task sequence plots. Tables~\ref{tab:nq-open-correctness-grid} and
+\ref{tab:squad-v2-correctness-grid} provide the corresponding model-level F1
+grids for the two short-answer tasks. Table~\ref{tab:short-answer-true-em}
+reports strict exact match to clarify why the main paper treats F1 as
+answer-overlap rather than exact-format success.
 
 \begin{figure}
     \centering
@@ -1512,6 +1547,11 @@ E4-Q4   & 20.1 & 10.4 & 0.1 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
 \end{tabular}
 \end{table}
 
+Table~\ref{tab:ifeval-model-edge-heatmap} gives the model-level IFEval results
+behind Figure~\ref{fig:ifeval-compliance-bars}. IFEval is evaluated under P0
+only; its \texttt{prompt\_acc} column is the official IFEval prompt-level
+compliance metric, not a PEEL prompt tier.
+
 \begin{table*}[t]
 \centering
 \scriptsize
@@ -1546,36 +1586,5 @@ InternLM-1.8B & -- & -- & \cellcolor[HTML]{FDEACC}46.2 & \cellcolor[HTML]{FDECCC
 \end{tabular}%
 }
 \end{table*}
-
-
-\subsection{Benchmark Automation and Reproducibility}
-
-PEEL is implemented as an automated benchmarking framework built around a
-unified registry for models, deployment settings, prompt tiers, and datasets.
-Given a model, task, prompt tier, and edge setting, PEEL constructs the
-corresponding prompt, dispatches inference to the appropriate backend, records
-runtime measurements, and applies offline task-specific scoring. This design
-ensures that cells in the prompt--edge grid are evaluated through a common
-registry and execution interface, rather than through ad hoc scripts for
-individual models or datasets.
-
-The framework separates generation from evaluation. Raw model outputs are saved
-before scoring, and all metrics are computed offline using deterministic
-parsers and task-specific normalization. Each run records its configuration,
-raw predictions, task metrics, and aggregate summaries, enabling the same
-outputs to be rescored when parser or normalization assumptions are audited.
-This separation is important for local SLM evaluation because lightweight
-runtimes may emit prompt echoes, end-of-text markers, or verbose continuations
-that can otherwise lead to scoring artifacts. PEEL therefore applies
-runtime-aware normalization before computing EM, token-overlap F1,
-multiple-choice accuracy, binary judgment accuracy, safety refusal rates, and
-latency/throughput summaries.
-
-All experiments are launched through resumable scripts over the model--task--
-prompt--edge grid. GPU settings are used for reference and INT8 inference,
-whereas CPU-only GGUF settings are used for local deployment conditions. We also
-provide a local interactive demo built on the same model registry, runner, and
-evaluator interfaces. The demo is intended for inspection and reproducibility;
-the paper's quantitative claims are derived from the scripted benchmark runs.
 
 \end{document}
