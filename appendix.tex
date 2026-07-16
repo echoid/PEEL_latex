@@ -9,26 +9,25 @@
 \usepackage{tabularx}
 \usepackage{array}
 
-\title{Supplementary Material \\
-
-Can Small Language Models Serve Ordinary Users? A Lower-Bound Benchmark Under Non-Expert Prompts and Edge Constraints
-}
+\title{Supplementary Material for\\
+Can Small Language Models Serve Ordinary Users? A Lower-Bound Benchmark Under Non-Expert Prompts and Edge Constraints}
 
 \author{Anonymous Authors}
+\affiliations{Anonymous Affiliation}
 
 \begin{document}
 \maketitle
 
 
 
-\section{Appendix}
+\section{Additional Results and Reproducibility Details}
 
 
 \subsection{Rule-Based Hallucination Results}
 \label{app:halueval-results}
 
 Table~\ref{tab:app-halueval-results} reports the model-level HaluEval results
-summarized. HaluEval is evaluated
+summarized in the main paper. HaluEval is evaluated
 only under P0-style prompts, so this table supports the task-format comparison
 rather than the P0--P3 prompt-degradation analysis.
 
@@ -103,8 +102,7 @@ the main paper.
 
 \subsection{Full Result Grids and Throughput}
 
-The main text presents the short-answer QA grid in
-Table~\ref{tab:short-answer-edge-prompt-em} and summarizes the other
+The main text presents the short-answer QA grid and summarizes the other
 reference-scored grids in prose. Tables~\ref{tab:squad_grid}
 and~\ref{tab:nq_grid} provide compact model-averaged views of the two
 short-answer tasks, while later appendix tables give model-level grids. This
@@ -728,6 +726,31 @@ InternLM-1.8B & \cellcolor[HTML]{FAD7CC}3.5 & \cellcolor[HTML]{FAD8CC}3.7 & \cel
 }
 \end{table*}
 
+\begin{table}[t]
+\centering
+\caption{Strict exact match (\%) for short-answer QA averaged across models,
+using the standard SQuAD/NQ exact-match scorer. Unlike the token-overlap F1
+reported in the model-level grids, strict EM is near-zero for weak prompts and
+low even under expert prompts, indicating that these SLMs rarely emit the exact
+gold span.}
+\label{tab:short-answer-true-em}
+\setlength{\tabcolsep}{2.4pt}
+\renewcommand{\arraystretch}{0.92}
+\begin{tabular}{rcccc|cccc}
+\toprule
+Edge & \multicolumn{4}{c}{SQuAD v2} & \multicolumn{4}{c}{NQ-Open} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+ & P0 & P1 & P2 & P3 & P0 & P1 & P2 & P3 \\
+\midrule
+E0-REF  & 20.8 & 7.9 & 0.1 & 0.0 & 1.6 & 0.0 & 0.0 & 0.0 \\
+E1-INT8 & 20.5 & 5.8 & 0.0 & 0.0 & 1.7 & 0.0 & 0.0 & 0.0 \\
+E2-Q8   & 22.0 & 12.4 & 0.2 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+E3-Q5   & 21.8 & 10.9 & 0.1 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+E4-Q4   & 20.1 & 10.4 & 0.1 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 
 \begin{table*}[t]
@@ -805,7 +828,7 @@ InternLM-1.8B & \cellcolor[HTML]{FBE5CC}47.2 & \cellcolor[HTML]{FCE6CC}47.1 & \c
 }
 \end{table*}
 
-\bibliography{references}
 \bibliographystyle{aaai2027}
+\bibliography{references}
 
 \end{document}
